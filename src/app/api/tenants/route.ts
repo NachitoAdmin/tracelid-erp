@@ -13,10 +13,10 @@ export async function GET() {
     })
 
     return NextResponse.json(tenants)
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching tenants:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch tenants' },
+      { error: 'Failed to fetch tenants', details: error?.message || String(error) },
       { status: 500 }
     )
   }
@@ -39,10 +39,10 @@ export async function POST(request: NextRequest) {
     })
 
     return NextResponse.json(tenant, { status: 201 })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating tenant:', error)
     return NextResponse.json(
-      { error: 'Failed to create tenant' },
+      { error: 'Failed to create tenant', details: error?.message || String(error) },
       { status: 500 }
     )
   }
