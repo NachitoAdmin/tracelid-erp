@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id          String        @id @default(uuid())
+  name        String
+  country     String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  transactions Transaction[]
+  documentCounters DocumentCounter[]
+}
+
+enum TransactionType {
+  SALE
+  RETURN
+  REBATE
+  DISCOUNT
+  COST
+}
+
+model Transaction {
+  id               String          @id @default(uuid())
+  documentNumber   String          @unique @map("document_number")
+  transactionType  TransactionType @map("transaction_type")
+  amount           Decimal         @db.Decimal(10, 2)
+  description      String?
+  tenantId         String          @map("tenant_id")
+  tenant           Tenant          @relation(fields: [tenantId], references: [id])
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  @@index([tenantId])
+  @@index([transactionType])
+  @@index([createdAt])
+  @@map("transactions")
+}
+
+model DocumentCounter {
+  id          String   @id @default(uuid())
+  tenantId    String   @map("tenant_id")
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  prefix      String
+  year        Int
+  lastNumber  Int      @map("last_number")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([tenantId, prefix, year])
+  @@index([tenantId])
+  @@map("document_counters")
+}
