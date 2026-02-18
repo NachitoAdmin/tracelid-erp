@@ -170,6 +170,9 @@ const styles: Record<string, React.CSSProperties> = {
     margin: '0 auto',
     padding: '24px',
     fontFamily: 'system-ui, -apple-system, sans-serif',
+    backgroundColor: '#0f0f0f',
+    minHeight: '100vh',
+    color: '#e5e5e5',
   },
   header: {
     display: 'flex',
@@ -181,19 +184,20 @@ const styles: Record<string, React.CSSProperties> = {
     margin: 0,
     fontSize: '1.875rem',
     fontWeight: 700,
-    color: '#111827',
+    color: '#ffffff',
   },
   backLink: {
-    color: '#3b82f6',
+    color: '#60a5fa',
     textDecoration: 'none',
     fontSize: '0.875rem',
     fontWeight: 500,
   },
   section: {
-    backgroundColor: '#fff',
+    backgroundColor: '#1a1a1a',
     borderRadius: '8px',
     padding: '24px',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.5)',
+    border: '1px solid #2a2a2a',
   },
   sectionHeader: {
     display: 'flex',
@@ -205,7 +209,7 @@ const styles: Record<string, React.CSSProperties> = {
     margin: 0,
     fontSize: '1.25rem',
     fontWeight: 600,
-    color: '#111827',
+    color: '#ffffff',
   },
   addButton: {
     padding: '8px 16px',
@@ -220,8 +224,9 @@ const styles: Record<string, React.CSSProperties> = {
   form: {
     marginBottom: '24px',
     padding: '20px',
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#252525',
     borderRadius: '8px',
+    border: '1px solid #333',
   },
   formRow: {
     display: 'flex',
@@ -239,13 +244,15 @@ const styles: Record<string, React.CSSProperties> = {
   label: {
     fontSize: '0.875rem',
     fontWeight: 500,
-    color: '#374151',
+    color: '#a1a1aa',
   },
   input: {
     padding: '8px 12px',
     borderRadius: '6px',
-    border: '1px solid #d1d5db',
+    border: '1px solid #3f3f46',
     fontSize: '0.875rem',
+    backgroundColor: '#0f0f0f',
+    color: '#e5e5e5',
   },
   submitButton: {
     padding: '8px 16px',
@@ -259,11 +266,12 @@ const styles: Record<string, React.CSSProperties> = {
   },
   error: {
     padding: '12px',
-    backgroundColor: '#fef2f2',
-    color: '#dc2626',
+    backgroundColor: '#450a0a',
+    color: '#fca5a5',
     borderRadius: '6px',
     marginBottom: '16px',
     fontSize: '0.875rem',
+    border: '1px solid #7f1d1d',
   },
   tableContainer: {
     overflowX: 'auto',
@@ -276,33 +284,34 @@ const styles: Record<string, React.CSSProperties> = {
   th: {
     textAlign: 'left',
     padding: '12px',
-    borderBottom: '2px solid #e5e7eb',
+    borderBottom: '2px solid #333',
     fontWeight: 600,
-    color: '#374151',
+    color: '#a1a1aa',
   },
   tr: {
-    borderBottom: '1px solid #e5e7eb',
+    borderBottom: '1px solid #2a2a2a',
   },
   td: {
     padding: '12px',
     verticalAlign: 'middle',
+    color: '#d4d4d8',
   },
   code: {
     fontFamily: 'monospace',
     fontSize: '0.75rem',
-    color: '#6b7280',
-    backgroundColor: '#f3f4f6',
+    color: '#a1a1aa',
+    backgroundColor: '#252525',
     padding: '2px 6px',
     borderRadius: '4px',
   },
   loading: {
     padding: '40px',
     textAlign: 'center',
-    color: '#6b7280',
+    color: '#71717a',
   },
   empty: {
     padding: '40px',
     textAlign: 'center',
-    color: '#6b7280',
+    color: '#71717a',
   },
 }
