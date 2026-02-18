@@ -92,7 +92,7 @@ export default function Home() {
       )}
 
       <div style={styles.grid}>
-        <div style={styles.column}
+        <div style={styles.column}>
           <SaleForm
             tenantId={selectedTenantId}
             onSuccess={handleTransactionSuccess}
