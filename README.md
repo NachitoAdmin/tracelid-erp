@@ -1,4 +1,4 @@
-# ERP Next.js Application
+ # ERP Next.js Application
 
 A complete ERP system built with Next.js 14+, Prisma ORM, and Supabase.
 
