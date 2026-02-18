@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma, generateDocumentNumber } from '@/lib/prisma'
-import { TransactionType } from '@prisma/client'
+
+const VALID_TRANSACTION_TYPES = ['SALE', 'RETURN', 'REBATE', 'DISCOUNT', 'COST'] as const
+type TransactionType = typeof VALID_TRANSACTION_TYPES[number]
 
 export async function GET(request: NextRequest) {
   try {
@@ -48,10 +50,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const validTypes = Object.values(TransactionType)
-    if (!validTypes.includes(transactionType.toUpperCase() as TransactionType)) {
+    const upperType = transactionType.toUpperCase()
+    if (!VALID_TRANSACTION_TYPES.includes(upperType as TransactionType)) {
       return NextResponse.json(
-        { error: `Invalid transaction type. Must be one of: ${validTypes.join(', ')}` },
+        { error: `Invalid transaction type. Must be one of: ${VALID_TRANSACTION_TYPES.join(', ')}` },
         { status: 400 }
       )
     }
@@ -72,7 +74,7 @@ export async function POST(request: NextRequest) {
     const transaction = await prisma.transaction.create({
       data: {
         documentNumber,
-        transactionType: transactionType.toUpperCase() as TransactionType,
+        transactionType: upperType,
         amount: parseFloat(amount),
         description,
         tenantId,

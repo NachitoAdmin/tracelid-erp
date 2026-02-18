@@ -17,6 +17,7 @@ interface Tenant {
 export default function Home() {
   const [tenants, setTenants] = useState<Tenant[]>([])
   const [selectedTenantId, setSelectedTenantId] = useState('')
+  const [tenantInput, setTenantInput] = useState('')
   const [loading, setLoading] = useState(true)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
 
@@ -32,11 +33,18 @@ export default function Home() {
       setTenants(data)
       if (data.length > 0 && !selectedTenantId) {
         setSelectedTenantId(data[0].id)
+        setTenantInput(data[0].id)
       }
     } catch (err) {
       console.error(err)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleSetTenant = () => {
+    if (tenantInput.trim()) {
+      setSelectedTenantId(tenantInput.trim())
     }
   }
 
@@ -47,15 +55,19 @@ export default function Home() {
   const selectedTenant = tenants.find(t => t.id === selectedTenantId)
 
   if (loading) {
-    return <div style={styles.loading}>Loading...</div>
+    return (
+      <div style={styles.loadingContainer}>
+        <div style={styles.loadingText}>Loading...</div>
+      </div>
+    )
   }
 
   if (tenants.length === 0) {
     return (
-      <div style={styles.container}>
+      <div style={styles.pageContainer}>
         <div style={styles.emptyState}>
-          <h1>Welcome to ERP System</h1>
-          <p>No tenants found. Please create a tenant in the admin panel first.</p>
+          <h1 style={styles.emptyTitle}>Welcome to ERP System</h1>
+          <p style={styles.emptyText}>No tenants found. Please create a tenant in the admin panel first.</p>
           <a href="/admin" style={styles.link}>Go to Admin →</a>
         </div>
       </div>
@@ -63,119 +75,173 @@ export default function Home() {
   }
 
   return (
-    <div style={styles.container}>
+    <div style={styles.pageContainer}>
+      {/* Header */}
       <header style={styles.header}>
-        <h1 style={styles.title}>ERP System</h1>
-        <div style={styles.tenantSelector}>
-          <label style={styles.label}>Tenant:</label>
-          <select
-            value={selectedTenantId}
-            onChange={(e) => setSelectedTenantId(e.target.value)}
-            style={styles.select}
-          >
-            {tenants.map((tenant) => (
-              <option key={tenant.id} value={tenant.id}>
-                {tenant.name} ({tenant.country})
-              </option>
-            ))}
-          </select>
-          <a href="/admin" style={styles.adminLink}>Admin →</a>
-        </div>
+        <h1 style={styles.headerTitle}>NachitoBot ERP</h1>
+        <p style={styles.headerSubtitle}>Advanced Business Intelligence & Analytics</p>
+        <div style={styles.statusBadge}>🟢 Live</div>
       </header>
 
-      {selectedTenant && (
-        <div style={styles.tenantInfo}>
-          <span style={styles.tenantBadge}>
-            {selectedTenant.name} • {selectedTenant.country} • {selectedTenant._count.transactions} transactions
-          </span>
-        </div>
-      )}
-
-      <div style={styles.grid}>
-        <div style={styles.column}>
-          <SaleForm
-            tenantId={selectedTenantId}
-            onSuccess={handleTransactionSuccess}
+      {/* Tenant Bar */}
+      <div style={styles.tenantBar}>
+        <div style={styles.tenantInputGroup}>
+          <label style={styles.tenantLabel}>Tenant ID:</label>
+          <input
+            type="text"
+            value={tenantInput}
+            onChange={(e) => setTenantInput(e.target.value)}
+            style={styles.tenantInput}
+            placeholder="Enter tenant ID..."
           />
+          <button onClick={handleSetTenant} style={styles.setTenantBtn}>
+            Set Tenant
+          </button>
         </div>
-        <div style={styles.column}>
-          <AnalyticsDashboard
+        {selectedTenant && (
+          <div style={styles.currentTenantBadge}>
+            Current: {selectedTenant.name} ({selectedTenant.country})
+          </div>
+        )}
+      </div>
+
+      {/* Main Content */}
+      <div style={styles.mainContent}>
+        <div style={styles.grid}>
+          <div style={styles.column}>
+            <SaleForm
+              tenantId={selectedTenantId}
+              onSuccess={handleTransactionSuccess}
+            />
+          </div>
+          <div style={styles.column}>
+            <AnalyticsDashboard
+              tenantId={selectedTenantId}
+              refreshTrigger={refreshTrigger}
+            />
+          </div>
+        </div>
+
+        <div style={styles.fullWidth}>
+          <TransactionList
             tenantId={selectedTenantId}
             refreshTrigger={refreshTrigger}
           />
         </div>
-      </div>
-
-      <div style={styles.fullWidth}>
-        <TransactionList
-          tenantId={selectedTenantId}
-          refreshTrigger={refreshTrigger}
-        />
       </div>
     </div>
   )
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  container: {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    padding: '24px',
-    fontFamily: 'system-ui, -apple-system, sans-serif',
+  pageContainer: {
+    minHeight: '100vh',
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    fontFamily: "'Segoe UI', system-ui, -apple-system, sans-serif",
+    paddingBottom: '40px',
+  },
+  loadingContainer: {
+    minHeight: '100vh',
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: '1.5rem',
+    color: '#fff',
+    fontWeight: 500,
   },
   header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '24px',
-    flexWrap: 'wrap',
-    gap: '16px',
+    textAlign: 'center',
+    padding: '40px 20px 30px',
+    color: '#fff',
   },
-  title: {
+  headerTitle: {
     margin: 0,
-    fontSize: '1.875rem',
+    fontSize: '2.5rem',
     fontWeight: 700,
-    color: '#111827',
+    color: '#fff',
+    textShadow: '0 2px 10px rgba(0,0,0,0.2)',
   },
-  tenantSelector: {
+  headerSubtitle: {
+    margin: '10px 0 0 0',
+    fontSize: '1.1rem',
+    color: 'rgba(255,255,255,0.9)',
+    fontWeight: 400,
+  },
+  statusBadge: {
+    display: 'inline-block',
+    marginTop: '15px',
+    padding: '6px 16px',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    color: '#fff',
+    borderRadius: '20px',
+    fontSize: '0.85rem',
+    fontWeight: 500,
+    backdropFilter: 'blur(10px)',
+  },
+  tenantBar: {
+    maxWidth: '1200px',
+    margin: '0 auto 30px',
+    padding: '20px 24px',
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderRadius: '16px',
+    backdropFilter: 'blur(10px)',
+    display: 'flex',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: '16px',
+    boxShadow: '0 4px 30px rgba(0,0,0,0.1)',
+  },
+  tenantInputGroup: {
     display: 'flex',
     alignItems: 'center',
     gap: '12px',
+    flexWrap: 'wrap',
   },
-  label: {
-    fontSize: '0.875rem',
+  tenantLabel: {
+    color: '#fff',
     fontWeight: 500,
-    color: '#374151',
+    fontSize: '0.95rem',
   },
-  select: {
-    padding: '8px 12px',
-    borderRadius: '6px',
-    border: '1px solid #d1d5db',
-    fontSize: '0.875rem',
-    backgroundColor: '#fff',
+  tenantInput: {
+    padding: '10px 16px',
+    borderRadius: '10px',
+    border: '2px solid rgba(255,255,255,0.3)',
+    fontSize: '0.95rem',
+    backgroundColor: 'rgba(255,255,255,0.9)',
     minWidth: '200px',
+    outline: 'none',
   },
-  adminLink: {
-    color: '#3b82f6',
-    textDecoration: 'none',
-    fontSize: '0.875rem',
-    fontWeight: 500,
+  setTenantBtn: {
+    padding: '10px 20px',
+    backgroundColor: '#fff',
+    color: '#667eea',
+    border: 'none',
+    borderRadius: '10px',
+    fontSize: '0.95rem',
+    fontWeight: 600,
+    cursor: 'pointer',
+    transition: 'all 0.2s',
   },
-  tenantInfo: {
-    marginBottom: '24px',
-  },
-  tenantBadge: {
-    display: 'inline-block',
+  currentTenantBadge: {
     padding: '8px 16px',
-    backgroundColor: '#eff6ff',
-    color: '#1e40af',
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    color: '#fff',
     borderRadius: '20px',
-    fontSize: '0.875rem',
+    fontSize: '0.9rem',
     fontWeight: 500,
+  },
+  mainContent: {
+    maxWidth: '1200px',
+    margin: '0 auto',
+    padding: '0 24px',
   },
   grid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))',
     gap: '24px',
     marginBottom: '24px',
   },
@@ -185,26 +251,30 @@ const styles: Record<string, React.CSSProperties> = {
   fullWidth: {
     marginBottom: '24px',
   },
-  loading: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    minHeight: '100vh',
-    fontSize: '1.125rem',
-    color: '#6b7280',
-  },
   emptyState: {
     textAlign: 'center',
-    padding: '60px 20px',
+    padding: '100px 20px',
+    color: '#fff',
+  },
+  emptyTitle: {
+    fontSize: '2rem',
+    fontWeight: 600,
+    marginBottom: '16px',
+  },
+  emptyText: {
+    fontSize: '1.1rem',
+    opacity: 0.9,
+    marginBottom: '24px',
   },
   link: {
     display: 'inline-block',
-    marginTop: '16px',
-    padding: '12px 24px',
-    backgroundColor: '#3b82f6',
-    color: '#fff',
-    borderRadius: '6px',
+    padding: '14px 28px',
+    backgroundColor: '#fff',
+    color: '#667eea',
+    borderRadius: '12px',
     textDecoration: 'none',
-    fontWeight: 500,
+    fontWeight: 600,
+    fontSize: '1rem',
+    boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
   },
 }

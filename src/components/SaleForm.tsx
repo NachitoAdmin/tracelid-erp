@@ -54,7 +54,7 @@ export default function SaleForm({ tenantId, onSuccess }: SaleFormProps) {
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.title}>New Transaction</h2>
+      <h2 style={styles.title}>💰 New Transaction</h2>
       
       {error && <div style={styles.error}>{error}</div>}
       {success && <div style={styles.success}>{success}</div>}
@@ -108,7 +108,7 @@ export default function SaleForm({ tenantId, onSuccess }: SaleFormProps) {
             cursor: loading ? 'not-allowed' : 'pointer',
           }}
         >
-          {loading ? 'Creating...' : 'Create Transaction'}
+          {loading ? 'Creating...' : '➕ Create Transaction'}
         </button>
       </form>
     </div>
@@ -118,75 +118,86 @@ export default function SaleForm({ tenantId, onSuccess }: SaleFormProps) {
 const styles: Record<string, React.CSSProperties> = {
   container: {
     backgroundColor: '#fff',
-    borderRadius: '8px',
-    padding: '24px',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+    borderRadius: '20px',
+    padding: '28px',
+    boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
   },
   title: {
-    margin: '0 0 20px 0',
-    fontSize: '1.25rem',
+    margin: '0 0 24px 0',
+    fontSize: '1.35rem',
     fontWeight: 600,
-    color: '#111827',
+    color: '#1a1a2e',
   },
   form: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '16px',
+    gap: '18px',
   },
   field: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '4px',
+    gap: '6px',
   },
   label: {
-    fontSize: '0.875rem',
+    fontSize: '0.9rem',
     fontWeight: 500,
-    color: '#374151',
+    color: '#4a4a6a',
   },
   select: {
-    padding: '8px 12px',
-    borderRadius: '6px',
-    border: '1px solid #d1d5db',
+    padding: '12px 16px',
+    borderRadius: '12px',
+    border: '2px solid #e8e8f0',
     fontSize: '1rem',
     backgroundColor: '#fff',
+    outline: 'none',
+    transition: 'border-color 0.2s',
   },
   input: {
-    padding: '8px 12px',
-    borderRadius: '6px',
-    border: '1px solid #d1d5db',
+    padding: '12px 16px',
+    borderRadius: '12px',
+    border: '2px solid #e8e8f0',
     fontSize: '1rem',
+    outline: 'none',
+    transition: 'border-color 0.2s',
   },
   textarea: {
-    padding: '8px 12px',
-    borderRadius: '6px',
-    border: '1px solid #d1d5db',
+    padding: '12px 16px',
+    borderRadius: '12px',
+    border: '2px solid #e8e8f0',
     fontSize: '1rem',
     resize: 'vertical',
+    outline: 'none',
+    transition: 'border-color 0.2s',
+    fontFamily: 'inherit',
   },
   button: {
-    padding: '10px 16px',
-    backgroundColor: '#3b82f6',
+    padding: '14px 20px',
+    backgroundColor: '#22c55e',
     color: '#fff',
     border: 'none',
-    borderRadius: '6px',
+    borderRadius: '12px',
     fontSize: '1rem',
-    fontWeight: 500,
+    fontWeight: 600,
     marginTop: '8px',
+    boxShadow: '0 4px 15px rgba(34, 197, 94, 0.3)',
+    transition: 'all 0.2s',
   },
   error: {
-    padding: '12px',
+    padding: '14px',
     backgroundColor: '#fef2f2',
     color: '#dc2626',
-    borderRadius: '6px',
-    marginBottom: '16px',
-    fontSize: '0.875rem',
+    borderRadius: '12px',
+    marginBottom: '20px',
+    fontSize: '0.9rem',
+    border: '1px solid #fecaca',
   },
   success: {
-    padding: '12px',
+    padding: '14px',
     backgroundColor: '#f0fdf4',
     color: '#16a34a',
-    borderRadius: '6px',
-    marginBottom: '16px',
-    fontSize: '0.875rem',
+    borderRadius: '12px',
+    marginBottom: '20px',
+    fontSize: '0.9rem',
+    border: '1px solid #bbf7d0',
   },
 }

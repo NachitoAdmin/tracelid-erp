@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { formatCurrency, getTransactionTypeColor, getTransactionTypeLabel } from '@/lib/utils'
+import { formatCurrency } from '@/lib/utils'
 
 interface Transaction {
   id: string
@@ -95,25 +95,29 @@ export default function AnalyticsDashboard({ tenantId, refreshTrigger }: Analyti
     }
   }
 
-  if (loading) return <div style={styles.loading}>Loading analytics...</div>
+  if (loading) {
+    return (
+      <div style={styles.container}>
+        <div style={styles.loading}>Loading analytics...</div>
+      </div>
+    )
+  }
   if (!analytics) return null
 
   const stats = [
-    { label: 'Total Sales', value: analytics.totalSales, color: '#22c55e' },
-    { label: 'Total Returns', value: analytics.totalReturns, color: '#f97316' },
-    { label: 'Total Rebates', value: analytics.totalRebates, color: '#3b82f6' },
-    { label: 'Total Discounts', value: analytics.totalDiscounts, color: '#8b5cf6' },
-    { label: 'Total Costs', value: analytics.totalCosts, color: '#ef4444' },
-    { label: 'Net Revenue', value: analytics.netRevenue, color: analytics.netRevenue >= 0 ? '#059669' : '#dc2626' },
+    { label: 'Sales', value: analytics.totalSales, color: '#22c55e', borderColor: '#22c55e' },
+    { label: 'Returns', value: analytics.totalReturns, color: '#f97316', borderColor: '#f97316' },
+    { label: 'Discounts', value: analytics.totalDiscounts, color: '#14b8a6', borderColor: '#14b8a6' },
+    { label: 'Net', value: analytics.netRevenue, color: '#3b82f6', borderColor: '#3b82f6' },
   ]
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.title}>Analytics Dashboard</h2>
+      <h2 style={styles.title}>📊 Analytics Dashboard</h2>
       
-      <div style={styles.statsGrid}>
+      <div style={styles.statsRow}>
         {stats.map((stat) => (
-          <div key={stat.label} style={styles.statCard}>
+          <div key={stat.label} style={{ ...styles.statCard, borderTopColor: stat.borderColor }}>
             <div style={{ ...styles.statValue, color: stat.color }}>
               {formatCurrency(stat.value)}
             </div>
@@ -128,31 +132,6 @@ export default function AnalyticsDashboard({ tenantId, refreshTrigger }: Analyti
           <span style={styles.summaryValue}>{analytics.transactionCount}</span>
         </div>
       </div>
-
-      {Object.keys(analytics.byType).length > 0 && (
-        <div style={styles.breakdown}>
-          <h3 style={styles.breakdownTitle}>Breakdown by Type</h3>
-          <div style={styles.breakdownGrid}>
-            {Object.entries(analytics.byType).map(([type, data]) => (
-              <div key={type} style={styles.breakdownItem}>
-                <div style={styles.breakdownHeader}>
-                  <span
-                    style={{
-                      ...styles.breakdownBadge,
-                      backgroundColor: getTransactionTypeColor(type) + '20',
-                      color: getTransactionTypeColor(type),
-                    }}
-                  >
-                    {getTransactionTypeLabel(type)}
-                  </span>
-                  <span style={styles.breakdownCount}>{data.count} txns</span>
-                </div>
-                <div style={styles.breakdownAmount}>{formatCurrency(data.total)}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   )
 }
@@ -160,42 +139,47 @@ export default function AnalyticsDashboard({ tenantId, refreshTrigger }: Analyti
 const styles: Record<string, React.CSSProperties> = {
   container: {
     backgroundColor: '#fff',
-    borderRadius: '8px',
-    padding: '24px',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+    borderRadius: '20px',
+    padding: '28px',
+    boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
   },
   title: {
-    margin: '0 0 20px 0',
-    fontSize: '1.25rem',
+    margin: '0 0 24px 0',
+    fontSize: '1.35rem',
     fontWeight: 600,
-    color: '#111827',
+    color: '#1a1a2e',
   },
-  statsGrid: {
+  statsRow: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+    gridTemplateColumns: 'repeat(4, 1fr)',
     gap: '16px',
     marginBottom: '24px',
   },
   statCard: {
-    backgroundColor: '#f9fafb',
-    borderRadius: '8px',
-    padding: '16px',
+    backgroundColor: '#fff',
+    borderRadius: '20px',
+    padding: '20px 16px',
     textAlign: 'center',
+    borderTop: '4px solid',
+    boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
   },
   statValue: {
-    fontSize: '1.5rem',
+    fontSize: '1.4rem',
     fontWeight: 700,
-    marginBottom: '4px',
+    marginBottom: '6px',
+    fontFamily: 'monospace',
   },
   statLabel: {
-    fontSize: '0.875rem',
+    fontSize: '0.8rem',
     color: '#6b7280',
+    fontWeight: 500,
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
   },
   summary: {
-    padding: '16px',
-    backgroundColor: '#f3f4f6',
-    borderRadius: '8px',
-    marginBottom: '24px',
+    padding: '16px 20px',
+    backgroundColor: '#f8f9fa',
+    borderRadius: '16px',
   },
   summaryItem: {
     display: 'flex',
@@ -203,57 +187,13 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
   },
   summaryLabel: {
-    fontSize: '0.875rem',
+    fontSize: '0.9rem',
     color: '#6b7280',
   },
   summaryValue: {
     fontSize: '1.25rem',
-    fontWeight: 600,
-    color: '#111827',
-  },
-  breakdown: {
-    borderTop: '1px solid #e5e7eb',
-    paddingTop: '20px',
-  },
-  breakdownTitle: {
-    margin: '0 0 16px 0',
-    fontSize: '1rem',
-    fontWeight: 600,
-    color: '#374151',
-  },
-  breakdownGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-    gap: '12px',
-  },
-  breakdownItem: {
-    backgroundColor: '#f9fafb',
-    borderRadius: '6px',
-    padding: '12px',
-  },
-  breakdownHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '8px',
-  },
-  breakdownBadge: {
-    display: 'inline-block',
-    padding: '2px 8px',
-    borderRadius: '4px',
-    fontSize: '0.75rem',
-    fontWeight: 500,
-    textTransform: 'uppercase',
-  },
-  breakdownCount: {
-    fontSize: '0.75rem',
-    color: '#6b7280',
-  },
-  breakdownAmount: {
-    fontSize: '1.125rem',
-    fontWeight: 600,
-    color: '#111827',
-    fontFamily: 'monospace',
+    fontWeight: 700,
+    color: '#1a1a2e',
   },
   loading: {
     padding: '40px',
@@ -261,3 +201,5 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#6b7280',
   },
 }
+
+// Responsive styles via media query would be in globals.css
