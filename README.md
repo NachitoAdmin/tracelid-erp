@@ -17,7 +17,9 @@ A complete ERP system built with Next.js 14+, Prisma ORM, and Supabase.
 - PostgreSQL (Supabase)
 - TypeScript
 
-## Setup
+## Quick Start
+
+### Local Development
 
 1. **Install dependencies**:
    ```bash
@@ -25,9 +27,9 @@ A complete ERP system built with Next.js 14+, Prisma ORM, and Supabase.
    ```
 
 2. **Set up environment variables**:
-   Create `.env.local`:
-   ```
-   DATABASE_URL="postgresql://postgres:[password]@db.[project].supabase.co:5432/postgres"
+   ```bash
+   cp .env.example .env.local
+   # Edit .env.local and add your DATABASE_URL with Supabase password
    ```
 
 3. **Generate Prisma client**:
@@ -45,38 +47,101 @@ A complete ERP system built with Next.js 14+, Prisma ORM, and Supabase.
    npm run dev
    ```
 
+Visit http://localhost:3000
+
 ## Deployment to Vercel
 
-1. Push to GitHub
-2. Connect repository to Vercel
-3. Add `DATABASE_URL` environment variable
-4. Deploy
+### Step 1: Create GitHub Repository
+
+1. Go to https://github.com/new
+2. Repository name: `erp-nextjs`
+3. Click **Create repository**
+4. Push local code:
+   ```bash
+   git remote add origin https://github.com/YOUR_USERNAME/erp-nextjs.git
+   git branch -M main
+   git push -u origin main
+   ```
+
+### Step 2: Deploy to Vercel
+
+1. Go to https://vercel.com/new
+2. Import your `erp-nextjs` repository
+3. Configure environment variables:
+   - `DATABASE_URL` - Supabase connection string
+   - `NEXT_PUBLIC_SUPABASE_URL` - `https://ijswvbminyhragalujus.supabase.co`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` - From `.env.example`
+4. Click **Deploy**
+
+### Step 3: Run Database Migrations
+
+```bash
+export DATABASE_URL="postgresql://postgres:[PASSWORD]@db.ijswvbminyhragalujus.supabase.co:5432/postgres"
+npx prisma db push
+```
+
+See [DEPLOYMENT_SUMMARY.md](./DEPLOYMENT_SUMMARY.md) for detailed instructions.
 
 ## API Endpoints
 
-- `GET /api/tenants` - List all tenants
-- `POST /api/tenants` - Create a new tenant
-- `GET /api/transactions?tenantId=xxx` - List transactions for tenant
-- `POST /api/transactions` - Create a new transaction
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/tenants` | List all tenants |
+| POST | `/api/tenants` | Create a new tenant |
+| GET | `/api/transactions?tenantId=xxx` | List transactions for tenant |
+| POST | `/api/transactions` | Create a new transaction |
 
 ## Project Structure
 
 ```
-/erp-nextjs
+erp-nextjs/
+├── prisma/
+│   └── schema.prisma          # Database schema
 ├── src/
 │   ├── app/
-│   │   ├── api/transactions/route.ts
-│   │   ├── api/tenants/route.ts
-│   │   ├── page.tsx (main ERP UI)
-│   │   └── admin/page.tsx
+│   │   ├── page.tsx           # Home page
+│   │   ├── layout.tsx         # Root layout
+│   │   ├── admin/
+│   │   │   └── page.tsx       # Admin dashboard
+│   │   └── api/
+│   │       ├── tenants/
+│   │       │   └── route.ts   # Tenant API
+│   │       └── transactions/
+│   │           └── route.ts   # Transaction API
 │   ├── components/
+│   │   ├── AnalyticsDashboard.tsx
 │   │   ├── SaleForm.tsx
-│   │   ├── TransactionList.tsx
-│   │   └── AnalyticsDashboard.tsx
+│   │   └── TransactionList.tsx
 │   └── lib/
-│       ├── prisma.ts
-│       └── utils.ts
-├── prisma/
-│   └── schema.prisma
-└── package.json
+│       ├── prisma.ts          # Prisma client
+│       └── utils.ts           # Utilities
+├── package.json
+├── next.config.js
+├── vercel.json                # Vercel configuration
+└── tsconfig.json
 ```
+
+## Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `DATABASE_URL` | PostgreSQL connection string | Yes |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL | Yes |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon/public key | Yes |
+
+## Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run db:generate` - Generate Prisma client
+- `npm run db:push` - Push schema to database
+- `npm run db:studio` - Open Prisma Studio
+
+## Supabase Configuration
+
+- **Project URL**: https://ijswvbminyhragalujus.supabase.co
+- **Dashboard**: https://app.supabase.com/project/ijswvbminyhragalujus
+
+## License
+
+MIT
