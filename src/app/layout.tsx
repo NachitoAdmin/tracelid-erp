@@ -1,8 +1,9 @@
 import type { Metadata } from 'next'
+import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'ERP System',
-  description: 'Next.js ERP Application',
+  title: 'NachitoBot ERP',
+  description: 'Advanced Business Intelligence & Analytics',
 }
 
 export default function RootLayout({
@@ -12,7 +13,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body style={{ margin: 0, backgroundColor: '#f3f4f6' }}>{children}</body>
+      <body>{children}</body>
     </html>
   )
 }
