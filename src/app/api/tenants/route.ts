@@ -1,22 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+
+const supabase = createClient(supabaseUrl, supabaseKey)
 
 export async function GET() {
   try {
-    const tenants = await prisma.tenant.findMany({
-      orderBy: { createdAt: 'desc' },
-      include: {
-        _count: {
-          select: { transactions: true },
-        },
-      },
-    })
+    const { data: tenants, error } = await supabase
+      .from('Tenant')
+      .select('*')
+      .order('createdAt', { ascending: false })
 
-    return NextResponse.json(tenants)
-  } catch (error) {
+    if (error) throw error
+
+    // Get transaction counts for each tenant
+    const tenantsWithCount = await Promise.all(
+      (tenants || []).map(async (tenant) => {
+        const { count } = await supabase
+          .from('transactions')
+          .select('*', { count: 'exact', head: true })
+          .eq('tenant_id', tenant.id)
+        
+        return {
+          ...tenant,
+          _count: { transactions: count || 0 }
+        }
+      })
+    )
+
+    return NextResponse.json(tenantsWithCount)
+  } catch (error: any) {
     console.error('Error fetching tenants:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch tenants' },
+      { error: 'Failed to fetch tenants', details: error?.message || String(error) },
       { status: 500 }
     )
   }
@@ -34,15 +52,19 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const tenant = await prisma.tenant.create({
-      data: { name, country },
-    })
+    const { data: tenant, error } = await supabase
+      .from('Tenant')
+      .insert({ name, country })
+      .select()
+      .single()
+
+    if (error) throw error
 
     return NextResponse.json(tenant, { status: 201 })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating tenant:', error)
     return NextResponse.json(
-      { error: 'Failed to create tenant' },
+      { error: 'Failed to create tenant', details: error?.message || String(error) },
       { status: 500 }
     )
   }

@@ -8,33 +8,25 @@ datasource db {
 }
 
 model Tenant {
-  id          String        @id @default(uuid())
-  name        String
-  country     String
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  transactions Transaction[]
+  id               String            @id @default(uuid())
+  name             String
+  country          String
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
   documentCounters DocumentCounter[]
-}
-
-enum TransactionType {
-  SALE
-  RETURN
-  REBATE
-  DISCOUNT
-  COST
+  transactions     Transaction[]
 }
 
 model Transaction {
-  id               String          @id @default(uuid())
-  documentNumber   String          @unique @map("document_number")
-  transactionType  TransactionType @map("transaction_type")
-  amount           Decimal         @db.Decimal(10, 2)
-  description      String?
-  tenantId         String          @map("tenant_id")
-  tenant           Tenant          @relation(fields: [tenantId], references: [id])
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
+  id              String          @id @default(uuid())
+  documentNumber  String          @unique @map("document_number")
+  transactionType TransactionType @map("transaction_type")
+  amount          Decimal         @db.Decimal(10, 2)
+  description     String?
+  tenantId        String          @map("tenant_id")
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  tenant          Tenant          @relation(fields: [tenantId], references: [id])
 
   @@index([tenantId])
   @@index([transactionType])
@@ -43,16 +35,24 @@ model Transaction {
 }
 
 model DocumentCounter {
-  id          String   @id @default(uuid())
-  tenantId    String   @map("tenant_id")
-  tenant      Tenant   @relation(fields: [tenantId], references: [id])
-  prefix      String
-  year        Int
-  lastNumber  Int      @map("last_number")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String   @id @default(uuid())
+  tenantId   String   @map("tenant_id")
+  prefix     String
+  year       Int
+  lastNumber Int      @map("last_number")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  tenant     Tenant   @relation(fields: [tenantId], references: [id])
 
   @@unique([tenantId, prefix, year])
   @@index([tenantId])
   @@map("document_counters")
+}
+
+enum TransactionType {
+  SALE
+  RETURN
+  REBATE
+  DISCOUNT
+  COST
 }
