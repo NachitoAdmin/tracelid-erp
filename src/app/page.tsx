@@ -263,7 +263,7 @@ export default function Home() {
               
               {/* Master Data button for admin/owner roles */}
               {(isAdmin || isOwner) && (
-                <a href="/master-data" style={{...styles.headerBtnSecondary, color: isDark ? '#9CA3AF' : '#6B7280'}}>
+                <a href="/master-data" style={{...styles.headerBtnPrimary, background: 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)'}}>
                   📊 Master Data
                 </a>
               )}
