@@ -13,7 +13,7 @@
       - navigation [ref=e5]:
         - navigation [ref=e6]:
           - link "Sign Up" [ref=e7] [cursor=pointer]:
-            - /url: /signup?next=%2Fsso-api%3Furl%3Dhttps%253A%252F%252Ferp-nextjs-k5qnqj5pm-nachitoadmins-projects.vercel.app%252F%26nonce%3D94df6608ab84b0c52d89079f93eff446d2c00e51702e541ffcf76fddfaecf385
+            - /url: /signup?next=%2Fsso-api%3Furl%3Dhttps%253A%252F%252Ferp-nextjs-jll6y2gaz-nachitoadmins-projects.vercel.app%252F%26nonce%3D2d1cf7894ab29b8181d384d28bbdbd76d41a137c094741eb2577ff2b35a897b3
             - paragraph [ref=e9]: Sign Up
     - main [ref=e10]:
       - generic [ref=e11]:
@@ -52,7 +52,7 @@
         - paragraph [ref=e74]:
           - text: Don't have an account?
           - link "Sign Up" [ref=e75] [cursor=pointer]:
-            - /url: /signup?next=%2Fsso-api%3Furl%3Dhttps%253A%252F%252Ferp-nextjs-k5qnqj5pm-nachitoadmins-projects.vercel.app%252F%26nonce%3D94df6608ab84b0c52d89079f93eff446d2c00e51702e541ffcf76fddfaecf385
+            - /url: /signup?next=%2Fsso-api%3Furl%3Dhttps%253A%252F%252Ferp-nextjs-jll6y2gaz-nachitoadmins-projects.vercel.app%252F%26nonce%3D2d1cf7894ab29b8181d384d28bbdbd76d41a137c094741eb2577ff2b35a897b3
       - generic [ref=e78]:
         - link "Terms" [ref=e79] [cursor=pointer]:
           - /url: /legal/terms
