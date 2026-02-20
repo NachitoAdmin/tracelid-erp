@@ -39,18 +39,25 @@ export default function LoginPage() {
       clearTimeout(timeoutId);
 
       console.log('Login response status:', res.status);
+      console.log('Response headers:', Object.fromEntries(res.headers.entries()));
+      
+      const responseText = await res.text();
+      console.log('Raw response text:', responseText);
       
       let data;
       try {
-        data = await res.json();
+        data = JSON.parse(responseText);
+        console.log('Parsed data:', data);
       } catch (jsonErr) {
         console.error('Failed to parse JSON:', jsonErr);
-        setError('Server error: Invalid response');
+        setError('Server error: Invalid response - ' + responseText.substring(0, 100));
         setLoading(false);
         return;
       }
       
       console.log('Login response data:', data);
+      console.log('Data has user?', data.hasOwnProperty('user'));
+      console.log('Data.user:', data.user);
 
       if (!res.ok) {
         setError(data.error || 'Login failed');
@@ -58,18 +65,33 @@ export default function LoginPage() {
         return;
       }
 
+      console.log('Storing user data to localStorage...');
+      console.log('data.user exists?', !!data.user);
+      console.log('data.user.id:', data.user?.id);
+      console.log('data.user.tenant:', data.user?.tenant);
+      
+      if (!data.user) {
+        console.error('No user data in response!');
+        setError('Invalid response: missing user data');
+        setLoading(false);
+        return;
+      }
+
       localStorage.setItem('tracelid-user', JSON.stringify(data.user));
-      localStorage.setItem('tracelid-selected-tenant', data.user.tenant.id);
-      localStorage.setItem('tracelid-selected-tenant-name', data.user.tenant.name);
+      localStorage.setItem('tracelid-selected-tenant', data.user.tenant?.id || '');
+      localStorage.setItem('tracelid-selected-tenant-name', data.user.tenant?.name || '');
 
       console.log('Redirecting to dashboard...');
+      console.log('User role:', data.user.role);
       setLoading(false);
       
-      if (data.user.role === 'operator') {
-        window.location.href = '/operator';
-      } else {
-        window.location.href = '/';
-      }
+      const redirectUrl = data.user.role === 'operator' ? '/operator' : '/';
+      console.log('Redirect URL:', redirectUrl);
+      
+      setTimeout(() => {
+        console.log('Executing redirect to:', redirectUrl);
+        window.location.href = redirectUrl;
+      }, 100);
     } catch (err: any) {
       console.error('Login error:', err);
       if (err.name === 'AbortError') {
