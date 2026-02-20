@@ -52,16 +52,7 @@ export default function LoginPage() {
     <div style={styles.container}>
       <div style={styles.card}>
         <div style={styles.logo}>
-          <svg width="60" height="60" viewBox="0 0 200 50">
-            <defs>
-              <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#6C5CE7" />
-                <stop offset="100%" stopColor="#A78BFA" />
-              </linearGradient>
-            </defs>
-            <circle cx="25" cy="25" r="20" fill="none" stroke="url(#logoGrad)" strokeWidth="3" />
-            <polyline points="14,30 20,22 26,28 36,16" fill="none" stroke="url(#logoGrad)" strokeWidth="3" strokeLinecap="round" />
-          </svg>
+          <div style={styles.icon}>📊</div>
           <h1 style={styles.title}>Tracelid</h1>
         </div>
         
@@ -71,7 +62,7 @@ export default function LoginPage() {
           <div style={styles.error}>⚠️ {error}</div>
         )}
         
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} style={styles.form}>
           <div style={styles.field}>
             <label style={styles.label}>Email Address</label>
             <input
@@ -109,6 +100,13 @@ export default function LoginPage() {
           Don&apos;t have an account?{' '}
           <Link href="/register" style={styles.link}>Create one</Link>
         </div>
+        
+        <div style={{marginTop: '15px'}}>
+          <p style={{margin: '0', fontSize: '0.8rem', color: '#9ca3af'}}>
+            Forgot password? Contact admin or{' '}
+            <Link href="/register" style={styles.link}>create new account</Link>
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -123,15 +121,17 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     padding: '20px',
     fontFamily: "'Segoe UI', system-ui, sans-serif",
+    boxSizing: 'border-box',
   },
   card: {
     backgroundColor: '#fff',
-    borderRadius: '24px',
+    borderRadius: '20px',
     padding: '40px',
     width: '100%',
     maxWidth: '400px',
     boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
     textAlign: 'center',
+    boxSizing: 'border-box',
   },
   logo: {
     display: 'flex',
@@ -139,8 +139,12 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     marginBottom: '20px',
   },
+  icon: {
+    fontSize: '3rem',
+    marginBottom: '10px',
+  },
   title: {
-    margin: '10px 0 0 0',
+    margin: '0',
     fontSize: '1.8rem',
     fontWeight: 700,
     color: '#1f2937',
@@ -150,6 +154,10 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#6b7280',
     fontSize: '0.95rem',
   },
+  form: {
+    width: '100%',
+    boxSizing: 'border-box',
+  },
   error: {
     padding: '12px 16px',
     backgroundColor: '#fee2e2',
@@ -157,10 +165,14 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '10px',
     marginBottom: '20px',
     fontSize: '0.9rem',
+    width: '100%',
+    boxSizing: 'border-box',
   },
   field: {
     marginBottom: '18px',
     textAlign: 'left',
+    width: '100%',
+    boxSizing: 'border-box',
   },
   label: {
     display: 'block',
@@ -178,6 +190,7 @@ const styles: Record<string, React.CSSProperties> = {
     outline: 'none',
     boxSizing: 'border-box',
     transition: 'border-color 0.2s',
+    maxWidth: '100%',
   },
   submitBtn: {
     width: '100%',
@@ -190,6 +203,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 600,
     cursor: 'pointer',
     marginTop: '10px',
+    boxSizing: 'border-box',
   },
   footer: {
     marginTop: '25px',

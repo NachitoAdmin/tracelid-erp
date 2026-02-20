@@ -253,6 +253,7 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     padding: '15px',
     fontFamily: "'Segoe UI', system-ui, sans-serif",
+    boxSizing: 'border-box',
   },
   card: {
     backgroundColor: '#fff',
@@ -261,6 +262,7 @@ const styles: Record<string, React.CSSProperties> = {
     width: '100%',
     maxWidth: '480px',
     boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+    boxSizing: 'border-box',
   },
   successCard: {
     backgroundColor: '#fff',
@@ -270,6 +272,7 @@ const styles: Record<string, React.CSSProperties> = {
     maxWidth: '400px',
     boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
     textAlign: 'center',
+    boxSizing: 'border-box',
   },
   successIcon: {
     fontSize: '4rem',
@@ -294,6 +297,8 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     flexDirection: 'column',
     gap: '12px',
+    width: '100%',
+    boxSizing: 'border-box',
   },
   error: {
     padding: '10px 14px',
@@ -302,15 +307,21 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '8px',
     marginBottom: '10px',
     fontSize: '0.9rem',
+    width: '100%',
+    boxSizing: 'border-box',
   },
   row: {
     display: 'flex',
     gap: '12px',
+    width: '100%',
+    boxSizing: 'border-box',
   },
   field: {
     display: 'flex',
     flexDirection: 'column',
     flex: 1,
+    minWidth: 0,
+    boxSizing: 'border-box',
   },
   label: {
     fontSize: '0.8rem',
@@ -327,6 +338,8 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '0.95rem',
     outline: 'none',
     boxSizing: 'border-box',
+    width: '100%',
+    maxWidth: '100%',
   },
   submitBtn: {
     padding: '12px',
@@ -338,6 +351,8 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 600,
     cursor: 'pointer',
     marginTop: '8px',
+    width: '100%',
+    boxSizing: 'border-box',
   },
   footer: {
     marginTop: '18px',
