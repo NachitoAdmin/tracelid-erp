@@ -17,11 +17,26 @@ function getSupabaseClient() {
   return createClient(supabaseUrl, supabaseKey)
 }
 
-async function generateDocumentNumber(supabase: any, tenantId: string): Promise<string> {
+async function generateDocumentNumber(supabase: any, tenantId: string, transactionType: string, referenceSaleId?: string): Promise<string> {
   const year = new Date().getFullYear()
-  const prefix = 'INV'
+  
+  // RETURN gets Credit Note (CN) prefix
+  const prefix = transactionType === 'RETURN' ? 'CN' : 'INV'
   
   try {
+    // For DISCOUNT/REBATE/COST on an existing sale, use the sale's document number
+    if (referenceSaleId && ['DISCOUNT', 'REBATE', 'COST'].includes(transactionType)) {
+      const { data: sale } = await supabase
+        .from('transactions')
+        .select('document_number')
+        .eq('id', referenceSaleId)
+        .single()
+      
+      if (sale?.document_number) {
+        return sale.document_number
+      }
+    }
+    
     const { data: existingCounter } = await supabase
       .from('document_counters')
       .select('*')
@@ -107,6 +122,7 @@ export async function POST(request: NextRequest) {
       productName,
       customerId,
       customerName,
+      referenceSaleId,
     } = body
 
     console.log('Extracted values:', { tenantId, transactionType, amount, description })
@@ -155,7 +171,7 @@ export async function POST(request: NextRequest) {
     }
     console.log('Tenant found:', tenant.name)
 
-    const documentNumber = await generateDocumentNumber(supabase, tenantId)
+    const documentNumber = await generateDocumentNumber(supabase, tenantId, upperType, referenceSaleId)
     console.log('Generated document number:', documentNumber)
 
     // Build insert data dynamically
