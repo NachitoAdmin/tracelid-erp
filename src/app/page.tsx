@@ -248,31 +248,28 @@ export default function Home() {
             </div>
             
             <div style={styles.headerRight}>
-              
-              <div style={styles.headerControl}>
-                <span style={{...styles.headerLabel, color: isDark ? '#9CA3AF' : '#6B7280'}}>Language</span>
+              <div style={styles.headerControlCompact}>
                 <LanguageSwitcher />
               </div>
-              <div style={styles.headerControl}>
-                <span style={{...styles.headerLabel, color: isDark ? '#9CA3AF' : '#6B7280'}}>Currency</span>
+              <div style={styles.headerControlCompact}>
                 <CurrencySelector />
               </div>
-              <button onClick={toggleTheme} style={{...styles.themeBtn, backgroundColor: isDark ? '#374151' : '#F3F4F6', color: textColor}}>
+              <button onClick={toggleTheme} style={{...styles.themeBtnCompact, backgroundColor: isDark ? '#374151' : '#F3F4F6', color: textColor}}>
                 {isDark ? '☀️' : '🌙'}
               </button>
               
               {/* Master Data button for admin/owner roles */}
               {(isAdmin || isOwner) && (
-                <a href="/master-data" style={{...styles.headerBtnPrimary, background: 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)'}}>
-                  📊 Master Data
+                <a href="/master-data" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)'}}>
+                  📊 Master
                 </a>
               )}
               
-              <a href="/analytics" style={styles.headerBtnPrimary}>📈 Analytics</a>
+              <a href="/analytics" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #6C5CE7 0%, #764ba2 100%)'}}>📈 Analytics</a>
               
               {user && (
-                <button onClick={handleLogout} style={{...styles.headerBtnSecondary, color: '#EF4444'}}>
-                  Logout
+                <button onClick={handleLogout} style={{...styles.logoutBtnCompact, color: '#EF4444'}}>
+                  🚪
                 </button>
               )}
             </div>
@@ -429,7 +426,7 @@ const styles: Record<string, React.CSSProperties> = {
   headerCenter: {
     display: 'flex',
     alignItems: 'center',
-    gap: '24px',
+    gap: '16px',
     flex: 1,
     justifyContent: 'center',
   },
@@ -437,7 +434,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'flex-start',
-    gap: '2px',
+    gap: '1px',
   },
   headerValue: {
     fontSize: '0.9rem',
@@ -489,6 +486,33 @@ const styles: Record<string, React.CSSProperties> = {
     background: 'none',
     border: 'none',
     cursor: 'pointer',
+  },
+  headerControlCompact: {
+    display: 'flex',
+    alignItems: 'center',
+  },
+  themeBtnCompact: {
+    padding: '6px 10px',
+    borderRadius: '6px',
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: '0.9rem',
+  },
+  headerBtnCompact: {
+    padding: '6px 12px',
+    color: 'white',
+    borderRadius: '6px',
+    textDecoration: 'none',
+    fontWeight: 600,
+    fontSize: '0.8rem',
+    whiteSpace: 'nowrap',
+  },
+  logoutBtnCompact: {
+    padding: '6px 10px',
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: '0.9rem',
   },
   roleBadge: {
     padding: '4px 10px',
