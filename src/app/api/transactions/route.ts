@@ -1,19 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-
-console.log('Transactions API - Supabase URL:', supabaseUrl ? 'Set' : 'Not set')
-console.log('Transactions API - Supabase Key:', supabaseKey ? 'Set' : 'Not set')
-
-const supabase = createClient(supabaseUrl, supabaseKey)
-
 const VALID_TRANSACTION_TYPES = ['SALE', 'RETURN', 'REBATE', 'DISCOUNT', 'COST'] as const
 
 type TransactionType = typeof VALID_TRANSACTION_TYPES[number]
 
-async function generateDocumentNumber(tenantId: string): Promise<string> {
+function getSupabaseClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  
+  if (!supabaseUrl || !supabaseKey) {
+    console.error('Missing Supabase credentials')
+    throw new Error('Missing Supabase credentials')
+  }
+  
+  return createClient(supabaseUrl, supabaseKey)
+}
+
+async function generateDocumentNumber(supabase: any, tenantId: string): Promise<string> {
   const year = new Date().getFullYear()
   const prefix = 'INV'
   
@@ -42,14 +46,20 @@ async function generateDocumentNumber(tenantId: string): Promise<string> {
     
     return `${prefix}-${year}-${String(lastNumber + 1).padStart(5, '0')}`
   } catch (error) {
+    console.error('Error generating document number:', error)
     return `${prefix}-${year}-${Date.now().toString().slice(-5)}`
   }
 }
 
 export async function GET(request: NextRequest) {
+  console.log('=== TRANSACTIONS GET API CALLED ===')
+  
   try {
+    const supabase = getSupabaseClient()
     const { searchParams } = new URL(request.url)
     const tenantId = searchParams.get('tenantId')
+
+    console.log('Tenant ID:', tenantId)
 
     if (!tenantId) {
       return NextResponse.json(
@@ -64,10 +74,15 @@ export async function GET(request: NextRequest) {
       .eq('tenant_id', tenantId)
       .order('createdat', { ascending: false })
 
-    if (error) throw error
+    if (error) {
+      console.error('GET Error:', error)
+      throw error
+    }
 
+    console.log('Found', transactions?.length || 0, 'transactions')
     return NextResponse.json(transactions || [])
   } catch (error: any) {
+    console.error('GET API Error:', error)
     return NextResponse.json(
       { error: 'Failed to fetch transactions', details: error?.message },
       { status: 500 }
@@ -79,6 +94,7 @@ export async function POST(request: NextRequest) {
   console.log('=== TRANSACTIONS POST API CALLED ===')
   
   try {
+    const supabase = getSupabaseClient()
     const body = await request.json()
     console.log('Request body:', JSON.stringify(body, null, 2))
     
@@ -139,7 +155,7 @@ export async function POST(request: NextRequest) {
     }
     console.log('Tenant found:', tenant.name)
 
-    const documentNumber = await generateDocumentNumber(tenantId)
+    const documentNumber = await generateDocumentNumber(supabase, tenantId)
     console.log('Generated document number:', documentNumber)
 
     // Build insert data dynamically
