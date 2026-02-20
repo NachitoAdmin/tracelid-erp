@@ -56,12 +56,14 @@ export default function Home() {
     
     // Get user from localStorage
     const userData = localStorage.getItem('tracelid-user')
+    let parsedUser = null
+    
     if (userData) {
       try {
-        const parsedUser = JSON.parse(userData)
+        parsedUser = JSON.parse(userData)
         setUser(parsedUser)
         // If admin/operator, auto-select their tenant
-        if (parsedUser.role !== 'owner' && parsedUser.tenant?.id) {
+        if (parsedUser?.role && parsedUser.role !== 'owner' && parsedUser.tenant?.id) {
           setSelectedTenantId(parsedUser.tenant.id)
           setTenantInput(parsedUser.tenant.id)
           localStorage.setItem('tracelid-selected-tenant', parsedUser.tenant.id)
@@ -73,7 +75,7 @@ export default function Home() {
     }
     
     // Only fetch tenants for owner role
-    if (!userData || JSON.parse(userData).role === 'owner') {
+    if (!parsedUser || parsedUser.role === 'owner') {
       fetchTenants()
     } else {
       setLoading(false)
