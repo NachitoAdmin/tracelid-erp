@@ -58,7 +58,7 @@ export default function LoginPage() {
     <div style={styles.container}>
       <div style={styles.card}>
         <div style={styles.logo}>
-          <!-- Tracelid Logo SVG -->
+          {/* Tracelid Logo SVG */}
           <svg width="80" height="80" viewBox="0 0 200 200" style={{marginBottom: '10px'}}>
             <defs>
               <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
