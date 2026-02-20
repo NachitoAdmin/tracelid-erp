@@ -216,6 +216,13 @@ export default function Home() {
             </div>
             
             <div style={styles.headerCenter}>
+              {/* Debug: Show user role */}
+              {user && (
+                <div style={{...styles.headerItem, background: '#fef3c7', padding: '4px 8px', borderRadius: '4px'}}>
+                  <span style={{fontSize: '0.7rem', color: '#92400e'}}>ROLE: {user.role}</span>
+                </div>
+              )}
+              
               {/* Tenant Name */}
               {selectedTenant?.name && (
                 <div style={styles.headerItem}>
