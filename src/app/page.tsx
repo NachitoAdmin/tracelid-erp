@@ -295,9 +295,9 @@ export default function Home() {
                   ))}
                 </select>
                 
-                {selectedTenant && (
+                {selectedTenant && '_count' in selectedTenant && (
                   <span style={{...styles.tenantInfo, color: isDark ? '#9CA3AF' : '#6B7280'}}>
-                    {selectedTenant._count?.transactions || 0} transactions
+                    {(selectedTenant as any)._count?.transactions || 0} transactions
                   </span>
                 )}
               </div>
