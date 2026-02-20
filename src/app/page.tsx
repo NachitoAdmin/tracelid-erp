@@ -269,7 +269,7 @@ export default function Home() {
         </header>
 
         <main style={styles.main}>
-          {/* Tenant Bar - Only show for Owner role */}
+          {/* Tenant Bar - Show for Owner role */}
           {isOwner && (
             <div style={{...styles.tenantBar, backgroundColor: cardBg, borderColor}}>
               <div style={styles.tenantLeft}>
