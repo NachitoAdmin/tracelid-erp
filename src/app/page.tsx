@@ -258,12 +258,10 @@ export default function Home() {
                 {isDark ? '☀️' : '🌙'}
               </button>
               
-              {/* Master Data button for admin/owner roles */}
-              {(isAdmin || isOwner) && (
-                <a href="/master-data" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)'}}>
-                  📊 Master
-                </a>
-              )}
+              {/* Master Data button - TEMPORARILY VISIBLE FOR ALL */}
+              <a href="/master-data" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)'}}>
+                📊 Master
+              </a>
               
               <a href="/analytics" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #6C5CE7 0%, #764ba2 100%)'}}>📈 Analytics</a>
               
