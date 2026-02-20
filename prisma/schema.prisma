@@ -16,8 +16,28 @@ model Tenant {
   updatedAt        DateTime          @updatedAt
   documentCounters DocumentCounter[]
   transactions     Transaction[]
+  users            User[]
 
   @@map("Tenant")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  role         String   // 'owner' | 'admin' | 'operator'
+  tenantId     String   @map("tenant_id")
+  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  firstName    String?  @map("first_name")
+  lastName     String?  @map("last_name")
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@index([email])
+  @@index([tenantId])
+  @@index([role])
+  @@map("users")
 }
 
 model Transaction {

@@ -1,36 +1,131 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { NextRequest, NextResponse } from 'next/server';
+import { parse } from 'cookie';
+import { verifyToken, hashPassword } from '@/lib/auth';
+import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-
-const supabase = createClient(supabaseUrl, supabaseKey)
-
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    // For now, return mock users since we don't have a users table yet
-    // In production, this would query a users table with roles
-    const { data: tenants } = await supabase
-      .from('Tenant')
-      .select('id, name')
+    // Verify admin
+    const cookies = parse(req.headers.get('cookie') || '');
+    const token = cookies['auth-token'];
+    const decoded = verifyToken(token);
 
-    const mockUsers = [
-      { id: '1', email: 'owner@tracelid.com', role: 'OWNER_ADMIN', tenantId: null, tenantName: 'All Tenants' },
-      ...(tenants || []).map((t, i) => ({
-        id: `user-${i}`,
-        email: `admin@${t.name.toLowerCase().replace(/\s+/g, '')}.com`,
-        role: 'TENANT_ADMIN',
-        tenantId: t.id,
-        tenantName: t.name,
-      })),
-    ]
+    if (!decoded || (decoded.role !== 'admin' && decoded.role !== 'owner')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
 
-    return NextResponse.json(mockUsers)
-  } catch (error: any) {
-    console.error('Error fetching users:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch users', details: error?.message },
-      { status: 500 }
-    )
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_KEY!
+    );
+
+    // Get current user's tenant
+    const { data: currentUser } = await supabase
+      .from('users')
+      .select('tenant_id')
+      .eq('id', decoded.userId)
+      .single();
+
+    // Get all users in tenant
+    const { data: users } = await supabase
+      .from('users')
+      .select('id, email, role, first_name, last_name, is_active, created_at')
+      .eq('tenant_id', currentUser.tenant_id)
+      .order('created_at', { ascending: false });
+
+    return NextResponse.json({ users });
+  } catch (error) {
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    // Verify admin
+    const cookies = parse(req.headers.get('cookie') || '');
+    const token = cookies['auth-token'];
+    const decoded = verifyToken(token);
+
+    if (!decoded || (decoded.role !== 'admin' && decoded.role !== 'owner')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
+    const { email, password, role, firstName, lastName } = await req.json();
+
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_KEY!
+    );
+
+    // Get current user's tenant
+    const { data: currentUser } = await supabase
+      .from('users')
+      .select('tenant_id')
+      .eq('id', decoded.userId)
+      .single();
+
+    // Hash password
+    const passwordHash = await hashPassword(password);
+
+    // Create user
+    const { data: user, error } = await supabase
+      .from('users')
+      .insert({
+        email,
+        password_hash: passwordHash,
+        role: role || 'operator',
+        tenant_id: currentUser.tenant_id,
+        first_name: firstName,
+        last_name: lastName,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });
+    }
+
+    return NextResponse.json({ user }, { status: 201 });
+  } catch (error) {
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
+export async function PATCH(req: NextRequest) {
+  try {
+    // Verify admin
+    const cookies = parse(req.headers.get('cookie') || '');
+    const token = cookies['auth-token'];
+    const decoded = verifyToken(token);
+
+    if (!decoded || (decoded.role !== 'admin' && decoded.role !== 'owner')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
+    const { userId, role, isActive } = await req.json();
+
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_KEY!
+    );
+
+    const updates: any = {};
+    if (role) updates.role = role;
+    if (typeof isActive === 'boolean') updates.is_active = isActive;
+
+    const { data: user, error } = await supabase
+      .from('users')
+      .update(updates)
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (error) {
+      return NextResponse.json({ error: 'Failed to update user' }, { status: 500 });
+    }
+
+    return NextResponse.json({ user });
+  } catch (error) {
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
