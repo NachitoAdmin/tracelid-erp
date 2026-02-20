@@ -127,9 +127,13 @@ export default function TransactionList({ tenantId, refreshTrigger }: Transactio
                   <td style={styles.td}>
                     <span style={{
                       ...styles.amount,
-                      color: transType === 'RETURN' ? '#dc2626' : (['SALE'].includes(transType) ? '#16a34a' : '#374151')
+                      color: ['RETURN', 'DISCOUNT', 'REBATE', 'COST'].includes(transType) ? '#dc2626' : '#16a34a'
                     }}>
-                      {formatCurrency(transType === 'RETURN' ? -Math.abs(parseFloat(t.amount as string)) : t.amount)}
+                      {formatCurrency(
+                        ['RETURN', 'DISCOUNT', 'REBATE', 'COST'].includes(transType) 
+                          ? -Math.abs(parseFloat(t.amount as string)) 
+                          : t.amount
+                      )}
                     </span>
                   </td>
                   <td style={styles.td}>

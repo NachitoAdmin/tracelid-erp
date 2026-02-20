@@ -17,7 +17,54 @@ function getSupabaseClient() {
   return createClient(supabaseUrl, supabaseKey)
 }
 
-async function generateDocumentNumber(supabase: any, tenantId: string, transactionType: string, referenceSaleId?: string): Promise<string> {
+async function getNextDocumentNumber(supabase: any, tenantId: string, prefix: string, year: number): Promise<number> {
+  // Use a simple approach: query the highest existing number and add 1
+  const { data: existing, error } = await supabase
+    .from('document_counters')
+    .select('last_number')
+    .eq('tenantId', tenantId)
+    .eq('prefix', prefix)
+    .eq('year', year)
+    .single()
+  
+  if (error && error.code !== 'PGRST116') {
+    console.error('Error fetching counter:', error)
+  }
+  
+  const currentNumber = existing?.last_number || 0
+  const nextNumber = currentNumber + 1
+  
+  // Update or insert the counter
+  if (existing) {
+    const { error: updateError } = await supabase
+      .from('document_counters')
+      .update({ last_number: nextNumber })
+      .eq('tenantId', tenantId)
+      .eq('prefix', prefix)
+      .eq('year', year)
+    
+    if (updateError) {
+      console.error('Error updating counter:', updateError)
+    }
+  } else {
+    const { error: insertError } = await supabase
+      .from('document_counters')
+      .insert({ tenantId, prefix, year, last_number: nextNumber })
+    
+    if (insertError) {
+      console.error('Error inserting counter:', insertError)
+    }
+  }
+  
+  return nextNumber
+}
+
+async function generateDocumentNumber(
+  supabase: any, 
+  tenantId: string, 
+  transactionType: string, 
+  referenceSaleId?: string
+): Promise<string> {
   const year = new Date().getFullYear()
   
   // RETURN gets Credit Note (CN) prefix
@@ -37,31 +84,13 @@ async function generateDocumentNumber(supabase: any, tenantId: string, transacti
       }
     }
     
-    const { data: existingCounter } = await supabase
-      .from('document_counters')
-      .select('*')
-      .eq('tenantId', tenantId)
-      .eq('prefix', prefix)
-      .eq('year', year)
-      .single()
+    // Get next number for this prefix/tenant/year
+    const nextNumber = await getNextDocumentNumber(supabase, tenantId, prefix, year)
     
-    let lastNumber = 0
-    
-    if (existingCounter) {
-      lastNumber = existingCounter.last_number || 0
-      await supabase
-        .from('document_counters')
-        .update({ last_number: lastNumber + 1 })
-        .eq('id', existingCounter.id)
-    } else {
-      await supabase
-        .from('document_counters')
-        .insert({ tenantId, prefix, year, last_number: 1 })
-    }
-    
-    return `${prefix}-${year}-${String(lastNumber + 1).padStart(5, '0')}`
+    return `${prefix}-${year}-${String(nextNumber).padStart(5, '0')}`
   } catch (error) {
     console.error('Error generating document number:', error)
+    // Fallback to timestamp-based number
     return `${prefix}-${year}-${Date.now().toString().slice(-5)}`
   }
 }
