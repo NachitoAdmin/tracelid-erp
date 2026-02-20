@@ -8,7 +8,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
   use: {
-    baseURL: 'https://erp-nextjs-k5qnqj5pm-nachitoadmins-projects.vercel.app',
+    baseURL: process.env.BASE_URL || 'https://erp-nextjs-jqbv317l2-nachitoadmins-projects.vercel.app',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     headless: true,

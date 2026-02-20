@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-const DEV_URL = 'https://erp-nextjs-k5qnqj5pm-nachitoadmins-projects.vercel.app'
+const DEV_URL = process.env.BASE_URL || 'https://erp-nextjs-jqbv317l2-nachitoadmins-projects.vercel.app'
 
 test.describe('DEV Environment E2E Tests', () => {
   
