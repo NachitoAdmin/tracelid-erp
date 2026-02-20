@@ -1,11 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useLanguage } from '@/lib/LanguageContext'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 export default function RegisterPage() {
   const { t } = useLanguage()
+  const router = useRouter()
   const [formData, setFormData] = useState({
     name: '',
     username: '',
@@ -16,6 +18,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
+  const [createdTenant, setCreatedTenant] = useState<any>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -49,6 +52,24 @@ export default function RegisterPage() {
         throw new Error(data.error || 'Failed to create tenant')
       }
 
+      const data = await response.json()
+      
+      // Store tenant info for auto-login
+      setCreatedTenant(data.tenant || data)
+      
+      // Auto-login: Save tenant to localStorage
+      if (data.tenant) {
+        localStorage.setItem('tracelid-selected-tenant', data.tenant.id)
+        localStorage.setItem('tracelid-selected-tenant-name', data.tenant.name)
+        
+        // If tenant has a password, mark it as authenticated
+        if (data.tenant.password) {
+          const authenticatedTenants = new Set(JSON.parse(localStorage.getItem('tracelid-authenticated-tenants') || '[]'))
+          authenticatedTenants.add(data.tenant.id)
+          localStorage.setItem('tracelid-authenticated-tenants', JSON.stringify([...authenticatedTenants]))
+        }
+      }
+      
       setSuccess(true)
     } catch (err: any) {
       setError(err.message)
@@ -57,17 +78,28 @@ export default function RegisterPage() {
     }
   }
 
+  // Auto-redirect to dashboard after successful registration
+  useEffect(() => {
+    if (success && createdTenant) {
+      const timer = setTimeout(() => {
+        router.push('/')
+      }, 1500) // Show success message for 1.5 seconds before redirecting
+      
+      return () => clearTimeout(timer)
+    }
+  }, [success, createdTenant, router])
+
   if (success) {
     return (
       <div style={styles.container}>
         <div style={styles.successCard}>
           <div style={styles.successIcon}>✅</div>
           <h2>Tenant Created Successfully!</h2>
-          <p>Your tenant <strong>{formData.name}</strong> has been created.</p>
-          <p>You can now login with your password.</p>
+          <p>Welcome, <strong>{formData.name}</strong>!</p>
+          <p>Redirecting you to the dashboard...</p>
           
           <Link href="/" style={styles.button}>
-            Go to Login →
+            Go to Dashboard →
           </Link>
         </div>
       </div>
