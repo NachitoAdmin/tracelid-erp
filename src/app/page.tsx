@@ -213,7 +213,27 @@ export default function Home() {
               </svg>
             </div>
             
-            <div style={styles.headerRight}>
+            <div style={styles.headerCenter}>
+              {/* Tenant Name */}
+              {selectedTenant?.name && (
+                <div style={styles.headerItem}>
+                  <span style={{...styles.headerLabel, color: isDark ? '#9CA3AF' : '#6B7280'}}>TENANT</span>
+                  <span style={{...styles.headerValue, color: textColor}}>
+                    {selectedTenant.name} {selectedTenant.country ? `(${selectedTenant.country})` : ''}
+                  </span>
+                </div>
+              )}
+              
+              {/* User Name */}
+              {user && (
+                <div style={styles.headerItem}>
+                  <span style={{...styles.headerLabel, color: isDark ? '#9CA3AF' : '#6B7280'}}>USER</span>
+                  <span style={{...styles.headerValue, color: textColor}}>
+                    👤 {user.firstName} {user.lastName}
+                  </span>
+                </div>
+              )}
+              
               {/* Role Badge */}
               {user && (
                 <div style={{
@@ -223,6 +243,9 @@ export default function Home() {
                   {user.role.toUpperCase()}
                 </div>
               )}
+            </div>
+            
+            <div style={styles.headerRight}>
               
               <div style={styles.headerControl}>
                 <span style={{...styles.headerLabel, color: isDark ? '#9CA3AF' : '#6B7280'}}>Language</span>
@@ -399,6 +422,24 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: '20px',
+  },
+  headerCenter: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '24px',
+    flex: 1,
+    justifyContent: 'center',
+  },
+  headerItem: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: '2px',
+  },
+  headerValue: {
+    fontSize: '0.9rem',
+    fontWeight: 600,
   },
   logo: {
     display: 'flex',

@@ -4,6 +4,9 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
+console.log('Transactions API - Supabase URL:', supabaseUrl ? 'Set' : 'Not set')
+console.log('Transactions API - Supabase Key:', supabaseKey ? 'Set' : 'Not set')
+
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 const VALID_TRANSACTION_TYPES = ['SALE', 'RETURN', 'REBATE', 'DISCOUNT', 'COST'] as const
@@ -73,8 +76,12 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  console.log('=== TRANSACTIONS POST API CALLED ===')
+  
   try {
     const body = await request.json()
+    console.log('Request body:', JSON.stringify(body, null, 2))
+    
     const { 
       tenantId, 
       transactionType, 
@@ -86,7 +93,10 @@ export async function POST(request: NextRequest) {
       customerName,
     } = body
 
+    console.log('Extracted values:', { tenantId, transactionType, amount, description })
+
     if (!tenantId || !transactionType || amount === undefined) {
+      console.log('Validation failed:', { tenantId, transactionType, amount })
       return NextResponse.json(
         { error: 'tenantId, transactionType, and amount are required' },
         { status: 400 }
@@ -110,20 +120,27 @@ export async function POST(request: NextRequest) {
     }
 
     // Check tenant exists
+    console.log('Checking tenant:', tenantId)
     const { data: tenant, error: tenantError } = await supabase
       .from('Tenant')
       .select('*')
       .eq('id', tenantId)
       .single()
 
+    if (tenantError) {
+      console.log('Tenant query error:', tenantError)
+    }
+    
     if (tenantError || !tenant) {
       return NextResponse.json(
-        { error: 'Tenant not found' },
+        { error: 'Tenant not found', details: tenantError?.message },
         { status: 404 }
       )
     }
+    console.log('Tenant found:', tenant.name)
 
     const documentNumber = await generateDocumentNumber(tenantId)
+    console.log('Generated document number:', documentNumber)
 
     // Build insert data dynamically
     const insertData: any = {
@@ -140,6 +157,8 @@ export async function POST(request: NextRequest) {
     if (customerId) insertData.customer_id = customerId
     if (customerName) insertData.customer_name = customerName
 
+    console.log('Insert data:', JSON.stringify(insertData, null, 2))
+
     const { data: transaction, error } = await supabase
       .from('transactions')
       .insert(insertData)
@@ -147,18 +166,26 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
+      console.error('Database insert error:', error)
+      console.error('Error code:', error.code)
+      console.error('Error message:', error.message)
+      console.error('Error details:', error.details)
       return NextResponse.json(
         { 
           error: 'Database insert failed', 
           details: error.message,
           code: error.code,
+          hint: error.hint,
         },
         { status: 500 }
       )
     }
 
+    console.log('Transaction created successfully:', transaction)
+    console.log('=== TRANSACTIONS POST API COMPLETED ===')
     return NextResponse.json(transaction, { status: 201 })
   } catch (error: any) {
+    console.error('=== TRANSACTIONS POST API ERROR ===', error)
     return NextResponse.json(
       { error: 'Failed to create transaction', details: error?.message },
       { status: 500 }
