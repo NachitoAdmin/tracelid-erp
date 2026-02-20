@@ -185,16 +185,55 @@ export default function Home() {
           <div style={{...styles.tenantBar, backgroundColor: cardBg, borderColor}}>
             <div style={styles.tenantLeft}>
               <span style={{...styles.tenantLabel, color: isDark ? '#9CA3AF' : '#9CA3AF'}}>TENANT</span>
-              {selectedTenant ? (
-                <span style={{...styles.tenantName, color: textColor}}>
-                  {selectedTenant.name} ({selectedTenant.country})
+              
+              {/* Tenant Dropdown */}
+              <select
+                value={selectedTenantId}
+                onChange={(e) => {
+                  const tenantId = e.target.value
+                  setTenantInput(tenantId)
+                  const tenant = tenants.find(t => t.id === tenantId)
+                  if (tenant) {
+                    console.log(`Selected tenant: ${tenant.name} (${tenant.id})`)
+                    localStorage.setItem('tracelid-selected-tenant', tenant.id)
+                    localStorage.setItem('tracelid-selected-tenant-name', tenant.name)
+                    
+                    if (tenant.password && !authenticatedTenants.has(tenant.id)) {
+                      setShowLogin(true)
+                      setLoginError('')
+                    } else {
+                      setSelectedTenantId(tenantId)
+                      setRefreshTrigger(prev => prev + 1)
+                    }
+                  }
+                }}
+                style={{
+                  ...styles.tenantSelect,
+                  backgroundColor: inputBg,
+                  borderColor,
+                  color: textColor
+                }}
+              >
+                <option value="">-- Select a tenant --</option>
+                {tenants.map(tenant => (
+                  <option key={tenant.id} value={tenant.id}>
+                    {tenant.name} ({tenant.country}) {tenant.password ? '🔒' : ''}
+                  </option>
+                ))}
+              </select>
+              
+              {selectedTenant && (
+                <span style={{...styles.tenantInfo, color: isDark ? '#9CA3AF' : '#6B7280'}}>
+                  {selectedTenant._count?.transactions || 0} transactions
                 </span>
-              ) : (
-                <span style={{color: isDark ? '#6B7280' : '#6B7280'}}>No tenant selected</span>
               )}
+            </div>
+            
+            <div style={styles.tenantRight}>
               <button 
                 onClick={() => document.getElementById('tenantIdInput')?.classList.toggle('hidden')}
                 style={{...styles.advancedBtn, color: isDark ? '#9CA3AF' : '#6B7280'}}
+                title="Advanced: Enter tenant ID manually"
               >
                 ⚙️
               </button>
@@ -341,11 +380,29 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     gap: '12px',
+    flex: 1,
   },
   tenantLabel: {
     fontSize: '0.7rem',
     fontWeight: 600,
     letterSpacing: '1px',
+  },
+  tenantSelect: {
+    padding: '10px 14px',
+    borderRadius: '8px',
+    border: '1px solid',
+    fontSize: '0.95rem',
+    minWidth: '250px',
+    outline: 'none',
+    cursor: 'pointer',
+  },
+  tenantInfo: {
+    fontSize: '0.85rem',
+    marginLeft: '8px',
+  },
+  tenantRight: {
+    display: 'flex',
+    alignItems: 'center',
   },
   tenantName: {
     fontSize: '1rem',
