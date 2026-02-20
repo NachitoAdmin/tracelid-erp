@@ -1,0 +1,220 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+
+const supabase = createClient(supabaseUrl, supabaseKey)
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json()
+    const { type, tenantId, data } = body
+
+    if (!type || !tenantId || !data || !data.rows) {
+      return NextResponse.json(
+        { error: 'Missing required fields: type, tenantId, data' },
+        { status: 400 }
+      )
+    }
+
+    console.log(`Processing ${type} upload for tenant ${tenantId}`)
+    console.log(`Rows to process: ${data.rows.length}`)
+
+    let result: any
+
+    switch (type) {
+      case 'customers':
+        result = await uploadCustomers(tenantId, data)
+        break
+      case 'products':
+        result = await uploadProducts(tenantId, data)
+        break
+      case 'costs':
+        result = await uploadCosts(tenantId, data)
+        break
+      case 'rebates':
+        result = await uploadRebates(tenantId, data)
+        break
+      default:
+        return NextResponse.json(
+          { error: `Unknown upload type: ${type}` },
+          { status: 400 }
+        )
+    }
+
+    return NextResponse.json({
+      success: true,
+      count: result.count,
+      message: `Successfully uploaded ${result.count} ${type}`,
+    })
+  } catch (error: any) {
+    console.error('Master data upload error:', error)
+    return NextResponse.json(
+      { error: 'Upload failed', details: error.message },
+      { status: 500 }
+    )
+  }
+}
+
+async function uploadCustomers(tenantId: string, data: any) {
+  const headers = data.headers.map((h: string) => h.toLowerCase())
+  const rows = data.rows
+
+  const customers = rows.map((row: string[]) => {
+    const customer: any = { tenant_id: tenantId }
+    headers.forEach((header: string, index: number) => {
+      switch (header) {
+        case 'customer_id':
+          customer.customer_id = row[index]
+          break
+        case 'customer_name':
+          customer.customer_name = row[index]
+          break
+        case 'email':
+          customer.email = row[index]
+          break
+        case 'phone':
+          customer.phone = row[index]
+          break
+        case 'address':
+          customer.address = row[index]
+          break
+      }
+    })
+    return customer
+  })
+
+  // Insert customers
+  const { data: inserted, error } = await supabase
+    .from('customers')
+    .upsert(customers, { onConflict: 'customer_id' })
+    .select()
+
+  if (error) {
+    console.error('Error inserting customers:', error)
+    throw error
+  }
+
+  return { count: inserted?.length || customers.length }
+}
+
+async function uploadProducts(tenantId: string, data: any) {
+  const headers = data.headers.map((h: string) => h.toLowerCase())
+  const rows = data.rows
+
+  const products = rows.map((row: string[]) => {
+    const product: any = { tenant_id: tenantId }
+    headers.forEach((header: string, index: number) => {
+      switch (header) {
+        case 'product_id':
+          product.product_id = row[index]
+          break
+        case 'product_name':
+          product.product_name = row[index]
+          break
+        case 'price':
+          product.price = parseFloat(row[index]) || 0
+          break
+        case 'category':
+          product.category = row[index]
+          break
+        case 'description':
+          product.description = row[index]
+          break
+      }
+    })
+    return product
+  })
+
+  const { data: inserted, error } = await supabase
+    .from('products')
+    .upsert(products, { onConflict: 'product_id' })
+    .select()
+
+  if (error) {
+    console.error('Error inserting products:', error)
+    throw error
+  }
+
+  return { count: inserted?.length || products.length }
+}
+
+async function uploadCosts(tenantId: string, data: any) {
+  const headers = data.headers.map((h: string) => h.toLowerCase())
+  const rows = data.rows
+
+  const costs = rows.map((row: string[]) => {
+    const cost: any = { tenant_id: tenantId }
+    headers.forEach((header: string, index: number) => {
+      switch (header) {
+        case 'product_id':
+          cost.product_id = row[index]
+          break
+        case 'cost_amount':
+          cost.cost_amount = parseFloat(row[index]) || 0
+          break
+        case 'date':
+          cost.date = row[index]
+          break
+      }
+    })
+    return cost
+  })
+
+  const { data: inserted, error } = await supabase
+    .from('product_costs')
+    .insert(costs)
+    .select()
+
+  if (error) {
+    console.error('Error inserting costs:', error)
+    throw error
+  }
+
+  return { count: inserted?.length || costs.length }
+}
+
+async function uploadRebates(tenantId: string, data: any) {
+  const headers = data.headers.map((h: string) => h.toLowerCase())
+  const rows = data.rows
+
+  const rebates = rows.map((row: string[]) => {
+    const rebate: any = { tenant_id: tenantId }
+    headers.forEach((header: string, index: number) => {
+      switch (header) {
+        case 'customer_id':
+          rebate.customer_id = row[index]
+          break
+        case 'product_id':
+          rebate.product_id = row[index]
+          break
+        case 'rebate_amount':
+          rebate.rebate_amount = parseFloat(row[index]) || 0
+          break
+        case 'discount_amount':
+          rebate.discount_amount = parseFloat(row[index]) || 0
+          break
+        case 'valid_from':
+          rebate.valid_from = row[index]
+          break
+        case 'valid_to':
+          rebate.valid_to = row[index]
+          break
+      }
+    })
+    return rebate
+  })
+
+  const { data: inserted, error } = await supabase
+    .from('rebates_discounts')
+    .insert(rebates)
+    .select()
+
+  if (error) {
+    console.error('Error inserting rebates:', error)
+    throw error
+  }
+
+  return { count: inserted?.length || rebates.length }
+}
