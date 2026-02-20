@@ -5,15 +5,17 @@ import { formatCurrency, formatDateTime, getTransactionTypeColor, getTransaction
 
 interface Transaction {
   id: string
-  documentNumber: string
-  transactionType: string
-  amount: string
+  document_number?: string
+  documentNumber?: string
+  transaction_type?: string
+  transactionType?: string
+  amount: string | number
   description: string | null
+  product_name?: string
+  product_id?: string
+  customer_name?: string
+  customer_id?: string
   createdAt: string
-  tenant: {
-    name: string
-    country: string
-  }
 }
 
 interface TransactionListProps {
@@ -75,44 +77,66 @@ export default function TransactionList({ tenantId, refreshTrigger }: Transactio
             <tr>
               <th style={styles.th}>Document #</th>
               <th style={styles.th}>Type</th>
+              <th style={styles.th}>Product</th>
+              <th style={styles.th}>Customer</th>
               <th style={styles.th}>Amount</th>
-              <th style={styles.th}>Description</th>
               <th style={styles.th}>Date</th>
             </tr>
           </thead>
           <tbody>
-            {transactions.map((t) => (
-              <tr key={t.id} style={styles.tr}>
-                <td style={styles.td}>
-                  <span style={styles.docNumber}>{t.documentNumber}</span>
-                </td>
-                <td style={styles.td}>
-                  <span
-                    style={{
-                      ...styles.badge,
-                      backgroundColor: getTransactionTypeColor(t.transactionType) + '20',
-                      color: getTransactionTypeColor(t.transactionType),
-                    }}
-                  >
-                    {getTransactionTypeLabel(t.transactionType)}
-                  </span>
-                </td>
-                <td style={styles.td}>
-                  <span style={{
-                    ...styles.amount,
-                    color: ['SALE', 'RETURN'].includes(t.transactionType) ? '#16a34a' : '#dc2626'
-                  }}>
-                    {formatCurrency(t.amount)}
-                  </span>
-                </td>
-                <td style={styles.td}>
-                  <span style={styles.description}>{t.description || '-'}</span>
-                </td>
-                <td style={styles.td}>
-                  <span style={styles.date}>{formatDateTime(t.createdAt)}</span>
-                </td>
-              </tr>
-            ))}
+            {transactions.map((t) => {
+              const docNumber = t.document_number || t.documentNumber || 'N/A'
+              const transType = t.transaction_type || t.transactionType || 'UNKNOWN'
+              return (
+                <tr key={t.id} style={styles.tr}>
+                  <td style={styles.td}>
+                    <span style={styles.docNumber}>{docNumber}</span>
+                  </td>
+                  <td style={styles.td}>
+                    <span
+                      style={{
+                        ...styles.badge,
+                        backgroundColor: getTransactionTypeColor(transType) + '20',
+                        color: getTransactionTypeColor(transType),
+                      }}
+                    >
+                      {getTransactionTypeLabel(transType)}
+                    </span>
+                  </td>
+                  <td style={styles.td}>
+                    {t.product_name ? (
+                      <div>
+                        <div style={styles.primaryText}>{t.product_name}</div>
+                        {t.product_id && <div style={styles.secondaryText}>ID: {t.product_id}</div>}
+                      </div>
+                    ) : (
+                      <span style={styles.muted}>-</span>
+                    )}
+                  </td>
+                  <td style={styles.td}>
+                    {t.customer_name ? (
+                      <div>
+                        <div style={styles.primaryText}>{t.customer_name}</div>
+                        {t.customer_id && <div style={styles.secondaryText}>ID: {t.customer_id}</div>}
+                      </div>
+                    ) : (
+                      <span style={styles.muted}>-</span>
+                    )}
+                  </td>
+                  <td style={styles.td}>
+                    <span style={{
+                      ...styles.amount,
+                      color: ['SALE', 'RETURN'].includes(transType) ? '#16a34a' : '#dc2626'
+                    }}>
+                      {formatCurrency(t.amount)}
+                    </span>
+                  </td>
+                  <td style={styles.td}>
+                    <span style={styles.date}>{formatDateTime(t.createdAt)}</span>
+                  </td>
+                </tr>
+              )
+            })}
           </tbody>
         </table>
       </div>
@@ -122,16 +146,13 @@ export default function TransactionList({ tenantId, refreshTrigger }: Transactio
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
-    backgroundColor: '#fff',
-    borderRadius: '20px',
-    padding: '28px',
-    boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
+    padding: '24px',
   },
   title: {
-    margin: '0 0 24px 0',
-    fontSize: '1.35rem',
+    margin: '0 0 20px 0',
+    fontSize: '1.1rem',
     fontWeight: 600,
-    color: '#1a1a2e',
+    color: '#1F2937',
   },
   tableContainer: {
     overflowX: 'auto',
@@ -143,71 +164,68 @@ const styles: Record<string, React.CSSProperties> = {
   },
   th: {
     textAlign: 'left',
-    padding: '14px 12px',
-    borderBottom: '2px solid #e8e8f0',
+    padding: '12px',
+    borderBottom: '2px solid #E5E7EB',
     fontWeight: 600,
-    color: '#4a4a6a',
-    whiteSpace: 'nowrap',
-    fontSize: '0.85rem',
+    color: '#6B7280',
+    fontSize: '0.75rem',
     textTransform: 'uppercase',
     letterSpacing: '0.5px',
   },
   tr: {
-    borderBottom: '1px solid #f0f0f5',
-    transition: 'background-color 0.2s',
+    borderBottom: '1px solid #F3F4F6',
   },
   td: {
-    padding: '14px 12px',
+    padding: '12px',
     verticalAlign: 'middle',
   },
   docNumber: {
     fontFamily: 'monospace',
     fontWeight: 600,
-    color: '#667eea',
-    fontSize: '0.9rem',
+    color: '#6C5CE7',
+    fontSize: '0.85rem',
   },
   badge: {
     display: 'inline-block',
-    padding: '6px 12px',
-    borderRadius: '20px',
+    padding: '4px 10px',
+    borderRadius: '4px',
     fontSize: '0.75rem',
     fontWeight: 600,
     textTransform: 'uppercase',
-    letterSpacing: '0.5px',
+  },
+  primaryText: {
+    fontWeight: 500,
+    color: '#1F2937',
+  },
+  secondaryText: {
+    fontSize: '0.8rem',
+    color: '#9CA3AF',
+  },
+  muted: {
+    color: '#9CA3AF',
   },
   amount: {
     fontWeight: 600,
     fontFamily: 'monospace',
-    fontSize: '0.95rem',
-  },
-  description: {
-    color: '#6b7280',
-    maxWidth: '250px',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    display: 'block',
   },
   date: {
-    color: '#6b7280',
-    whiteSpace: 'nowrap',
+    color: '#6B7280',
     fontSize: '0.85rem',
   },
   loading: {
     padding: '40px',
     textAlign: 'center',
-    color: '#6b7280',
+    color: '#6B7280',
   },
   error: {
     padding: '20px',
-    backgroundColor: '#fef2f2',
-    color: '#dc2626',
-    borderRadius: '16px',
-    border: '1px solid #fecaca',
+    backgroundColor: '#FEF2F2',
+    color: '#DC2626',
+    borderRadius: '8px',
   },
   empty: {
     padding: '40px',
     textAlign: 'center',
-    color: '#6b7280',
+    color: '#6B7280',
   },
 }

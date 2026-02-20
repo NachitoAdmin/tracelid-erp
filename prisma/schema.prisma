@@ -23,6 +23,16 @@ model Transaction {
   transactionType TransactionType @map("transaction_type")
   amount          Decimal         @db.Decimal(10, 2)
   description     String?
+  
+  // Product fields
+  category        String?         @db.VarChar(100)
+  productId       String?         @map("product_id") @db.VarChar(100)
+  productName     String?         @map("product_name") @db.VarChar(255)
+  
+  // Customer fields
+  customerId      String?         @map("customer_id") @db.VarChar(100)
+  customerName    String?         @map("customer_name") @db.VarChar(255)
+  
   tenantId        String          @map("tenant_id")
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
@@ -31,6 +41,9 @@ model Transaction {
   @@index([tenantId])
   @@index([transactionType])
   @@index([createdAt])
+  @@index([category])
+  @@index([productId])
+  @@index([customerId])
   @@map("transactions")
 }
 

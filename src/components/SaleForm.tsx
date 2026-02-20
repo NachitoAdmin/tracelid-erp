@@ -1,6 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import { useLanguage } from '@/lib/LanguageContext'
+import { useCurrency } from '@/lib/CurrencyContext'
+import { translateType } from '@/lib/i18n'
 
 interface SaleFormProps {
   tenantId: string
@@ -10,9 +13,15 @@ interface SaleFormProps {
 const transactionTypes = ['SALE', 'RETURN', 'REBATE', 'DISCOUNT', 'COST']
 
 export default function SaleForm({ tenantId, onSuccess }: SaleFormProps) {
+  const { t, language } = useLanguage()
+  const { currency } = useCurrency()
   const [transactionType, setTransactionType] = useState('SALE')
   const [amount, setAmount] = useState('')
   const [description, setDescription] = useState('')
+  const [productId, setProductId] = useState('')
+  const [productName, setProductName] = useState('')
+  const [customerId, setCustomerId] = useState('')
+  const [customerName, setCustomerName] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -23,6 +32,12 @@ export default function SaleForm({ tenantId, onSuccess }: SaleFormProps) {
     setError('')
     setSuccess('')
 
+    if (!tenantId) {
+      setError('❌ No tenant selected. Please select a tenant first.')
+      setLoading(false)
+      return
+    }
+
     try {
       const response = await fetch('/api/transactions', {
         method: 'POST',
@@ -32,21 +47,29 @@ export default function SaleForm({ tenantId, onSuccess }: SaleFormProps) {
           transactionType,
           amount: parseFloat(amount),
           description,
+          productId: productId || null,
+          productName: productName || null,
+          customerId: customerId || null,
+          customerName: customerName || null,
         }),
       })
 
+      const data = await response.json()
+
       if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || 'Failed to create transaction')
+        throw new Error(data.error || data.details || 'Failed to create transaction')
       }
 
-      const data = await response.json()
-      setSuccess(`Transaction created: ${data.documentNumber}`)
+      setSuccess(`✅ Transaction created: ${data.document_number || data.documentNumber || 'Success'}`)
       setAmount('')
       setDescription('')
+      setProductId('')
+      setProductName('')
+      setCustomerId('')
+      setCustomerName('')
       onSuccess?.()
     } catch (err: any) {
-      setError(err.message)
+      setError(`❌ ${err.message}`)
     } finally {
       setLoading(false)
     }
@@ -54,14 +77,14 @@ export default function SaleForm({ tenantId, onSuccess }: SaleFormProps) {
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.title}>💰 New Transaction</h2>
+      <h2 style={styles.title}>💰 {t('newTransaction')}</h2>
       
       {error && <div style={styles.error}>{error}</div>}
       {success && <div style={styles.success}>{success}</div>}
       
       <form onSubmit={handleSubmit} style={styles.form}>
         <div style={styles.field}>
-          <label style={styles.label}>Transaction Type</label>
+          <label style={styles.label}>{t('transactionType')}</label>
           <select
             value={transactionType}
             onChange={(e) => setTransactionType(e.target.value)}
@@ -69,14 +92,58 @@ export default function SaleForm({ tenantId, onSuccess }: SaleFormProps) {
           >
             {transactionTypes.map((type) => (
               <option key={type} value={type}>
-                {type}
+                {translateType(language, type)}
               </option>
             ))}
           </select>
         </div>
 
         <div style={styles.field}>
-          <label style={styles.label}>Amount</label>
+          <label style={styles.label}>Product ID</label>
+          <input
+            type="text"
+            value={productId}
+            onChange={(e) => setProductId(e.target.value)}
+            style={styles.input}
+            placeholder="Enter product ID..."
+          />
+        </div>
+
+        <div style={styles.field}>
+          <label style={styles.label}>Product Name</label>
+          <input
+            type="text"
+            value={productName}
+            onChange={(e) => setProductName(e.target.value)}
+            style={styles.input}
+            placeholder="Enter product name..."
+          />
+        </div>
+
+        <div style={styles.field}>
+          <label style={styles.label}>Customer ID</label>
+          <input
+            type="text"
+            value={customerId}
+            onChange={(e) => setCustomerId(e.target.value)}
+            style={styles.input}
+            placeholder="Enter customer ID..."
+          />
+        </div>
+
+        <div style={styles.field}>
+          <label style={styles.label}>Customer Name</label>
+          <input
+            type="text"
+            value={customerName}
+            onChange={(e) => setCustomerName(e.target.value)}
+            style={styles.input}
+            placeholder="Enter customer name..."
+          />
+        </div>
+
+        <div style={styles.field}>
+          <label style={styles.label}>{t('amount')} ({currency})</label>
           <input
             type="number"
             step="0.01"
@@ -89,7 +156,7 @@ export default function SaleForm({ tenantId, onSuccess }: SaleFormProps) {
         </div>
 
         <div style={styles.field}>
-          <label style={styles.label}>Description</label>
+          <label style={styles.label}>{t('description')}</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -101,11 +168,11 @@ export default function SaleForm({ tenantId, onSuccess }: SaleFormProps) {
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || !tenantId}
           style={{
             ...styles.button,
-            opacity: loading ? 0.7 : 1,
-            cursor: loading ? 'not-allowed' : 'pointer',
+            opacity: loading || !tenantId ? 0.6 : 1,
+            cursor: loading || !tenantId ? 'not-allowed' : 'pointer',
           }}
         >
           {loading ? 'Creating...' : '➕ Create Transaction'}
@@ -117,21 +184,18 @@ export default function SaleForm({ tenantId, onSuccess }: SaleFormProps) {
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
-    backgroundColor: '#fff',
-    borderRadius: '20px',
-    padding: '28px',
-    boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
+    padding: '24px',
   },
   title: {
-    margin: '0 0 24px 0',
-    fontSize: '1.35rem',
+    margin: '0 0 20px 0',
+    fontSize: '1.1rem',
     fontWeight: 600,
-    color: '#1a1a2e',
+    color: '#1F2937',
   },
   form: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '18px',
+    gap: '16px',
   },
   field: {
     display: 'flex',
@@ -139,65 +203,63 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '6px',
   },
   label: {
-    fontSize: '0.9rem',
+    fontSize: '0.8rem',
     fontWeight: 500,
-    color: '#4a4a6a',
+    color: '#6B7280',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
   },
   select: {
-    padding: '12px 16px',
-    borderRadius: '12px',
-    border: '2px solid #e8e8f0',
-    fontSize: '1rem',
+    padding: '10px 14px',
+    borderRadius: '8px',
+    border: '1px solid #E5E7EB',
+    fontSize: '0.95rem',
     backgroundColor: '#fff',
     outline: 'none',
-    transition: 'border-color 0.2s',
+    color: '#1F2937',
   },
   input: {
-    padding: '12px 16px',
-    borderRadius: '12px',
-    border: '2px solid #e8e8f0',
-    fontSize: '1rem',
+    padding: '10px 14px',
+    borderRadius: '8px',
+    border: '1px solid #E5E7EB',
+    fontSize: '0.95rem',
     outline: 'none',
-    transition: 'border-color 0.2s',
+    color: '#1F2937',
   },
   textarea: {
-    padding: '12px 16px',
-    borderRadius: '12px',
-    border: '2px solid #e8e8f0',
-    fontSize: '1rem',
+    padding: '10px 14px',
+    borderRadius: '8px',
+    border: '1px solid #E5E7EB',
+    fontSize: '0.95rem',
     resize: 'vertical',
     outline: 'none',
-    transition: 'border-color 0.2s',
+    color: '#1F2937',
     fontFamily: 'inherit',
   },
   button: {
-    padding: '14px 20px',
-    backgroundColor: '#22c55e',
+    padding: '12px 20px',
+    backgroundColor: '#6C5CE7',
     color: '#fff',
     border: 'none',
-    borderRadius: '12px',
-    fontSize: '1rem',
+    borderRadius: '8px',
+    fontSize: '0.95rem',
     fontWeight: 600,
     marginTop: '8px',
-    boxShadow: '0 4px 15px rgba(34, 197, 94, 0.3)',
-    transition: 'all 0.2s',
   },
   error: {
-    padding: '14px',
-    backgroundColor: '#fef2f2',
-    color: '#dc2626',
-    borderRadius: '12px',
-    marginBottom: '20px',
+    padding: '12px',
+    backgroundColor: '#FEF2F2',
+    color: '#DC2626',
+    borderRadius: '8px',
+    marginBottom: '16px',
     fontSize: '0.9rem',
-    border: '1px solid #fecaca',
   },
   success: {
-    padding: '14px',
-    backgroundColor: '#f0fdf4',
-    color: '#16a34a',
-    borderRadius: '12px',
-    marginBottom: '20px',
+    padding: '12px',
+    backgroundColor: '#F0FDF4',
+    color: '#16A34A',
+    borderRadius: '8px',
+    marginBottom: '16px',
     fontSize: '0.9rem',
-    border: '1px solid #bbf7d0',
   },
 }

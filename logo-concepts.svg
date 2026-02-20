@@ -1,0 +1,100 @@
+<!-- Tracelid Logo Concepts -->
+
+<!-- Concept 1: Modern Minimalist -->
+<svg viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Icon: Stylized T with chart bars -->
+  <rect x="10" y="10" width="40" height="40" rx="8" fill="url(#grad1)" />
+  <text x="30" y="38" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white" text-anchor="middle">T</text>
+  
+  <!-- Chart bars -->
+  <rect x="55" y="35" width="6" height="15" rx="2" fill="#667eea" />
+  <rect x="65" y="25" width="6" height="25" rx="2" fill="#764ba2" />
+  <rect x="75" y="20" width="6" height="30" rx="2" fill="#667eea" />
+  
+  <!-- Text -->
+  <text x="95" y="38" font-family="'Segoe UI', Arial, sans-serif" font-size="28" font-weight="700" fill="#1a1a2e">Tracelid</text>
+</svg>
+
+---
+
+<!-- Concept 2: Geometric Hexagon -->
+<svg viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Hexagon with T inside -->
+  <polygon points="30,5 55,17.5 55,42.5 30,55 5,42.5 5,17.5" fill="url(#grad2)" />
+  <text x="30" y="38" font-family="Arial, sans-serif" font-size="22" font-weight="bold" fill="white" text-anchor="middle">T</text>
+  
+  <!-- Text -->
+  <text x="70" y="38" font-family="'Segoe UI', Arial, sans-serif" font-size="28" font-weight="700" fill="#1a1a2e">Tracelid</text>
+</svg>
+
+---
+
+<!-- Concept 3: Abstract Graph -->
+<svg viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Abstract graph lines forming T -->
+  <path d="M10 50 L25 20 L40 35 L55 10 L70 25" stroke="url(#grad3)" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="55" cy="10" r="5" fill="#764ba2" />
+  
+  <!-- Text -->
+  <text x="85" y="38" font-family="'Segoe UI', Arial, sans-serif" font-size="28" font-weight="700" fill="#1a1a2e">Tracelid</text>
+</svg>
+
+---
+
+<!-- Concept 4: Circle Badge -->
+<svg viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad4" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Circle with chart icon -->
+  <circle cx="30" cy="30" r="25" fill="url(#grad4)" />
+  <!-- Mini chart inside -->
+  <rect x="22" y="32" width="4" height="8" fill="white" opacity="0.8" />
+  <rect x="28" y="26" width="4" height="14" fill="white" />
+  <rect x="34" y="20" width="4" height="20" fill="white" opacity="0.9" />
+  
+  <!-- Text -->
+  <text x="65" y="38" font-family="'Segoe UI', Arial, sans-serif" font-size="28" font-weight="700" fill="#1a1a2e">Tracelid</text>
+</svg>
+
+---
+
+<!-- Favicon / App Icon Versions -->
+
+<!-- Favicon 1: Simple T -->
+<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <rect width="32" height="32" rx="6" fill="url(#grad1)" />
+  <text x="16" y="23" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white" text-anchor="middle">T</text>
+</svg>
+
+<!-- Favicon 2: Chart bars -->
+<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <rect width="32" height="32" rx="6" fill="#667eea" />
+  <rect x="6" y="20" width="6" height="10" rx="1" fill="white" />
+  <rect x="13" y="12" width="6" height="18" rx="1" fill="white" opacity="0.8" />
+  <rect x="20" y="6" width="6" height="24" rx="1" fill="white" opacity="0.6" />
+</svg>

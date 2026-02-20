@@ -1,12 +1,16 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { formatCurrency } from '@/lib/utils'
+import { useCurrency } from '@/lib/CurrencyContext'
+import { formatCurrency } from '@/lib/currency'
 
 interface Transaction {
   id: string
-  transactionType: string
-  amount: string
+  transaction_type: string
+  category: string
+  amount: number
+  description: string
+  createdAt: string
 }
 
 interface AnalyticsDashboardProps {
@@ -14,80 +18,27 @@ interface AnalyticsDashboardProps {
   refreshTrigger?: number
 }
 
-interface Analytics {
-  totalSales: number
-  totalReturns: number
-  totalRebates: number
-  totalDiscounts: number
-  totalCosts: number
-  netRevenue: number
-  transactionCount: number
-  byType: Record<string, { count: number; total: number }>
-}
-
 export default function AnalyticsDashboard({ tenantId, refreshTrigger }: AnalyticsDashboardProps) {
-  const [analytics, setAnalytics] = useState<Analytics | null>(null)
+  const { currency } = useCurrency()
+  const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchAnalytics()
+    fetchTransactions()
   }, [tenantId, refreshTrigger])
 
-  const fetchAnalytics = async () => {
+  const fetchTransactions = async () => {
+    if (!tenantId) {
+      setLoading(false)
+      return
+    }
+    
     setLoading(true)
     try {
       const response = await fetch(`/api/transactions?tenantId=${tenantId}`)
-      if (!response.ok) throw new Error('Failed to fetch transactions')
-      const transactions: Transaction[] = await response.json()
-
-      const byType: Record<string, { count: number; total: number }> = {}
-      let totalSales = 0
-      let totalReturns = 0
-      let totalRebates = 0
-      let totalDiscounts = 0
-      let totalCosts = 0
-
-      transactions.forEach((t) => {
-        const amount = parseFloat(t.amount)
-        const type = t.transactionType
-
-        if (!byType[type]) {
-          byType[type] = { count: 0, total: 0 }
-        }
-        byType[type].count++
-        byType[type].total += amount
-
-        switch (type) {
-          case 'SALE':
-            totalSales += amount
-            break
-          case 'RETURN':
-            totalReturns += amount
-            break
-          case 'REBATE':
-            totalRebates += amount
-            break
-          case 'DISCOUNT':
-            totalDiscounts += amount
-            break
-          case 'COST':
-            totalCosts += amount
-            break
-        }
-      })
-
-      const netRevenue = totalSales + totalReturns - totalRebates - totalDiscounts - totalCosts
-
-      setAnalytics({
-        totalSales,
-        totalReturns,
-        totalRebates,
-        totalDiscounts,
-        totalCosts,
-        netRevenue,
-        transactionCount: transactions.length,
-        byType,
-      })
+      if (!response.ok) throw new Error('Failed to fetch')
+      const data = await response.json()
+      setTransactions(data)
     } catch (err) {
       console.error(err)
     } finally {
@@ -95,42 +46,64 @@ export default function AnalyticsDashboard({ tenantId, refreshTrigger }: Analyti
     }
   }
 
+  const calculateStats = () => {
+    let sales = 0, returns = 0, discounts = 0, costs = 0
+    
+    transactions.forEach((t) => {
+      const amount = t.amount
+      switch (t.transaction_type) {
+        case 'SALE': sales += amount; break
+        case 'RETURN': returns += amount; break
+        case 'REBATE':
+        case 'DISCOUNT': discounts += amount; break
+        case 'COST': costs += amount; break
+      }
+    })
+    
+    const net = sales - Math.abs(returns) - Math.abs(discounts) - Math.abs(costs)
+    
+    return { sales, returns, discounts, net, count: transactions.length }
+  }
+
+  const stats = calculateStats()
+
   if (loading) {
     return (
       <div style={styles.container}>
-        <div style={styles.loading}>Loading analytics...</div>
+        <div style={styles.loading}>Loading...</div>
       </div>
     )
   }
-  if (!analytics) return null
-
-  const stats = [
-    { label: 'Sales', value: analytics.totalSales, color: '#22c55e', borderColor: '#22c55e' },
-    { label: 'Returns', value: analytics.totalReturns, color: '#f97316', borderColor: '#f97316' },
-    { label: 'Discounts', value: analytics.totalDiscounts, color: '#14b8a6', borderColor: '#14b8a6' },
-    { label: 'Net', value: analytics.netRevenue, color: '#3b82f6', borderColor: '#3b82f6' },
-  ]
 
   return (
     <div style={styles.container}>
       <h2 style={styles.title}>📊 Analytics Dashboard</h2>
       
-      <div style={styles.statsRow}>
-        {stats.map((stat) => (
-          <div key={stat.label} style={{ ...styles.statCard, borderTopColor: stat.borderColor }}>
-            <div style={{ ...styles.statValue, color: stat.color }}>
-              {formatCurrency(stat.value)}
-            </div>
-            <div style={styles.statLabel}>{stat.label}</div>
-          </div>
-        ))}
+      <div style={styles.grid}>
+        <div style={{ ...styles.stat, borderLeftColor: '#22c55e' }}>
+          <div style={{ ...styles.statValue, color: '#22c55e' }}>{formatCurrency(stats.sales, currency)}</div>
+          <div style={styles.statLabel}>Sales</div>
+        </div>
+        
+        <div style={{ ...styles.stat, borderLeftColor: '#f97316' }}>
+          <div style={{ ...styles.statValue, color: '#f97316' }}>{formatCurrency(stats.returns, currency)}</div>
+          <div style={styles.statLabel}>Returns</div>
+        </div>
+        
+        <div style={{ ...styles.stat, borderLeftColor: '#14b8a6' }}>
+          <div style={{ ...styles.statValue, color: '#14b8a6' }}>{formatCurrency(stats.discounts, currency)}</div>
+          <div style={styles.statLabel}>Discounts</div>
+        </div>
+        
+        <div style={{ ...styles.stat, borderLeftColor: stats.net >= 0 ? '#3b82f6' : '#ef4444' }}>
+          <div style={{ ...styles.statValue, color: stats.net >= 0 ? '#3b82f6' : '#ef4444' }}>{formatCurrency(stats.net, currency)}</div>
+          <div style={styles.statLabel}>Net</div>
+        </div>
       </div>
 
-      <div style={styles.summary}>
-        <div style={styles.summaryItem}>
-          <span style={styles.summaryLabel}>Total Transactions:</span>
-          <span style={styles.summaryValue}>{analytics.transactionCount}</span>
-        </div>
+      <div style={styles.footer}>
+        <span style={styles.footerLabel}>Total Transactions:</span>
+        <span style={styles.footerValue}>{stats.count}</span>
       </div>
     </div>
   )
@@ -138,68 +111,62 @@ export default function AnalyticsDashboard({ tenantId, refreshTrigger }: Analyti
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
-    backgroundColor: '#fff',
-    borderRadius: '20px',
-    padding: '28px',
-    boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
-  },
-  title: {
-    margin: '0 0 24px 0',
-    fontSize: '1.35rem',
-    fontWeight: 600,
-    color: '#1a1a2e',
-  },
-  statsRow: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(4, 1fr)',
-    gap: '16px',
-    marginBottom: '24px',
-  },
-  statCard: {
-    backgroundColor: '#fff',
-    borderRadius: '20px',
-    padding: '20px 16px',
-    textAlign: 'center',
-    borderTop: '4px solid',
-    boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
-  },
-  statValue: {
-    fontSize: '1.4rem',
-    fontWeight: 700,
-    marginBottom: '6px',
-    fontFamily: 'monospace',
-  },
-  statLabel: {
-    fontSize: '0.8rem',
-    color: '#6b7280',
-    fontWeight: 500,
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px',
-  },
-  summary: {
-    padding: '16px 20px',
-    backgroundColor: '#f8f9fa',
-    borderRadius: '16px',
-  },
-  summaryItem: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  summaryLabel: {
-    fontSize: '0.9rem',
-    color: '#6b7280',
-  },
-  summaryValue: {
-    fontSize: '1.25rem',
-    fontWeight: 700,
-    color: '#1a1a2e',
+    padding: '24px',
   },
   loading: {
     padding: '40px',
     textAlign: 'center',
-    color: '#6b7280',
+    color: '#6B7280',
+  },
+  title: {
+    margin: '0 0 20px 0',
+    fontSize: '1.1rem',
+    fontWeight: 600,
+    color: '#1F2937',
+  },
+  grid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(4, 1fr)',
+    gap: '12px',
+    marginBottom: '20px',
+  },
+  stat: {
+    backgroundColor: '#F9FAFB',
+    padding: '16px 12px',
+    borderRadius: '10px',
+    textAlign: 'center',
+    borderLeft: '3px solid',
+  },
+  statValue: {
+    fontSize: '1rem',
+    fontWeight: 700,
+    fontFamily: 'monospace',
+    marginBottom: '4px',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  },
+  statLabel: {
+    fontSize: '0.7rem',
+    color: '#6B7280',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+  },
+  footer: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '12px 16px',
+    backgroundColor: '#F9FAFB',
+    borderRadius: '8px',
+  },
+  footerLabel: {
+    fontSize: '0.85rem',
+    color: '#6B7280',
+  },
+  footerValue: {
+    fontSize: '1.1rem',
+    fontWeight: 700,
+    color: '#1F2937',
   },
 }
-
-// Responsive styles via media query would be in globals.css

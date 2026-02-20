@@ -43,7 +43,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { name, country } = body
+    const { name, country, password } = body
 
     if (!name || !country) {
       return NextResponse.json(
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
 
     const { data: tenant, error } = await supabase
       .from('Tenant')
-      .insert({ name, country })
+      .insert({ name, country, password })
       .select()
       .single()
 

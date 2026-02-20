@@ -1,9 +1,11 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { LanguageProvider } from '@/lib/LanguageContext'
+import { CurrencyProvider } from '@/lib/CurrencyContext'
 
 export const metadata: Metadata = {
-  title: 'NachitoBot ERP',
-  description: 'Advanced Business Intelligence & Analytics',
+  title: 'Tracelid - Business Intelligence & Analytics',
+  description: 'Advanced ERP system for business intelligence, analytics, and transaction management',
 }
 
 export default function RootLayout({
@@ -13,7 +15,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <LanguageProvider>
+          <CurrencyProvider>
+            {children}
+          </CurrencyProvider>
+        </LanguageProvider>
+      </body>
     </html>
   )
 }
