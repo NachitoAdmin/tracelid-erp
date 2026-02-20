@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-export default function LoginForm() {
+export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -30,7 +30,7 @@ export default function LoginForm() {
         return;
       }
 
-      // Store user data in localStorage
+      // Store user data
       localStorage.setItem('tracelid-user', JSON.stringify(data.user));
       localStorage.setItem('tracelid-selected-tenant', data.user.tenant.id);
       localStorage.setItem('tracelid-selected-tenant-name', data.user.tenant.name);
@@ -49,35 +49,49 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-96">
-        <h1 className="text-2xl font-bold mb-6 text-center">Tracelid Login</h1>
+    <div style={styles.container}>
+      <div style={styles.card}>
+        <div style={styles.logo}>
+          <svg width="60" height="60" viewBox="0 0 200 50">
+            <defs>
+              <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#6C5CE7" />
+                <stop offset="100%" stopColor="#A78BFA" />
+              </linearGradient>
+            </defs>
+            <circle cx="25" cy="25" r="20" fill="none" stroke="url(#logoGrad)" strokeWidth="3" />
+            <polyline points="14,30 20,22 26,28 36,16" fill="none" stroke="url(#logoGrad)" strokeWidth="3" strokeLinecap="round" />
+          </svg>
+          <h1 style={styles.title}>Tracelid</h1>
+        </div>
+        
+        <p style={styles.subtitle}>Sign in to your account</p>
         
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
-          </div>
+          <div style={styles.error}>⚠️ {error}</div>
         )}
         
         <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block text-gray-700 mb-2">Email</label>
+          <div style={styles.field}>
+            <label style={styles.label}>Email Address</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 border rounded"
+              style={styles.input}
+              placeholder="you@company.com"
               required
             />
           </div>
           
-          <div className="mb-6">
-            <label className="block text-gray-700 mb-2">Password</label>
+          <div style={styles.field}>
+            <label style={styles.label}>Password</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border rounded"
+              style={styles.input}
+              placeholder="Enter your password"
               required
             />
           </div>
@@ -85,19 +99,106 @@ export default function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-purple-600 text-white py-2 rounded hover:bg-purple-700 disabled:opacity-50"
+            style={styles.submitBtn}
           >
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
         
-        <p className="mt-4 text-center text-sm text-gray-600">
+        <div style={styles.footer}>
           Don&apos;t have an account?{' '}
-          <Link href="/register" className="text-purple-600 hover:underline">
-            Register
-          </Link>
-        </p>
+          <Link href="/register" style={styles.link}>Create one</Link>
+        </div>
       </div>
     </div>
   );
 }
+
+const styles: Record<string, React.CSSProperties> = {
+  container: {
+    minHeight: '100vh',
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: '20px',
+    fontFamily: "'Segoe UI', system-ui, sans-serif",
+  },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: '24px',
+    padding: '40px',
+    width: '100%',
+    maxWidth: '400px',
+    boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+    textAlign: 'center',
+  },
+  logo: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    marginBottom: '20px',
+  },
+  title: {
+    margin: '10px 0 0 0',
+    fontSize: '1.8rem',
+    fontWeight: 700,
+    color: '#1f2937',
+  },
+  subtitle: {
+    margin: '0 0 25px 0',
+    color: '#6b7280',
+    fontSize: '0.95rem',
+  },
+  error: {
+    padding: '12px 16px',
+    backgroundColor: '#fee2e2',
+    color: '#991b1b',
+    borderRadius: '10px',
+    marginBottom: '20px',
+    fontSize: '0.9rem',
+  },
+  field: {
+    marginBottom: '18px',
+    textAlign: 'left',
+  },
+  label: {
+    display: 'block',
+    marginBottom: '6px',
+    fontWeight: 600,
+    color: '#374151',
+    fontSize: '0.9rem',
+  },
+  input: {
+    width: '100%',
+    padding: '12px 16px',
+    borderRadius: '10px',
+    border: '2px solid #e5e7eb',
+    fontSize: '1rem',
+    outline: 'none',
+    boxSizing: 'border-box',
+    transition: 'border-color 0.2s',
+  },
+  submitBtn: {
+    width: '100%',
+    padding: '14px',
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '10px',
+    fontSize: '1rem',
+    fontWeight: 600,
+    cursor: 'pointer',
+    marginTop: '10px',
+  },
+  footer: {
+    marginTop: '25px',
+    color: '#6b7280',
+    fontSize: '0.9rem',
+  },
+  link: {
+    color: '#667eea',
+    textDecoration: 'none',
+    fontWeight: 600,
+  },
+};
