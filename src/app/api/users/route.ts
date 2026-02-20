@@ -26,6 +26,10 @@ export async function GET(req: NextRequest) {
       .eq('id', decoded.userId)
       .single();
 
+    if (!currentUser) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
     // Get all users in tenant
     const { data: users } = await supabase
       .from('users')
@@ -63,6 +67,10 @@ export async function POST(req: NextRequest) {
       .select('tenant_id')
       .eq('id', decoded.userId)
       .single();
+
+    if (!currentUser) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
 
     // Hash password
     const passwordHash = await hashPassword(password);
