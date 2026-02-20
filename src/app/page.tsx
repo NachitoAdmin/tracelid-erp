@@ -261,14 +261,14 @@ export default function Home() {
                 {isDark ? '☀️' : '🌙'}
               </button>
               
-              {/* Admin menu for admin/owner roles */}
+              {/* Master Data button for admin/owner roles */}
               {(isAdmin || isOwner) && (
                 <a href="/admin/master-data" style={{...styles.headerBtnSecondary, color: isDark ? '#9CA3AF' : '#6B7280'}}>
-                  Master Data
+                  📊 Master Data
                 </a>
               )}
               
-              <a href="/analytics" style={styles.headerBtnPrimary}>Analytics</a>
+              <a href="/analytics" style={styles.headerBtnPrimary}>📈 Analytics</a>
               
               {user && (
                 <button onClick={handleLogout} style={{...styles.headerBtnSecondary, color: '#EF4444'}}>

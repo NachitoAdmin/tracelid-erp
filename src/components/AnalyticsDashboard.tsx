@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useCurrency } from '@/lib/CurrencyContext'
 import { formatCurrency } from '@/lib/currency'
+import { useLanguage } from '@/lib/LanguageContext'
 
 interface Transaction {
   id: string
@@ -20,6 +21,7 @@ interface AnalyticsDashboardProps {
 
 export default function AnalyticsDashboard({ tenantId, refreshTrigger }: AnalyticsDashboardProps) {
   const { currency } = useCurrency()
+  const { t } = useLanguage()
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -77,32 +79,32 @@ export default function AnalyticsDashboard({ tenantId, refreshTrigger }: Analyti
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.title}>📊 Analytics Dashboard</h2>
+      <h2 style={styles.title}>📊 {t('analyticsDashboard')}</h2>
       
       <div style={styles.grid}>
         <div style={{ ...styles.stat, borderLeftColor: '#22c55e' }}>
           <div style={{ ...styles.statValue, color: '#22c55e' }}>{formatCurrency(stats.sales, currency)}</div>
-          <div style={styles.statLabel}>Sales</div>
+          <div style={styles.statLabel}>{t('sales')}</div>
         </div>
         
         <div style={{ ...styles.stat, borderLeftColor: '#f97316' }}>
           <div style={{ ...styles.statValue, color: '#f97316' }}>{formatCurrency(stats.returns, currency)}</div>
-          <div style={styles.statLabel}>Returns</div>
+          <div style={styles.statLabel}>{t('returns')}</div>
         </div>
         
         <div style={{ ...styles.stat, borderLeftColor: '#14b8a6' }}>
           <div style={{ ...styles.statValue, color: '#14b8a6' }}>{formatCurrency(stats.discounts, currency)}</div>
-          <div style={styles.statLabel}>Discounts</div>
+          <div style={styles.statLabel}>{t('discounts')}</div>
         </div>
         
         <div style={{ ...styles.stat, borderLeftColor: stats.net >= 0 ? '#3b82f6' : '#ef4444' }}>
           <div style={{ ...styles.statValue, color: stats.net >= 0 ? '#3b82f6' : '#ef4444' }}>{formatCurrency(stats.net, currency)}</div>
-          <div style={styles.statLabel}>Net</div>
+          <div style={styles.statLabel}>{t('net')}</div>
         </div>
       </div>
 
       <div style={styles.footer}>
-        <span style={styles.footerLabel}>Total Transactions:</span>
+        <span style={styles.footerLabel}>{t('totalTransactions')}:</span>
         <span style={styles.footerValue}>{stats.count}</span>
       </div>
     </div>
