@@ -22,6 +22,7 @@ interface ParsedData {
 
 export default function MasterDataPage() {
   const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'customers' | 'products' | 'costs' | 'rebates'>('customers')
   const [uploading, setUploading] = useState(false)
   const [message, setMessage] = useState('')
@@ -37,6 +38,7 @@ export default function MasterDataPage() {
         console.error('Failed to parse user data')
       }
     }
+    setLoading(false)
   }, [])
 
   const downloadTemplate = (type: string) => {
@@ -122,12 +124,23 @@ export default function MasterDataPage() {
 
   const isAdmin = user?.role === 'admin' || user?.role === 'owner'
 
+  if (loading) {
+    return (
+      <div style={styles.container}>
+        <div style={styles.loading}>
+          <h2>Loading...</h2>
+        </div>
+      </div>
+    )
+  }
+
   if (!isAdmin) {
     return (
       <div style={styles.container}>
         <div style={styles.unauthorized}>
           <h1>⛔ Access Denied</h1>
           <p>You need Admin or Owner permissions to access this page.</p>
+          <p>Your role: {user?.role || 'Not logged in'}</p>
           <Link href="/" style={styles.backLink}>← Back to Dashboard</Link>
         </div>
       </div>
@@ -435,6 +448,15 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: 'pointer',
   },
   unauthorized: {
+    backgroundColor: 'white',
+    borderRadius: '16px',
+    padding: '50px',
+    textAlign: 'center',
+    maxWidth: '500px',
+    margin: '100px auto',
+    boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+  },
+  loading: {
     backgroundColor: 'white',
     borderRadius: '16px',
     padding: '50px',
