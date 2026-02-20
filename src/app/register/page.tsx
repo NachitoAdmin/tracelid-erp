@@ -63,6 +63,7 @@ export default function RegisterPage() {
       const tenant = tenantData.tenant
 
       // Step 2: Create Admin User for the tenant
+      console.log('Creating user for tenant:', tenant.id);
       const userResponse = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -75,12 +76,12 @@ export default function RegisterPage() {
         }),
       })
 
-      if (!userResponse.ok) {
-        const data = await userResponse.json()
-        throw new Error(data.error || 'Failed to create user account')
-      }
+      const userData = await userResponse.json();
+      console.log('User creation response:', userResponse.status, userData);
 
-      const userData = await userResponse.json()
+      if (!userResponse.ok) {
+        throw new Error(userData.error || `Failed to create user account (${userResponse.status})`);
+      }
 
       // Step 3: Auto-login
       const loginResponse = await fetch('/api/auth/login', {

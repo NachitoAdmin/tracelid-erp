@@ -6,8 +6,11 @@ export async function POST(req: NextRequest) {
   try {
     const { email, password, firstName, lastName, tenantId } = await req.json();
 
+    console.log('Register API called:', { email, firstName, lastName, tenantId: tenantId?.substring(0, 8) + '...' });
+
     // Validate input
     if (!email || !password || !tenantId) {
+      console.log('Missing required fields:', { email: !!email, password: !!password, tenantId: !!tenantId });
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -18,27 +21,39 @@ export async function POST(req: NextRequest) {
     );
 
     // Check if user already exists
-    const { data: existingUser } = await supabase
+    const { data: existingUser, error: checkError } = await supabase
       .from('users')
       .select('id')
       .eq('email', email)
-      .single();
+      .maybeSingle();
+
+    if (checkError) {
+      console.log('Error checking existing user:', checkError);
+    }
 
     if (existingUser) {
+      console.log('User already exists:', email);
       return NextResponse.json({ error: 'Email already registered' }, { status: 409 });
     }
 
     // Hash password
     const passwordHash = await hashPassword(password);
+    console.log('Password hashed successfully');
 
-    // Create user (first user in tenant becomes admin, others become operator)
-    const { data: tenantUsers } = await supabase
+    // Check if this is the first user in the tenant
+    const { data: tenantUsers, error: tenantError } = await supabase
       .from('users')
       .select('id')
       .eq('tenant_id', tenantId);
 
-    const role = tenantUsers && tenantUsers.length === 0 ? 'admin' : 'operator';
+    if (tenantError) {
+      console.log('Error checking tenant users:', tenantError);
+    }
 
+    const role = tenantUsers && tenantUsers.length === 0 ? 'admin' : 'operator';
+    console.log('Assigning role:', role, '(tenant has', tenantUsers?.length || 0, 'users)');
+
+    // Create user
     const { data: user, error } = await supabase
       .from('users')
       .insert({
@@ -53,8 +68,11 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (error) {
-      return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });
+      console.log('Error creating user:', error);
+      return NextResponse.json({ error: 'Failed to create user: ' + error.message }, { status: 500 });
     }
+
+    console.log('User created successfully:', user.id);
 
     return NextResponse.json({
       user: {
@@ -63,7 +81,8 @@ export async function POST(req: NextRequest) {
         role: user.role
       }
     }, { status: 201 });
-  } catch (error) {
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  } catch (error: any) {
+    console.log('Unexpected error:', error);
+    return NextResponse.json({ error: 'Internal server error: ' + error.message }, { status: 500 });
   }
 }
