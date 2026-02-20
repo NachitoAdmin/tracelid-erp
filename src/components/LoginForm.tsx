@@ -13,20 +13,25 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Login form submitted');
     setError('');
     setLoading(true);
 
     try {
+      console.log('Calling login API...');
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
 
+      console.log('Login response status:', res.status);
       const data = await res.json();
+      console.log('Login response data:', data);
 
       if (!res.ok) {
         setError(data.error || 'Login failed');
+        setLoading(false);
         return;
       }
 
@@ -35,6 +40,7 @@ export default function LoginPage() {
       localStorage.setItem('tracelid-selected-tenant', data.user.tenant.id);
       localStorage.setItem('tracelid-selected-tenant-name', data.user.tenant.name);
 
+      console.log('Redirecting to dashboard...');
       // Redirect based on role
       if (data.user.role === 'operator') {
         router.push('/operator');
@@ -42,8 +48,8 @@ export default function LoginPage() {
         router.push('/');
       }
     } catch (err) {
+      console.error('Login error:', err);
       setError('Network error');
-    } finally {
       setLoading(false);
     }
   };
@@ -52,7 +58,19 @@ export default function LoginPage() {
     <div style={styles.container}>
       <div style={styles.card}>
         <div style={styles.logo}>
-          <div style={styles.icon}>📊</div>
+          <!-- Tracelid Logo SVG -->
+          <svg width="80" height="80" viewBox="0 0 200 200" style={{marginBottom: '10px'}}>
+            <defs>
+              <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#6C5CE7" />
+                <stop offset="100%" stopColor="#A78BFA" />
+              </linearGradient>
+            </defs>
+            <circle cx="100" cy="100" r="80" fill="none" stroke="url(#logoGrad)" strokeWidth="12" />
+            <polyline points="55,120 80,85 105,110 145,65" fill="none" stroke="url(#logoGrad)" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx="100" cy="100" r="20" fill="#6C5CE7" opacity="0.3" />
+            <line x1="160" y1="160" x2="190" y2="190" stroke="url(#logoGrad)" strokeWidth="20" strokeLinecap="round" />
+          </svg>
           <h1 style={styles.title}>Tracelid</h1>
         </div>
         
@@ -90,7 +108,12 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            style={styles.submitBtn}
+            style={{
+              ...styles.submitBtn,
+              opacity: loading ? 0.7 : 1,
+              cursor: loading ? 'not-allowed' : 'pointer',
+            }}
+            onClick={() => console.log('Sign In button clicked')}
           >
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
@@ -138,10 +161,6 @@ const styles: Record<string, React.CSSProperties> = {
     flexDirection: 'column',
     alignItems: 'center',
     marginBottom: '20px',
-  },
-  icon: {
-    fontSize: '3rem',
-    marginBottom: '10px',
   },
   title: {
     margin: '0',
@@ -201,7 +220,6 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '10px',
     fontSize: '1rem',
     fontWeight: 600,
-    cursor: 'pointer',
     marginTop: '10px',
     boxSizing: 'border-box',
   },
