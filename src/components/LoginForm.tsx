@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -10,10 +10,17 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    console.log('LoginPage mounted');
+    setMounted(true);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
+    console.log('HANDLE SUBMIT CALLED');
     e.preventDefault();
-    console.log('Login form submitted');
+    console.log('Login form submitted - email:', email);
     setError('');
     setLoading(true);
 
@@ -74,11 +81,18 @@ export default function LoginPage() {
     }
   };
 
+  const handleButtonClick = () => {
+    console.log('BUTTON CLICKED DIRECTLY');
+  };
+
+  if (!mounted) {
+    return <div style={styles.container}>Loading...⏳</div>;
+  }
+
   return (
     <div style={styles.container}>
       <div style={styles.card}>
         <div style={styles.logo}>
-          {/* Tracelid Logo SVG */}
           <svg width="80" height="80" viewBox="0 0 200 200" style={{marginBottom: '10px'}}>
             <defs>
               <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -100,7 +114,7 @@ export default function LoginPage() {
           <div style={styles.error}>⚠️ {error}</div>
         )}
         
-        <form onSubmit={handleSubmit} style={styles.form}>
+        <form onSubmit={handleSubmit} style={styles.form} noValidate>
           <div style={styles.field}>
             <label style={styles.label}>Email Address</label>
             <input
@@ -133,7 +147,7 @@ export default function LoginPage() {
               opacity: loading ? 0.7 : 1,
               cursor: loading ? 'not-allowed' : 'pointer',
             }}
-            onClick={() => console.log('Sign In button clicked')}
+            onClick={handleButtonClick}
           >
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
