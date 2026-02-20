@@ -45,7 +45,7 @@ export default function OperatorPage() {
       </nav>
       <div className="p-6">
         <h2 className="text-2xl font-bold mb-4">Enter Transaction</h2>
-        <SaleForm />
+        <SaleForm tenantId={user.tenant.id} />
       </div>
     </div>
   );
