@@ -3,9 +3,33 @@ import { createClient } from '@supabase/supabase-js';
 import { verifyPassword, generateToken } from '@/lib/auth';
 import { serialize } from 'cookie';
 
+// Handle CORS preflight
+export async function OPTIONS(req: NextRequest) {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    },
+  });
+}
+
 export async function POST(req: NextRequest) {
+  console.log('=== LOGIN API CALLED ===');
+  console.log('Request method:', req.method);
+  console.log('Request URL:', req.url);
+  
   try {
-    const { email, password } = await req.json();
+    let body;
+    try {
+      body = await req.json();
+    } catch (e) {
+      console.log('Failed to parse request body:', e);
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+    }
+    
+    const { email, password } = body;
     console.log('Login attempt for:', email);
 
     if (!email || !password) {
@@ -13,12 +37,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Email and password required' }, { status: 400 });
     }
 
+    console.log('Creating Supabase client...');
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_KEY!
     );
 
-    // Get user with tenant info
+    console.log('Querying user from database...');
     const { data: user, error } = await supabase
       .from('users')
       .select('*, tenant:Tenant(id, name, country)')
@@ -32,7 +57,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
-    // Verify password
     console.log('Verifying password...');
     const isValid = await verifyPassword(password, user.password_hash);
     console.log('Password valid:', isValid);
@@ -41,21 +65,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
-    // Check if active
     if (!user.is_active) {
       return NextResponse.json({ error: 'Account disabled' }, { status: 403 });
     }
 
-    // Generate JWT
+    console.log('Generating JWT...');
     const token = generateToken(user.id, user.email, user.role);
     console.log('JWT generated for user:', user.id);
 
-    // Set HTTP-only cookie
     const cookie = serialize('auth-token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+      maxAge: 60 * 60 * 24 * 7,
       path: '/',
     });
 
@@ -70,13 +92,14 @@ export async function POST(req: NextRequest) {
       },
     };
     
-    console.log('Login successful, returning:', JSON.stringify(responseData));
+    console.log('Login successful, returning user data');
 
-    const response = NextResponse.json(responseData);
+    const response = NextResponse.json(responseData, { status: 200 });
     response.headers.set('Set-Cookie', cookie);
+    console.log('=== LOGIN API COMPLETED ===');
     return response;
   } catch (error: any) {
-    console.error('Login API error:', error);
+    console.error('=== LOGIN API ERROR ===', error);
     return NextResponse.json({ error: 'Internal server error', details: error.message }, { status: 500 });
   }
 }
