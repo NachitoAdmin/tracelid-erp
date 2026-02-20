@@ -64,9 +64,12 @@ export default function RegisterPage() {
         
         // If tenant has a password, mark it as authenticated
         if (data.tenant.password) {
-          const authenticatedTenants = new Set(JSON.parse(localStorage.getItem('tracelid-authenticated-tenants') || '[]'))
-          authenticatedTenants.add(data.tenant.id)
-          localStorage.setItem('tracelid-authenticated-tenants', JSON.stringify([...authenticatedTenants]))
+          const stored = localStorage.getItem('tracelid-authenticated-tenants')
+          const authenticatedTenants: string[] = stored ? JSON.parse(stored) : []
+          if (!authenticatedTenants.includes(data.tenant.id)) {
+            authenticatedTenants.push(data.tenant.id)
+          }
+          localStorage.setItem('tracelid-authenticated-tenants', JSON.stringify(authenticatedTenants))
         }
       }
       
