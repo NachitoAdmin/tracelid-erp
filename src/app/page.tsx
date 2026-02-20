@@ -232,32 +232,12 @@ export default function Home() {
               )}
               
               {/* User Name */}
-              {selectedTenant?.name && (
-                <div style={styles.headerItem}>
-                  <span style={{...styles.headerLabel, color: isDark ? '#9CA3AF' : '#6B7280'}}>TENANT</span>
-                  <span style={{...styles.headerValue, color: textColor}}>
-                    {selectedTenant.name} {'country' in selectedTenant ? `(${(selectedTenant as any).country})` : ''}
-                  </span>
-                </div>
-              )}
-              
-              {/* User Name */}
               {user && (
                 <div style={styles.headerItem}>
                   <span style={{...styles.headerLabel, color: isDark ? '#9CA3AF' : '#6B7280'}}>USER</span>
                   <span style={{...styles.headerValue, color: textColor}}>
-                    👤 {user.firstName} {user.lastName}
+                    {user.firstName} {user.lastName}
                   </span>
-                </div>
-              )}
-              
-              {/* Role Badge */}
-              {user && (
-                <div style={{
-                  ...styles.roleBadge,
-                  backgroundColor: roleColors[user.role] || '#6B7280',
-                }}>
-                  {user.role.toUpperCase()}
                 </div>
               )}
             </div>
@@ -280,11 +260,10 @@ export default function Home() {
               
               <a href="/analytics" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #6C5CE7 0%, #764ba2 100%)'}}>📈 Analytics</a>
               
-              {user && (
-                <button onClick={handleLogout} style={{...styles.logoutBtnCompact, color: '#EF4444'}}>
-                  🚪
-                </button>
-              )}
+              {/* Logout button */}
+              <button onClick={handleLogout} style={{...styles.headerBtnCompact, background: '#EF4444'}}>
+                🚪 Logout
+              </button>
             </div>
           </div>
         </header>
