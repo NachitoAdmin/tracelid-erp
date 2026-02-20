@@ -13,51 +13,22 @@ export default function LoginPage() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    console.log('LoginPage mounted');
     setMounted(true);
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    console.log('HANDLE SUBMIT CALLED');
     e.preventDefault();
-    console.log('Login form submitted - email:', email);
     setError('');
     setLoading(true);
 
     try {
-      console.log('Calling login API...');
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
-      
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
-        signal: controller.signal,
       });
-      
-      clearTimeout(timeoutId);
 
-      console.log('Login response status:', res.status);
-      console.log('Response headers:', Object.fromEntries(res.headers.entries()));
-      
-      const responseText = await res.text();
-      console.log('Raw response text:', responseText);
-      
-      let data;
-      try {
-        data = JSON.parse(responseText);
-        console.log('Parsed data:', data);
-      } catch (jsonErr) {
-        console.error('Failed to parse JSON:', jsonErr);
-        setError('Server error: Invalid response - ' + responseText.substring(0, 100));
-        setLoading(false);
-        return;
-      }
-      
-      console.log('Login response data:', data);
-      console.log('Data has user?', data.hasOwnProperty('user'));
-      console.log('Data.user:', data.user);
+      const data = await res.json();
 
       if (!res.ok) {
         setError(data.error || 'Login failed');
@@ -65,46 +36,26 @@ export default function LoginPage() {
         return;
       }
 
-      console.log('Storing user data to localStorage...');
-      console.log('data.user exists?', !!data.user);
-      console.log('data.user.id:', data.user?.id);
-      console.log('data.user.tenant:', data.user?.tenant);
-      
-      if (!data.user) {
-        console.error('No user data in response!');
-        setError('Invalid response: missing user data');
-        setLoading(false);
-        return;
-      }
-
+      // Store user data
       localStorage.setItem('tracelid-user', JSON.stringify(data.user));
       localStorage.setItem('tracelid-selected-tenant', data.user.tenant?.id || '');
       localStorage.setItem('tracelid-selected-tenant-name', data.user.tenant?.name || '');
 
-      console.log('Redirecting to dashboard...');
-      console.log('User role:', data.user.role);
-      setLoading(false);
-      
+      // Redirect using Next.js router
       const redirectUrl = data.user.role === 'operator' ? '/operator' : '/';
-      console.log('Redirect URL:', redirectUrl);
+      router.push(redirectUrl);
       
+      // Fallback: also try window.location as backup
       setTimeout(() => {
-        console.log('Executing redirect to:', redirectUrl);
-        window.location.href = redirectUrl;
-      }, 100);
+        if (window.location.pathname === '/login') {
+          window.location.replace(redirectUrl);
+        }
+      }, 500);
+      
     } catch (err: any) {
-      console.error('Login error:', err);
-      if (err.name === 'AbortError') {
-        setError('Request timed out. Please try again.');
-      } else {
-        setError('Network error: ' + err.message);
-      }
+      setError('Network error: ' + err.message);
       setLoading(false);
     }
-  };
-
-  const handleButtonClick = () => {
-    console.log('BUTTON CLICKED DIRECTLY');
   };
 
   if (!mounted) {
@@ -169,7 +120,6 @@ export default function LoginPage() {
               opacity: loading ? 0.7 : 1,
               cursor: loading ? 'not-allowed' : 'pointer',
             }}
-            onClick={handleButtonClick}
           >
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
