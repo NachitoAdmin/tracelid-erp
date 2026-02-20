@@ -15,7 +15,8 @@ interface Transaction {
   product_id?: string
   customer_name?: string
   customer_id?: string
-  createdAt: string
+  createdAt?: string
+  createdat?: string
 }
 
 interface TransactionListProps {
@@ -132,7 +133,7 @@ export default function TransactionList({ tenantId, refreshTrigger }: Transactio
                     </span>
                   </td>
                   <td style={styles.td}>
-                    <span style={styles.date}>{formatDateTime(t.createdAt)}</span>
+                    <span style={styles.date}>{formatDateTime(t.createdAt || t.createdat)}</span>
                   </td>
                 </tr>
               )
