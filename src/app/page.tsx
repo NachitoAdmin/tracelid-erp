@@ -216,14 +216,22 @@ export default function Home() {
             </div>
             
             <div style={styles.headerCenter}>
-              {/* Debug: Show user role */}
-              {user && (
-                <div style={{...styles.headerItem, background: '#fef3c7', padding: '4px 8px', borderRadius: '4px'}}>
-                  <span style={{fontSize: '0.7rem', color: '#92400e'}}>ROLE: {user.role}</span>
+              {/* Tenant Name with Role */}
+              {selectedTenant?.name && (
+                <div style={styles.headerItem}>
+                  <span style={{...styles.headerLabel, color: isDark ? '#9CA3AF' : '#6B7280'}}>TENANT</span>
+                  <span style={{...styles.headerValue, color: textColor}}>
+                    {selectedTenant.name} {'country' in selectedTenant ? `(${(selectedTenant as any).country})` : ''}
+                    {user?.role && (
+                      <span style={{...styles.roleTag, backgroundColor: roleColors[user.role] || '#6B7280'}}>
+                        {user.role.toUpperCase()}
+                      </span>
+                    )}
+                  </span>
                 </div>
               )}
               
-              {/* Tenant Name */}
+              {/* User Name */}
               {selectedTenant?.name && (
                 <div style={styles.headerItem}>
                   <span style={{...styles.headerLabel, color: isDark ? '#9CA3AF' : '#6B7280'}}>TENANT</span>
@@ -265,12 +273,10 @@ export default function Home() {
                 {isDark ? '☀️' : '🌙'}
               </button>
               
-              {/* Master Data button for admin/owner roles */}
-              {(user?.role === 'admin' || user?.role === 'owner') && (
-                <a href="/master-data" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)'}}>
-                  📊 Master
-                </a>
-              )}
+              {/* Master Data button - ALWAYS VISIBLE */}
+              <a href="/master-data" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)'}}>
+                📊 Master
+              </a>
               
               <a href="/analytics" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #6C5CE7 0%, #764ba2 100%)'}}>📈 Analytics</a>
               
@@ -528,6 +534,14 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '0.7rem',
     fontWeight: 700,
     letterSpacing: '0.05em',
+  },
+  roleTag: {
+    padding: '2px 8px',
+    borderRadius: '10px',
+    color: 'white',
+    fontSize: '0.65rem',
+    fontWeight: 600,
+    marginLeft: '8px',
   },
   main: {
     maxWidth: '1400px',
