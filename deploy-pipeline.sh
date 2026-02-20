@@ -1,5 +1,5 @@
 #!/bin/bash
-# TRACELID Deployment Pipeline
+# TRACELID Deployment Pipeline - Non-Interactive Mode
 # DEV → E2E Tests → PROD
 # Usage: ./deploy-pipeline.sh [--skip-tests]
 
@@ -16,6 +16,9 @@ NC='\033[0m' # No Color
 DEV_URL="https://erp-nextjs-jqbv317l2-nachitoadmins-projects.vercel.app"
 PROD_URL="https://www.tracelid.com"
 SKIP_TESTS=false
+
+# Use token from environment
+VERCEL_TOKEN="${VERCEL_TOKEN:-}"
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -53,14 +56,13 @@ fi
 echo -e "${GREEN}✅ Prerequisites met${NC}"
 echo ""
 
-# Check Vercel authentication
-echo -e "${YELLOW}🔐 Checking Vercel authentication...${NC}"
-if ! vercel whoami &> /dev/null; then
-    echo -e "${RED}❌ Not logged in to Vercel${NC}"
-    echo "   Run: vercel login"
+# Check Vercel token
+if [ -z "$VERCEL_TOKEN" ]; then
+    echo -e "${RED}❌ VERCEL_TOKEN environment variable not set${NC}"
     exit 1
+else
+    echo -e "${GREEN}✅ Vercel token configured${NC}"
 fi
-echo -e "${GREEN}✅ Authenticated as: $(vercel whoami)${NC}"
 echo ""
 
 # Step 1: Deploy to DEV
@@ -71,17 +73,18 @@ echo ""
 
 echo -e "${YELLOW}🚀 Deploying to DEV environment...${NC}"
 echo "   Project: erp-nextjs-dev"
-echo "   URL: $DEV_URL"
 echo ""
 
-# Deploy to DEV (preview deployment)
-DEPLOY_OUTPUT=$(vercel --token="$VERCEL_TOKEN" --yes 2>&1) || {
+# Deploy to DEV using non-interactive mode
+DEPLOY_OUTPUT=$(vercel --yes --token="$VERCEL_TOKEN" 2>&1) || {
     echo -e "${RED}❌ DEV deployment failed${NC}"
     echo "$DEPLOY_OUTPUT"
     exit 1
 }
 
-DEV_DEPLOY_URL=$(echo "$DEPLOY_OUTPUT" | tail -n1)
+# Extract the deployment URL
+DEV_DEPLOY_URL=$(echo "$DEPLOY_OUTPUT" | grep -oE 'https://[^ ]+\.vercel\.app' | tail -n1)
+
 echo -e "${GREEN}✅ DEV deployment successful!${NC}"
 echo "   URL: $DEV_DEPLOY_URL"
 echo ""
@@ -106,7 +109,7 @@ if [ "$SKIP_TESTS" = false ]; then
     
     # Run E2E tests
     export BASE_URL="$DEV_DEPLOY_URL"
-    if npx playwright test; then
+    if npx playwright test --reporter=list; then
         echo -e "${GREEN}✅ All E2E tests passed!${NC}"
         TESTS_PASSED=true
     else
@@ -143,35 +146,28 @@ if [ "$TESTS_PASSED" = true ]; then
     echo "   URL: $PROD_URL"
     echo ""
     
-    read -p "⚠️  Are you sure you want to deploy to PRODUCTION? (yes/no): " confirm
-    
-    if [ "$confirm" = "yes" ]; then
-        # Deploy to production
-        if vercel --prod --yes; then
-            echo -e "${GREEN}✅ PRODUCTION deployment successful!${NC}"
-            echo "   URL: $PROD_URL"
-            echo ""
-            
-            echo -e "${GREEN}═══════════════════════════════════════════════════════${NC}"
-            echo -e "${GREEN}  🎉 DEPLOYMENT PIPELINE COMPLETE!${NC}"
-            echo -e "${GREEN}═══════════════════════════════════════════════════════${NC}"
-            echo ""
-            echo "Summary:"
-            echo "  ✅ DEV: $DEV_DEPLOY_URL"
-            if [ "$SKIP_TESTS" = false ]; then
-                echo "  ✅ E2E Tests: PASSED"
-            else
-                echo "  ⚠️  E2E Tests: SKIPPED"
-            fi
-            echo "  ✅ PROD: $PROD_URL"
-            echo ""
+    # Deploy to production using non-interactive mode
+    if vercel --prod --yes --token="$VERCEL_TOKEN" 2>&1; then
+        echo -e "${GREEN}✅ PRODUCTION deployment successful!${NC}"
+        echo "   URL: $PROD_URL"
+        echo ""
+        
+        echo -e "${GREEN}═══════════════════════════════════════════════════════${NC}"
+        echo -e "${GREEN}  🎉 DEPLOYMENT PIPELINE COMPLETE!${NC}"
+        echo -e "${GREEN}═══════════════════════════════════════════════════════${NC}"
+        echo ""
+        echo "Summary:"
+        echo "  ✅ DEV: $DEV_DEPLOY_URL"
+        if [ "$SKIP_TESTS" = false ]; then
+            echo "  ✅ E2E Tests: PASSED"
         else
-            echo -e "${RED}❌ PRODUCTION deployment failed${NC}"
-            exit 1
+            echo "  ⚠️  E2E Tests: SKIPPED"
         fi
+        echo "  ✅ PROD: $PROD_URL"
+        echo ""
     else
-        echo -e "${YELLOW}⚠️  Production deployment cancelled${NC}"
-        exit 0
+        echo -e "${RED}❌ PRODUCTION deployment failed${NC}"
+        exit 1
     fi
 else
     echo -e "${RED}❌ Cannot deploy to PROD - tests failed${NC}"
