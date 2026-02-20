@@ -18,45 +18,64 @@ function getSupabaseClient() {
 }
 
 async function getNextDocumentNumber(supabase: any, tenantId: string, prefix: string, year: number): Promise<number> {
-  // Use a simple approach: query the highest existing number and add 1
-  const { data: existing, error } = await supabase
-    .from('document_counters')
-    .select('last_number')
-    .eq('tenantId', tenantId)
-    .eq('prefix', prefix)
-    .eq('year', year)
-    .single()
-  
-  if (error && error.code !== 'PGRST116') {
-    console.error('Error fetching counter:', error)
-  }
-  
-  const currentNumber = existing?.last_number || 0
-  const nextNumber = currentNumber + 1
-  
-  // Update or insert the counter
-  if (existing) {
-    const { error: updateError } = await supabase
+  try {
+    // Use RPC or a more reliable method to get and increment the counter
+    // First, try to get existing counter
+    const { data: existing, error: selectError } = await supabase
       .from('document_counters')
-      .update({ last_number: nextNumber })
+      .select('id, last_number')
       .eq('tenantId', tenantId)
       .eq('prefix', prefix)
       .eq('year', year)
+      .single()
     
-    if (updateError) {
-      console.error('Error updating counter:', updateError)
+    if (selectError && selectError.code !== 'PGRST116') {
+      console.error('Error fetching counter:', selectError)
     }
-  } else {
-    const { error: insertError } = await supabase
-      .from('document_counters')
-      .insert({ tenantId, prefix, year, last_number: nextNumber })
     
-    if (insertError) {
-      console.error('Error inserting counter:', insertError)
+    let nextNumber: number
+    
+    if (existing) {
+      // Counter exists - increment it
+      const currentNumber = existing.last_number || 0
+      nextNumber = currentNumber + 1
+      
+      const { error: updateError } = await supabase
+        .from('document_counters')
+        .update({ last_number: nextNumber })
+        .eq('id', existing.id)
+      
+      if (updateError) {
+        console.error('Error updating counter:', updateError)
+        // Fallback: use timestamp
+        return Date.now() % 100000
+      }
+    } else {
+      // No counter exists - create one starting at 1
+      nextNumber = 1
+      
+      const { error: insertError } = await supabase
+        .from('document_counters')
+        .insert({ 
+          tenantId, 
+          prefix, 
+          year, 
+          last_number: nextNumber 
+        })
+      
+      if (insertError) {
+        console.error('Error inserting counter:', insertError)
+        // Fallback: use timestamp
+        return Date.now() % 100000
+      }
     }
+    
+    return nextNumber
+  } catch (err) {
+    console.error('Exception in getNextDocumentNumber:', err)
+    // Fallback to timestamp-based number
+    return Date.now() % 100000
   }
-  
-  return nextNumber
 }
 
 async function generateDocumentNumber(
@@ -200,6 +219,7 @@ export async function POST(request: NextRequest) {
     }
     console.log('Tenant found:', tenant.name)
 
+    // Generate unique document number
     const documentNumber = await generateDocumentNumber(supabase, tenantId, upperType, referenceSaleId)
     console.log('Generated document number:', documentNumber)
 
