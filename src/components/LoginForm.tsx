@@ -19,14 +19,30 @@ export default function LoginPage() {
 
     try {
       console.log('Calling login API...');
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
+        signal: controller.signal,
       });
+      
+      clearTimeout(timeoutId);
 
       console.log('Login response status:', res.status);
-      const data = await res.json();
+      
+      let data;
+      try {
+        data = await res.json();
+      } catch (jsonErr) {
+        console.error('Failed to parse JSON:', jsonErr);
+        setError('Server error: Invalid response');
+        setLoading(false);
+        return;
+      }
+      
       console.log('Login response data:', data);
 
       if (!res.ok) {
@@ -35,21 +51,25 @@ export default function LoginPage() {
         return;
       }
 
-      // Store user data
       localStorage.setItem('tracelid-user', JSON.stringify(data.user));
       localStorage.setItem('tracelid-selected-tenant', data.user.tenant.id);
       localStorage.setItem('tracelid-selected-tenant-name', data.user.tenant.name);
 
       console.log('Redirecting to dashboard...');
-      // Redirect based on role
+      setLoading(false);
+      
       if (data.user.role === 'operator') {
-        router.push('/operator');
+        window.location.href = '/operator';
       } else {
-        router.push('/');
+        window.location.href = '/';
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Login error:', err);
-      setError('Network error');
+      if (err.name === 'AbortError') {
+        setError('Request timed out. Please try again.');
+      } else {
+        setError('Network error: ' + err.message);
+      }
       setLoading(false);
     }
   };
