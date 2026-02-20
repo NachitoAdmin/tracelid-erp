@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
       .from('transactions')
       .select('*')
       .eq('tenant_id', tenantId)
-      .order('createdAt', { ascending: false })
+      .order('createdat', { ascending: false })
 
     if (error) throw error
 

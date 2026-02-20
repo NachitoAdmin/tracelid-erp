@@ -23,11 +23,11 @@ export async function GET() {
       .eq('table_schema', 'public')
       .order('ordinal_position')
 
-    // Try to get tenants
+    // Try to get tenants - use lowercase column names
     const { data: tenants, error } = await supabase
       .from('Tenant')
       .select('*')
-      .order('createdAt', { ascending: false })
+      .order('createdat', { ascending: false })
 
     return NextResponse.json({
       tables: tables || [],
