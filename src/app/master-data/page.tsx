@@ -31,9 +31,12 @@ export default function MasterDataPage() {
 
   useEffect(() => {
     const userData = localStorage.getItem('tracelid-user')
+    console.log('Master Data - localStorage user:', userData)
     if (userData) {
       try {
-        setUser(JSON.parse(userData))
+        const parsed = JSON.parse(userData)
+        console.log('Master Data - parsed user:', parsed)
+        setUser(parsed)
       } catch (e) {
         console.error('Failed to parse user data')
       }
@@ -141,6 +144,13 @@ export default function MasterDataPage() {
           <h1>⛔ Access Denied</h1>
           <p>You need Admin or Owner permissions to access this page.</p>
           <p>Your role: {user?.role || 'Not logged in'}</p>
+          {!user && (
+            <p>
+              <Link href="/login" style={{...styles.backLink, color: '#6C5CE7'}}>
+                → Go to Login
+              </Link>
+            </p>
+          )}
           <Link href="/" style={styles.backLink}>← Back to Dashboard</Link>
         </div>
       </div>
