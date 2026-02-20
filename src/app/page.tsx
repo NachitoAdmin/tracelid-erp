@@ -54,9 +54,13 @@ export default function Home() {
       const response = await fetch('/api/tenants')
       if (!response.ok) throw new Error('Failed to fetch tenants')
       const data = await response.json()
-      setTenants(data)
-      if (data.length > 0 && !selectedTenantId) {
-        const firstTenant = data[0]
+      
+      // Handle both array response and object with tenants property
+      const tenantList = Array.isArray(data) ? data : (data.tenants || [])
+      
+      setTenants(tenantList)
+      if (tenantList.length > 0 && !selectedTenantId) {
+        const firstTenant = tenantList[0]
         setSelectedTenantId(firstTenant.id)
         setTenantInput(firstTenant.id)
         // Auto-save first tenant
@@ -65,7 +69,7 @@ export default function Home() {
         console.log(`Auto-selected tenant: ${firstTenant.name} (${firstTenant.id})`)
       }
     } catch (err) {
-      console.error(err)
+      console.error('Error fetching tenants:', err)
     } finally {
       setLoading(false)
     }
@@ -111,7 +115,7 @@ export default function Home() {
       setSelectedTenantId(tenantInput.trim())
       setLoginError('')
     } else {
-      setLoginError(t('invalidPassword'))
+      setLoginError('Invalid password')
     }
   }
 
