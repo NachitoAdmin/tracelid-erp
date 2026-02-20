@@ -219,7 +219,7 @@ export default function Home() {
                 <div style={styles.headerItem}>
                   <span style={{...styles.headerLabel, color: isDark ? '#9CA3AF' : '#6B7280'}}>TENANT</span>
                   <span style={{...styles.headerValue, color: textColor}}>
-                    {selectedTenant.name} {selectedTenant.country ? `(${selectedTenant.country})` : ''}
+                    {selectedTenant.name} {'country' in selectedTenant ? `(${(selectedTenant as any).country})` : ''}
                   </span>
                 </div>
               )}
