@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
   try {
     // Verify admin
     const cookies = parse(req.headers.get('cookie') || '');
-    const token = cookies['auth-token'];
+    const token = cookies['auth-token'] || '';
     const decoded = verifyToken(token);
 
     if (!decoded || (decoded.role !== 'admin' && decoded.role !== 'owner')) {
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
   try {
     // Verify admin
     const cookies = parse(req.headers.get('cookie') || '');
-    const token = cookies['auth-token'];
+    const token = cookies['auth-token'] || '';
     const decoded = verifyToken(token);
 
     if (!decoded || (decoded.role !== 'admin' && decoded.role !== 'owner')) {
@@ -95,7 +95,7 @@ export async function PATCH(req: NextRequest) {
   try {
     // Verify admin
     const cookies = parse(req.headers.get('cookie') || '');
-    const token = cookies['auth-token'];
+    const token = cookies['auth-token'] || '';
     const decoded = verifyToken(token);
 
     if (!decoded || (decoded.role !== 'admin' && decoded.role !== 'owner')) {
