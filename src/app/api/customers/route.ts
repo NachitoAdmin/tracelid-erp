@@ -46,6 +46,10 @@ export async function GET(req: NextRequest) {
 
 // POST /api/customers - Create customer
 export async function POST(req: NextRequest) {
+  console.log('SUPABASE_SERVICE_KEY:', process.env.SUPABASE_SERVICE_KEY ? 'SET' : 'NOT SET');
+  console.log('SUPABASE_SERVICE_KEY_DEV:', process.env.SUPABASE_SERVICE_KEY_DEV ? 'SET' : 'NOT SET');
+  console.log('NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'SET' : 'NOT SET');
+  
   try {
     const supabase = getSupabaseClient();
     const body = await req.json();
