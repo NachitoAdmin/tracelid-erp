@@ -76,6 +76,12 @@ export default function Home() {
     
     // Only fetch tenants for owner role
     if (!parsedUser || parsedUser.role === 'owner') {
+      // For owner, check if there's a saved tenant in localStorage first
+      const savedTenantId = localStorage.getItem('tracelid-selected-tenant')
+      if (savedTenantId) {
+        setSelectedTenantId(savedTenantId)
+        setTenantInput(savedTenantId)
+      }
       fetchTenants()
     } else {
       setLoading(false)
