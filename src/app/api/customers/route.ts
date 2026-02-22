@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/lib/supabase-server';
+import { createClient } from '@supabase/supabase-js';
 
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const serviceKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_KEY_DEV;
 
+function getSupabaseClient() {
+  if (!serviceKey) {
+    throw new Error('SUPABASE_SERVICE_KEY or SUPABASE_SERVICE_KEY_DEV must be set');
+  }
+  return createClient(supabaseUrl, serviceKey);
+}
 
 // GET /api/customers - List customers
 export async function GET(req: NextRequest) {
