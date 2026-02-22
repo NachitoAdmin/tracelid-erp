@@ -1,9 +1,7 @@
 'use client'
 
 import { useEffect, useState, createContext } from 'react'
-import SaleForm from '@/components/SaleForm'
-import TransactionList from '@/components/TransactionList'
-import AnalyticsDashboard from '@/components/AnalyticsDashboard'
+import Link from 'next/link'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
 import CurrencySelector from '@/components/CurrencySelector'
 import TenantLogin from '@/components/TenantLogin'
@@ -17,7 +15,7 @@ interface Tenant {
   name: string
   country: string
   password?: string
-  _count: {
+  _count?: {
     transactions: number
   }
 }
@@ -34,6 +32,13 @@ interface User {
   }
 }
 
+interface Stats {
+  salesOrders: number
+  pendingDeliveries: number
+  unpaidInvoices: number
+  totalReceivables: number
+}
+
 export default function Home() {
   const { t } = useLanguage()
   const [theme, setTheme] = useState('light')
@@ -41,11 +46,16 @@ export default function Home() {
   const [selectedTenantId, setSelectedTenantId] = useState('')
   const [tenantInput, setTenantInput] = useState('')
   const [loading, setLoading] = useState(true)
-  const [refreshTrigger, setRefreshTrigger] = useState(0)
   const [showLogin, setShowLogin] = useState(false)
   const [loginError, setLoginError] = useState('')
   const [authenticatedTenants, setAuthenticatedTenants] = useState<Set<string>>(new Set())
   const [user, setUser] = useState<User | null>(null)
+  const [stats, setStats] = useState<Stats>({
+    salesOrders: 0,
+    pendingDeliveries: 0,
+    unpaidInvoices: 0,
+    totalReceivables: 0
+  })
   
   const envName = process.env.NEXT_PUBLIC_ENV_NAME || 'production'
   const isDev = envName === 'development'
@@ -54,7 +64,6 @@ export default function Home() {
     const saved = localStorage.getItem('tracelid-theme')
     if (saved) setTheme(saved)
     
-    // Get user from localStorage
     const userData = localStorage.getItem('tracelid-user')
     let parsedUser = null
     
@@ -62,7 +71,6 @@ export default function Home() {
       try {
         parsedUser = JSON.parse(userData)
         setUser(parsedUser)
-        // If admin/operator, auto-select their tenant
         if (parsedUser?.role && parsedUser.role !== 'owner' && parsedUser.tenant?.id) {
           setSelectedTenantId(parsedUser.tenant.id)
           setTenantInput(parsedUser.tenant.id)
@@ -74,9 +82,7 @@ export default function Home() {
       }
     }
     
-    // Only fetch tenants for owner role
     if (!parsedUser || parsedUser.role === 'owner') {
-      // For owner, check if there's a saved tenant in localStorage first
       const savedTenantId = localStorage.getItem('tracelid-selected-tenant')
       if (savedTenantId) {
         setSelectedTenantId(savedTenantId)
@@ -88,6 +94,12 @@ export default function Home() {
     }
   }, [])
 
+  useEffect(() => {
+    if (selectedTenantId) {
+      fetchStats(selectedTenantId)
+    }
+  }, [selectedTenantId])
+
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light'
     setTheme(newTheme)
@@ -96,13 +108,17 @@ export default function Home() {
 
   const fetchTenants = async () => {
     try {
-      const response = await fetch('/api/tenants')
+      const token = localStorage.getItem('tracelid-token')
+      const headers: Record<string, string> = {}
+      if (token) headers.Authorization = `Bearer ${token}`
+      
+      const response = await fetch('/api/tenants', { headers })
       if (!response.ok) throw new Error('Failed to fetch tenants')
       const data = await response.json()
       
       const tenantList = Array.isArray(data) ? data : (data.tenants || [])
-      
       setTenants(tenantList)
+      
       if (tenantList.length > 0 && !selectedTenantId) {
         const firstTenant = tenantList[0]
         setSelectedTenantId(firstTenant.id)
@@ -117,24 +133,31 @@ export default function Home() {
     }
   }
 
-  const handleSetTenant = () => {
-    const tenant = tenants.find(t => t.id === tenantInput.trim())
-    if (!tenant) {
-      console.error('Tenant not found:', tenantInput)
-      return
+  const fetchStats = async (tenantId: string) => {
+    try {
+      const token = localStorage.getItem('tracelid-token')
+      const headers: Record<string, string> = {}
+      if (token) headers.Authorization = `Bearer ${token}`
+      
+      const [salesRes, deliveryRes, receivablesRes] = await Promise.all([
+        fetch(`/api/sales-orders?tenantId=${tenantId}`, { headers }),
+        fetch(`/api/delivery-status?tenantId=${tenantId}&status=pending`, { headers }),
+        fetch(`/api/receivables?tenantId=${tenantId}&paid=false`, { headers })
+      ])
+      
+      const sales = salesRes.ok ? await salesRes.json() : []
+      const deliveries = deliveryRes.ok ? await deliveryRes.json() : []
+      const receivables = receivablesRes.ok ? await receivablesRes.json() : []
+      
+      setStats({
+        salesOrders: sales.length,
+        pendingDeliveries: deliveries.length,
+        unpaidInvoices: receivables.length,
+        totalReceivables: receivables.reduce((sum: number, r: any) => sum + (r.amount || 0), 0)
+      })
+    } catch (err) {
+      console.error('Error fetching stats:', err)
     }
-
-    localStorage.setItem('tracelid-selected-tenant', tenant.id)
-    localStorage.setItem('tracelid-selected-tenant-name', tenant.name)
-
-    if (tenant.password && !authenticatedTenants.has(tenant.id)) {
-      setShowLogin(true)
-      setLoginError('')
-      return
-    }
-
-    setSelectedTenantId(tenantInput.trim())
-    setRefreshTrigger(prev => prev + 1)
   }
 
   const handleLogin = async (password: string) => {
@@ -157,10 +180,6 @@ export default function Home() {
     }
   }
 
-  const handleTransactionSuccess = () => {
-    setRefreshTrigger(prev => prev + 1)
-  }
-
   const handleLogout = () => {
     localStorage.removeItem('tracelid-user')
     localStorage.removeItem('tracelid-selected-tenant')
@@ -179,18 +198,18 @@ export default function Home() {
   const textColor = isDark ? '#F9FAFB' : '#1F2937'
   const borderColor = isDark ? '#374151' : '#E5E7EB'
   const inputBg = isDark ? '#374151' : '#F9FAFB'
+  const mutedColor = isDark ? '#9CA3AF' : '#6B7280'
 
-  // Role badge colors
   const roleColors: Record<string, string> = {
-    owner: '#8B5CF6', // Purple
-    admin: '#10B981', // Green
-    operator: '#F59E0B', // Orange
+    owner: '#8B5CF6',
+    admin: '#10B981',
+    operator: '#F59E0B',
   }
 
   if (loading) {
     return (
       <div style={{...styles.page, backgroundColor: bgColor}}>
-        <div style={{...styles.loading, color: isDark ? '#9CA3AF' : '#6B7280'}}>Loading...</div>
+        <div style={{...styles.loading, color: mutedColor}}>Loading...</div>
       </div>
     )
   }
@@ -203,6 +222,8 @@ export default function Home() {
             🚧 DEV ENVIRONMENT - {envName.toUpperCase()} 🚧
           </div>
         )}
+        
+        {/* Header */}
         <header style={{...styles.header, backgroundColor: cardBg, borderBottomColor: borderColor}}>
           <div style={styles.headerContent}>
             <div style={styles.logo}>
@@ -222,14 +243,13 @@ export default function Home() {
             </div>
             
             <div style={styles.headerCenter}>
-              {/* Tenant Name with Role */}
               {selectedTenant?.name && (
                 <div style={styles.headerItem}>
-                  <span style={{...styles.headerLabel, color: isDark ? '#9CA3AF' : '#6B7280'}}>TENANT</span>
+                  <span style={{...styles.headerLabel, color: mutedColor}}>TENANT</span>
                   <span style={{...styles.headerValue, color: textColor}}>
-                    {selectedTenant.name} {'country' in selectedTenant ? `(${(selectedTenant as any).country})` : ''}
+                    {selectedTenant.name}
                     {user?.role && (
-                      <span style={{...styles.roleTag, backgroundColor: roleColors[user.role] || '#6B7280'}}>
+                      <span style={{...styles.roleTag, backgroundColor: roleColors[user.role]}}>
                         {user.role.toUpperCase()}
                       </span>
                     )}
@@ -237,10 +257,9 @@ export default function Home() {
                 </div>
               )}
               
-              {/* User Name */}
               {user && (
                 <div style={styles.headerItem}>
-                  <span style={{...styles.headerLabel, color: isDark ? '#9CA3AF' : '#6B7280'}}>USER</span>
+                  <span style={{...styles.headerLabel, color: mutedColor}}>USER</span>
                   <span style={{...styles.headerValue, color: textColor}}>
                     {user.firstName} {user.lastName}
                   </span>
@@ -259,14 +278,21 @@ export default function Home() {
                 {isDark ? '☀️' : '🌙'}
               </button>
               
-              {/* Master Data button - ALWAYS VISIBLE */}
-              <a href="/master-data" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)'}}>
-                📊 Master
+              {(isOwner || isAdmin) && (
+                <a href="/master-data" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)'}}>
+                  📊 Master Data
+                </a>
+              )}
+              
+              {/* Financial Analysis Button - GREEN GRADIENT */}
+              <a href="/financial-analysis" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #10B981 0%, #34D399 100%)'}}>
+                📊 Financial
               </a>
               
-              <a href="/analytics" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #6C5CE7 0%, #764ba2 100%)'}}>📈 Analytics</a>
+              <a href="/analytics" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #6C5CE7 0%, #764ba2 100%)'}}>
+                📈 Analytics
+              </a>
               
-              {/* Logout button */}
               <button onClick={handleLogout} style={{...styles.headerBtnCompact, background: '#EF4444'}}>
                 🚪 Logout
               </button>
@@ -275,12 +301,11 @@ export default function Home() {
         </header>
 
         <main style={styles.main}>
-          {/* Tenant Bar - Show for Owner role */}
+          {/* Tenant Bar */}
           {isOwner && (
             <div style={{...styles.tenantBar, backgroundColor: cardBg, borderColor}}>
               <div style={styles.tenantLeft}>
-                <span style={{...styles.tenantLabel, color: isDark ? '#9CA3AF' : '#9CA3AF'}}>TENANT</span>
-                
+                <span style={{...styles.tenantLabel, color: '#9CA3AF'}}>TENANT</span>
                 <select
                   value={selectedTenantId}
                   onChange={(e) => {
@@ -291,21 +316,19 @@ export default function Home() {
                       localStorage.setItem('tracelid-selected-tenant', tenant.id)
                       localStorage.setItem('tracelid-selected-tenant-name', tenant.name)
                       
-                      if (tenant.password && !authenticatedTenants.has(tenant.id)) {
+                      const userData = localStorage.getItem('tracelid-user')
+                      const userRole = userData ? JSON.parse(userData).role : user?.role
+                      console.log('User role:', userRole, 'Bypass password:', userRole === 'owner')
+                      
+                      if (tenant.password && !authenticatedTenants.has(tenant.id) && userRole !== 'owner') {
                         setShowLogin(true)
                         setLoginError('')
                       } else {
                         setSelectedTenantId(tenantId)
-                        setRefreshTrigger(prev => prev + 1)
                       }
                     }
                   }}
-                  style={{
-                    ...styles.tenantSelect,
-                    backgroundColor: inputBg,
-                    borderColor,
-                    color: textColor
-                  }}
+                  style={{...styles.tenantSelect, backgroundColor: inputBg, borderColor, color: textColor}}
                 >
                   <option value="">-- Select a tenant --</option>
                   {tenants.map(tenant => (
@@ -314,60 +337,96 @@ export default function Home() {
                     </option>
                   ))}
                 </select>
-                
-                {selectedTenant && '_count' in selectedTenant && (
-                  <span style={{...styles.tenantInfo, color: isDark ? '#9CA3AF' : '#6B7280'}}>
-                    {(selectedTenant as any)._count?.transactions || 0} transactions
-                  </span>
-                )}
-              </div>
-              
-              <div style={styles.tenantRight}>
-                <button 
-                  onClick={() => document.getElementById('tenantIdInput')?.classList.toggle('hidden')}
-                  style={{...styles.advancedBtn, color: isDark ? '#9CA3AF' : '#6B7280'}}
-                >
-                  ⚙️
-                </button>
-              </div>
-              
-              <div id="tenantIdInput" className="hidden" style={styles.tenantInputGroup}>
-                <span style={{...styles.tenantLabel, color: isDark ? '#9CA3AF' : '#9CA3AF'}}>ID (Advanced)</span>
-                <input
-                  type="text"
-                  value={tenantInput}
-                  onChange={(e) => setTenantInput(e.target.value)}
-                  style={{...styles.tenantInput, backgroundColor: inputBg, borderColor, color: textColor}}
-                  placeholder="Tenant ID..."
-                />
-                <button onClick={handleSetTenant} style={styles.tenantBtn}>Set</button>
               </div>
             </div>
           )}
           
-          {/* For Admin/Operator - Show tenant name without selector */}
           {(isAdmin || isOperator) && user?.tenant && (
             <div style={{...styles.tenantBar, backgroundColor: cardBg, borderColor}}>
               <div style={styles.tenantLeft}>
-                <span style={{...styles.tenantLabel, color: isDark ? '#9CA3AF' : '#9CA3AF'}}>TENANT</span>
-                <span style={{...styles.tenantName, color: textColor}}>
-                  {user.tenant.name}
-                </span>
+                <span style={{...styles.tenantLabel, color: '#9CA3AF'}}>TENANT</span>
+                <span style={{...styles.tenantName, color: textColor}}>{user.tenant.name}</span>
               </div>
             </div>
           )}
 
-          <div style={styles.grid}>
-            <div style={{...styles.card, backgroundColor: cardBg, borderColor}}>
-              <SaleForm tenantId={selectedTenantId || user?.tenant?.id || ''} onSuccess={handleTransactionSuccess} />
+          {/* Welcome Card */}
+          <div style={{...styles.welcomeCard, backgroundColor: cardBg, borderColor}}>
+            <h1 style={{...styles.welcomeTitle, color: textColor}}>Welcome to Tracelid ERP</h1>
+            <p style={{...styles.welcomeSubtitle, color: mutedColor}}>
+              Manage your sales orders, deliveries, invoices, and receivables in one place.
+            </p>
+          </div>
+
+          {/* Stats Grid */}
+          <div style={styles.statsGrid}>
+            <div style={{...styles.statCard, backgroundColor: cardBg, borderColor}}>
+              <div style={styles.statIcon}>📋</div>
+              <div style={{...styles.statValue, color: '#6C5CE7'}}>{stats.salesOrders}</div>
+              <div style={{...styles.statLabel, color: mutedColor}}>Sales Orders</div>
             </div>
-            <div style={{...styles.card, backgroundColor: cardBg, borderColor}}>
-              <AnalyticsDashboard tenantId={selectedTenantId || user?.tenant?.id || ''} refreshTrigger={refreshTrigger} />
+            <div style={{...styles.statCard, backgroundColor: cardBg, borderColor}}>
+              <div style={styles.statIcon}>🚚</div>
+              <div style={{...styles.statValue, color: '#F59E0B'}}>{stats.pendingDeliveries}</div>
+              <div style={{...styles.statLabel, color: mutedColor}}>Pending Deliveries</div>
+            </div>
+            <div style={{...styles.statCard, backgroundColor: cardBg, borderColor}}>
+              <div style={styles.statIcon}>📄</div>
+              <div style={{...styles.statValue, color: '#EF4444'}}>{stats.unpaidInvoices}</div>
+              <div style={{...styles.statLabel, color: mutedColor}}>Unpaid Invoices</div>
+            </div>
+            <div style={{...styles.statCard, backgroundColor: cardBg, borderColor}}>
+              <div style={styles.statIcon}>💰</div>
+              <div style={{...styles.statValue, color: '#10B981'}}>${stats.totalReceivables.toFixed(2)}</div>
+              <div style={{...styles.statLabel, color: mutedColor}}>Total Receivables</div>
             </div>
           </div>
 
-          <div style={{...styles.card, backgroundColor: cardBg, borderColor}}>
-            <TransactionList tenantId={selectedTenantId || user?.tenant?.id || ''} refreshTrigger={refreshTrigger} />
+          {/* Navigation Cards */}
+          <div style={styles.navGrid}>
+            <Link href="/sales-orders" style={{textDecoration: 'none'}}>
+              <div style={{...styles.navCard, backgroundColor: cardBg, borderColor}}>
+                <div style={{...styles.navIcon, backgroundColor: '#6C5CE720', color: '#6C5CE7'}}>📋</div>
+                <h3 style={{...styles.navTitle, color: textColor}}>Sales Orders</h3>
+                <p style={{...styles.navDesc, color: mutedColor}}>
+                  Create and manage sales orders. Track order status from pending to delivered.
+                </p>
+                <span style={{...styles.navLink, color: '#6C5CE7'}}>Go to Sales Orders →</span>
+              </div>
+            </Link>
+            
+            <Link href="/delivery-status" style={{textDecoration: 'none'}}>
+              <div style={{...styles.navCard, backgroundColor: cardBg, borderColor}}>
+                <div style={{...styles.navIcon, backgroundColor: '#F59E0B20', color: '#F59E0B'}}>🚚</div>
+                <h3 style={{...styles.navTitle, color: textColor}}>Deliveries</h3>
+                <p style={{...styles.navDesc, color: mutedColor}}>
+                  Track delivery status and manage pending shipments.
+                </p>
+                <span style={{...styles.navLink, color: '#F59E0B'}}>Go to Deliveries →</span>
+              </div>
+            </Link>
+            
+            <Link href="/invoices" style={{textDecoration: 'none'}}>
+              <div style={{...styles.navCard, backgroundColor: cardBg, borderColor}}>
+                <div style={{...styles.navIcon, backgroundColor: '#EF444420', color: '#EF4444'}}>📄</div>
+                <h3 style={{...styles.navTitle, color: textColor}}>Invoices</h3>
+                <p style={{...styles.navDesc, color: mutedColor}}>
+                  View and manage invoices. Track paid and unpaid invoices.
+                </p>
+                <span style={{...styles.navLink, color: '#EF4444'}}>Go to Invoices →</span>
+              </div>
+            </Link>
+            
+            <Link href="/receivables" style={{textDecoration: 'none'}}>
+              <div style={{...styles.navCard, backgroundColor: cardBg, borderColor}}>
+                <div style={{...styles.navIcon, backgroundColor: '#10B98120', color: '#10B981'}}>💰</div>
+                <h3 style={{...styles.navTitle, color: textColor}}>Receivables</h3>
+                <p style={{...styles.navDesc, color: mutedColor}}>
+                  Manage accounts receivable and track payments.
+                </p>
+                <span style={{...styles.navLink, color: '#10B981'}}>Go to Receivables →</span>
+              </div>
+            </Link>
           </div>
         </main>
 
@@ -447,47 +506,11 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     gap: '16px',
   },
-  headerControl: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '4px',
-  },
   headerLabel: {
     fontSize: '0.625rem',
     fontWeight: 600,
     textTransform: 'uppercase',
     letterSpacing: '0.05em',
-  },
-  themeBtn: {
-    padding: '8px 12px',
-    borderRadius: '8px',
-    border: 'none',
-    cursor: 'pointer',
-    fontSize: '1rem',
-  },
-  headerBtnPrimary: {
-    padding: '8px 16px',
-    background: 'linear-gradient(135deg, #6C5CE7, #A78BFA)',
-    color: 'white',
-    borderRadius: '8px',
-    textDecoration: 'none',
-    fontWeight: 600,
-    fontSize: '0.875rem',
-  },
-  headerBtnSecondary: {
-    padding: '8px 12px',
-    textDecoration: 'none',
-    fontWeight: 500,
-    fontSize: '0.875rem',
-    borderRadius: '6px',
-    background: 'none',
-    border: 'none',
-    cursor: 'pointer',
-  },
-  headerControlCompact: {
-    display: 'flex',
-    alignItems: 'center',
   },
   themeBtnCompact: {
     padding: '6px 10px',
@@ -505,20 +528,9 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '0.8rem',
     whiteSpace: 'nowrap',
   },
-  logoutBtnCompact: {
-    padding: '6px 10px',
-    background: 'none',
-    border: 'none',
-    cursor: 'pointer',
-    fontSize: '0.9rem',
-  },
-  roleBadge: {
-    padding: '4px 10px',
-    borderRadius: '12px',
-    color: 'white',
-    fontSize: '0.7rem',
-    fontWeight: 700,
-    letterSpacing: '0.05em',
+  headerControlCompact: {
+    display: 'flex',
+    alignItems: 'center',
   },
   roleTag: {
     padding: '2px 8px',
@@ -564,56 +576,85 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '1rem',
     fontWeight: 600,
   },
-  tenantInfo: {
-    fontSize: '0.8rem',
-  },
-  tenantRight: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-  },
-  advancedBtn: {
-    background: 'none',
-    border: 'none',
-    cursor: 'pointer',
-    fontSize: '1rem',
-    padding: '4px',
-  },
-  tenantInputGroup: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    width: '100%',
-    marginTop: '12px',
-    paddingTop: '12px',
-    borderTop: '1px dashed #E5E7EB',
-  },
-  tenantInput: {
-    flex: 1,
-    padding: '8px 12px',
-    borderRadius: '8px',
+  welcomeCard: {
     border: '1px solid',
-    fontSize: '0.9rem',
-    fontFamily: 'monospace',
-  },
-  tenantBtn: {
-    padding: '8px 16px',
-    background: '#6C5CE7',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontWeight: 600,
-  },
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
-    gap: '24px',
+    borderRadius: '16px',
+    padding: '32px',
     marginBottom: '24px',
+    textAlign: 'center',
   },
-  card: {
+  welcomeTitle: {
+    margin: '0 0 8px 0',
+    fontSize: '1.75rem',
+    fontWeight: 700,
+  },
+  welcomeSubtitle: {
+    margin: 0,
+    fontSize: '1rem',
+  },
+  statsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+    gap: '16px',
+    marginBottom: '32px',
+  },
+  statCard: {
+    border: '1px solid',
+    borderRadius: '12px',
+    padding: '20px',
+    textAlign: 'center',
+  },
+  statIcon: {
+    fontSize: '2rem',
+    marginBottom: '8px',
+  },
+  statValue: {
+    fontSize: '1.75rem',
+    fontWeight: 700,
+    marginBottom: '4px',
+  },
+  statLabel: {
+    fontSize: '0.875rem',
+    fontWeight: 500,
+  },
+  navGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+    gap: '24px',
+  },
+  navCard: {
     border: '1px solid',
     borderRadius: '16px',
     padding: '24px',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  navIcon: {
+    width: '48px',
+    height: '48px',
+    borderRadius: '12px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '1.5rem',
+    marginBottom: '16px',
+  },
+  navTitle: {
+    margin: '0 0 8px 0',
+    fontSize: '1.25rem',
+    fontWeight: 600,
+  },
+  navDesc: {
+    margin: '0 0 16px 0',
+    fontSize: '0.9rem',
+    lineHeight: 1.5,
+    flex: 1,
+  },
+  navLink: {
+    fontSize: '0.875rem',
+    fontWeight: 600,
   },
 }
