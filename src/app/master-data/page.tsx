@@ -108,12 +108,10 @@ export default function MasterDataPage() {
     setMessage('')
 
     try {
-      const token = localStorage.getItem('tracelid-token')
       const response = await fetch('/api/master-data/upload', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           type: activeTab,
@@ -153,12 +151,10 @@ export default function MasterDataPage() {
     setMessage('')
 
     try {
-      const token = localStorage.getItem('tracelid-token')
       const response = await fetch('/api/customers', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           customer_code: manualCustomer.customer_code,

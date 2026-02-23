@@ -1,11 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@supabase/supabase-js';
+import { NextRequest, NextResponse } from 'next/server';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_KEY!
+);
 
 export async function POST(request: NextRequest) {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const serviceKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_KEY_DEV
-  const supabase = createClient(supabaseUrl, serviceKey!)
-  
   try {
     const body = await request.json()
     const { type, tenantId, data } = body
@@ -24,16 +25,16 @@ export async function POST(request: NextRequest) {
 
     switch (type) {
       case 'customers':
-        result = await uploadCustomers(supabase, tenantId, data)
+        result = await uploadCustomers(tenantId, data)
         break
       case 'products':
-        result = await uploadProducts(supabase, tenantId, data)
+        result = await uploadProducts(tenantId, data)
         break
       case 'costs':
-        result = await uploadCosts(supabase, tenantId, data)
+        result = await uploadCosts(tenantId, data)
         break
       case 'rebates':
-        result = await uploadRebates(supabase, tenantId, data)
+        result = await uploadRebates(tenantId, data)
         break
       default:
         return NextResponse.json(
@@ -49,7 +50,6 @@ export async function POST(request: NextRequest) {
     })
   } catch (error: any) {
     console.error('Master data upload error:', error)
-    console.error('Error details:', JSON.stringify(error, null, 2))
     return NextResponse.json(
       { error: 'Upload failed', details: error.message },
       { status: 500 }
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function uploadCustomers(supabase: any, tenantId: string, data: any) {
+async function uploadCustomers(tenantId: string, data: any) {
   const headers = data.headers.map((h: string) => h.toLowerCase())
   const rows = data.rows
 
@@ -85,7 +85,6 @@ async function uploadCustomers(supabase: any, tenantId: string, data: any) {
     return customer
   })
 
-  // Insert customers
   const { data: inserted, error } = await supabase
     .from('customers')
     .upsert(customers, { onConflict: 'customer_id' })
@@ -99,7 +98,7 @@ async function uploadCustomers(supabase: any, tenantId: string, data: any) {
   return { count: inserted?.length || customers.length }
 }
 
-async function uploadProducts(supabase: any, tenantId: string, data: any) {
+async function uploadProducts(tenantId: string, data: any) {
   const headers = data.headers.map((h: string) => h.toLowerCase())
   const rows = data.rows
 
@@ -140,7 +139,7 @@ async function uploadProducts(supabase: any, tenantId: string, data: any) {
   return { count: inserted?.length || products.length }
 }
 
-async function uploadCosts(supabase: any, tenantId: string, data: any) {
+async function uploadCosts(tenantId: string, data: any) {
   const headers = data.headers.map((h: string) => h.toLowerCase())
   const rows = data.rows
 
@@ -175,7 +174,7 @@ async function uploadCosts(supabase: any, tenantId: string, data: any) {
   return { count: inserted?.length || costs.length }
 }
 
-async function uploadRebates(supabase: any, tenantId: string, data: any) {
+async function uploadRebates(tenantId: string, data: any) {
   const headers = data.headers.map((h: string) => h.toLowerCase())
   const rows = data.rows
 
