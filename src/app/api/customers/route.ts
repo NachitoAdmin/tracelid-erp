@@ -1,16 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { verifyToken } from '@/lib/auth';
+
+function getSupabaseClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_KEY!
+  );
+}
+
+function getUserFromToken(req: NextRequest) {
+  const authHeader = req.headers.get('authorization');
+  if (!authHeader?.startsWith('Bearer ')) return null;
+  const token = authHeader.substring(7);
+  return verifyToken(token);
+}
 
 // GET /api/customers - List customers
 export async function GET(req: NextRequest) {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const serviceKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_KEY_DEV;
-  const supabase = createClient(supabaseUrl, serviceKey!);
+  const user = getUserFromToken(req);
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const supabase = getSupabaseClient();
   
   try {
     const { searchParams } = new URL(req.url);
     const tenantId = searchParams.get('tenantId');
     const search = searchParams.get('search');
+
+    // tenant_id is REQUIRED unless role is owner
+    if (!tenantId && user.role !== 'owner') {
+      return NextResponse.json(
+        { error: 'tenant_id is required' },
+        { status: 400 }
+      );
+    }
 
     let query = supabase
       .from('customers')
@@ -38,28 +64,54 @@ export async function GET(req: NextRequest) {
 }
 
 // POST /api/customers - Create customer
-export async function POST(request: Request) {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_KEY!
-  );
-  
-  const body = await request.json();
-  const { data, error } = await supabase.from('customers').insert([body]);
-  
-  if (error) {
-    console.error('Supabase error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+export async function POST(req: NextRequest) {
+  const user = getUserFromToken(req);
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+
+  const supabase = getSupabaseClient();
   
-  return NextResponse.json(data);
+  try {
+    const body = await req.json();
+    const { tenant_id, ...customerData } = body;
+
+    // Validate tenant_id is present
+    if (!tenant_id) {
+      return NextResponse.json(
+        { error: 'tenant_id is required' },
+        { status: 400 }
+      );
+    }
+
+    const { data, error } = await supabase
+      .from('customers')
+      .insert({
+        ...customerData,
+        tenant_id,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Supabase error:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json(data, { status: 201 });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
 }
 
 // PUT /api/customers - Update customer
 export async function PUT(req: NextRequest) {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const serviceKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_KEY_DEV;
-  const supabase = createClient(supabaseUrl, serviceKey!);
+  const user = getUserFromToken(req);
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const supabase = getSupabaseClient();
   
   try {
     const body = await req.json();
@@ -94,9 +146,12 @@ export async function PUT(req: NextRequest) {
 
 // DELETE /api/customers - Delete customer
 export async function DELETE(req: NextRequest) {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const serviceKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_KEY_DEV;
-  const supabase = createClient(supabaseUrl, serviceKey!);
+  const user = getUserFromToken(req);
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const supabase = getSupabaseClient();
   
   try {
     const { searchParams } = new URL(req.url);
