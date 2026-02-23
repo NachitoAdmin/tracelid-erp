@@ -48,16 +48,13 @@ export async function POST(req: NextRequest) {
       cost_center,
       profit_center,
       customer_id,
-      customer_name,
       product_id,
-      product_name,
       quantity,
       quantity_unit,
       price,
       total_amount,
       tenant_id,
       transaction_type,
-      gl_account_id,
       is_damaged_return,
     } = body;
 
@@ -71,48 +68,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Determine GL account based on transaction type
-    let finalGlAccountId = gl_account_id;
-    
-    if (transaction_type === 'SALE') {
-      // For SALE: auto-assign via DB trigger (GROSS_REVENUE)
-      // Don't set gl_account_id, let the trigger handle it
-      finalGlAccountId = null;
-    } else if (transaction_type === 'RETURN') {
-      // For RETURN: determine based on damage status
-      if (is_damaged_return) {
-        // Get DAMAGE_COST account (4120)
-        const { data: damageAccount } = await supabase
-          .from('gl_accounts')
-          .select('id')
-          .eq('tenant_id', tenant_id)
-          .eq('account_code', '4120')
-          .single();
-        finalGlAccountId = damageAccount?.id || null;
-      } else {
-        // Get original sale account (4100)
-        const { data: saleAccount } = await supabase
-          .from('gl_accounts')
-          .select('id')
-          .eq('tenant_id', tenant_id)
-          .eq('account_code', '4100')
-          .single();
-        finalGlAccountId = saleAccount?.id || null;
-      }
-    }
-    // For COST: use the provided gl_account_id
-
     const { data, error } = await supabase
       .from('sales_orders')
       .insert({
-        country: country || 'US',
-        cost_center,
-        profit_center,
         sales_order_number,
         customer_id,
-        customer_name,
         product_id,
-        product_name,
         quantity: quantity || 1,
         quantity_unit: quantity_unit || 'PCS',
         price,
@@ -120,7 +81,9 @@ export async function POST(req: NextRequest) {
         status: 'pending',
         tenant_id,
         transaction_type: transaction_type || 'SALE',
-        gl_account_id: finalGlAccountId,
+        country: country || 'US',
+        cost_center,
+        profit_center,
         is_damaged_return: is_damaged_return || false,
       })
       .select()
