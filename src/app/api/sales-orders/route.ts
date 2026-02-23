@@ -92,6 +92,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: error.message, details: error }, { status: 500 });
     }
 
+    // Create delivery_status record for tracking
+    try {
+      await supabase.from('delivery_status').insert({
+        sales_order_number: sales_order_number,
+        tenant_id: tenant_id,
+        delivery_status: 'pending',
+        delivery_date: null,
+      });
+      console.log('Delivery status record created for:', sales_order_number);
+    } catch (deliveryErr: any) {
+      console.error('Failed to create delivery status:', deliveryErr.message);
+      // Don't fail the request if delivery_status creation fails
+    }
+
     return NextResponse.json(data, { status: 201 });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
