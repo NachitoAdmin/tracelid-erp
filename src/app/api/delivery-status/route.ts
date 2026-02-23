@@ -37,6 +37,18 @@ export async function PATCH(req: NextRequest) {
     }
 
     console.log('Updating delivery_status to:', delivery_status, 'length:', delivery_status?.length);
+
+    // Fetch existing delivery record first
+    const { data: existingDelivery, error: fetchError } = await supabase
+      .from('delivery_status')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (fetchError) {
+      return NextResponse.json({ error: fetchError.message }, { status: 500 });
+    }
+
     const updates: any = { delivery_status, updated_at: new Date().toISOString() };
     if (delivery_date) updates.delivery_date = delivery_date;
 
@@ -50,24 +62,20 @@ export async function PATCH(req: NextRequest) {
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
     // If status is delivered, create an invoice
-    if (delivery_status === 'delivered' && data) {
+    if (delivery_status === 'delivered' && existingDelivery) {
       try {
-        const { error: invoiceError } = await supabase
+        const invoiceNumber = `INV-${Date.now()}`;
+        await supabase
           .from('sales_invoices')
           .insert({
-            invoice_number: `INV-${data.sales_order_number}`,
-            sales_order_number: data.sales_order_number,
-            tenant_id: data.tenant_id,
-            amount: 0,
-            status: 'unpaid',
+            invoice_number: invoiceNumber,
+            sales_order_number: existingDelivery.sales_order_number,
+            tenant_id: existingDelivery.tenant_id,
             invoice_date: new Date().toISOString().split('T')[0],
+            status: 'unpaid',
+            amount: 0,
           });
-
-        if (invoiceError) {
-          console.error('Failed to create invoice:', invoiceError);
-        } else {
-          console.log('Invoice created:', `INV-${data.sales_order_number}`);
-        }
+        console.log('Invoice created:', invoiceNumber);
       } catch (invoiceErr: any) {
         console.error('Invoice creation error:', invoiceErr.message);
       }
@@ -91,6 +99,18 @@ export async function PUT(req: NextRequest) {
     }
 
     console.log('Updating delivery_status to:', delivery_status, 'length:', delivery_status?.length);
+
+    // Fetch existing delivery record first
+    const { data: existingDelivery, error: fetchError } = await supabase
+      .from('delivery_status')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (fetchError) {
+      return NextResponse.json({ error: fetchError.message }, { status: 500 });
+    }
+
     const updates: any = { delivery_status, updated_at: new Date().toISOString() };
     if (delivery_date) updates.delivery_date = delivery_date;
 
@@ -104,24 +124,20 @@ export async function PUT(req: NextRequest) {
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
     // If status is delivered, create an invoice
-    if (delivery_status === 'delivered' && data) {
+    if (delivery_status === 'delivered' && existingDelivery) {
       try {
-        const { error: invoiceError } = await supabase
+        const invoiceNumber = `INV-${Date.now()}`;
+        await supabase
           .from('sales_invoices')
           .insert({
-            invoice_number: `INV-${data.sales_order_number}`,
-            sales_order_number: data.sales_order_number,
-            tenant_id: data.tenant_id,
-            amount: 0,
-            status: 'unpaid',
+            invoice_number: invoiceNumber,
+            sales_order_number: existingDelivery.sales_order_number,
+            tenant_id: existingDelivery.tenant_id,
             invoice_date: new Date().toISOString().split('T')[0],
+            status: 'unpaid',
+            amount: 0,
           });
-
-        if (invoiceError) {
-          console.error('Failed to create invoice:', invoiceError);
-        } else {
-          console.log('Invoice created:', `INV-${data.sales_order_number}`);
-        }
+        console.log('Invoice created:', invoiceNumber);
       } catch (invoiceErr: any) {
         console.error('Invoice creation error:', invoiceErr.message);
       }
