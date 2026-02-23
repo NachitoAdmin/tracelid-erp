@@ -1,11 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { verifyToken } from '@/lib/auth';
 
 function getSupabaseClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_KEY!
   );
+}
+
+function getUserFromToken(req: NextRequest) {
+  const authHeader = req.headers.get('authorization');
+  if (!authHeader?.startsWith('Bearer ')) return null;
+  const token = authHeader.substring(7);
+  return verifyToken(token);
 }
 
 // GET /api/products - List products
@@ -44,6 +52,16 @@ export async function GET(req: NextRequest) {
 
 // POST /api/products - Create product
 export async function POST(req: NextRequest) {
+  const user = getUserFromToken(req);
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  // Allow both owner and admin roles
+  if (user.role !== 'owner' && user.role !== 'admin') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const supabase = getSupabaseClient();
   
   try {
@@ -79,6 +97,16 @@ export async function POST(req: NextRequest) {
 
 // PUT /api/products - Update product
 export async function PUT(req: NextRequest) {
+  const user = getUserFromToken(req);
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  // Allow both owner and admin roles
+  if (user.role !== 'owner' && user.role !== 'admin') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const supabase = getSupabaseClient();
   
   try {
@@ -114,6 +142,16 @@ export async function PUT(req: NextRequest) {
 
 // DELETE /api/products - Delete product
 export async function DELETE(req: NextRequest) {
+  const user = getUserFromToken(req);
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  // Allow both owner and admin roles
+  if (user.role !== 'owner' && user.role !== 'admin') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const supabase = getSupabaseClient();
   
   try {

@@ -23,6 +23,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  // Allow both owner and admin roles
+  if (user.role !== 'owner' && user.role !== 'admin') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const supabase = getSupabaseClient();
   
   try {
@@ -75,6 +80,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  // Allow both owner and admin roles
+  if (user.role !== 'owner' && user.role !== 'admin') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const supabase = getSupabaseClient();
   
   try {
@@ -115,6 +125,11 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  // Allow both owner and admin roles
+  if (user.role !== 'owner' && user.role !== 'admin') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const supabase = getSupabaseClient();
   
   try {
@@ -152,6 +167,11 @@ export async function PUT(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   const user = getUserFromToken(req);
   if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  // Allow both owner and admin roles
+  if (user.role !== 'owner' && user.role !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
