@@ -69,24 +69,30 @@ async function uploadCustomers(tenantId: string, data: any) {
   const headers = data.headers.map((h: string) => h.toLowerCase().trim())
   const rows = data.rows
 
-  const customers = rows.map((row: string[]) => {
-    const customer: any = { tenant_id: tenantId }
-    headers.forEach((header: string, index: number) => {
-      switch (header) {
-        case 'customer_id':
-          customer.customer_code = row[index]
-          break
-        case 'customer_name':
-          customer.name = row[index]
-          break
-        case 'email':
-          customer.email = row[index]
-          break
-        // phone and address columns are ignored (not in customers table)
-      }
+  const customers = rows
+    .map((row: string[]) => {
+      const customer: any = { tenant_id: tenantId }
+      headers.forEach((header: string, index: number) => {
+        switch (header) {
+          case 'customer_id':
+            customer.customer_code = row[index]?.trim() || null
+            break
+          case 'customer_name':
+            customer.name = row[index]?.trim() || null
+            break
+          case 'email':
+            customer.email = row[index]?.trim() || null
+            break
+          // phone and address columns are ignored (not in customers table)
+        }
+      })
+      return customer
     })
-    return customer
-  })
+    .filter((c: any) => c.customer_code && c.customer_code.length > 0)
+
+  if (customers.length === 0) {
+    throw new Error('No valid customers found. Make sure customer_id column has values.')
+  }
 
   const { data: inserted, error } = await supabase
     .from('customers')

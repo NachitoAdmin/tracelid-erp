@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { verifyToken } from '@/lib/auth';
 
 function getSupabaseClient() {
   return createClient(
@@ -9,34 +8,14 @@ function getSupabaseClient() {
   );
 }
 
-function getUserFromToken(req: NextRequest) {
-  const authHeader = req.headers.get('authorization');
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  const token = authHeader.substring(7);
-  return verifyToken(token);
-}
-
 // GET /api/products - List products
 export async function GET(req: NextRequest) {
-  const user = getUserFromToken(req);
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   const supabase = getSupabaseClient();
   
   try {
     const { searchParams } = new URL(req.url);
     const tenantId = searchParams.get('tenantId');
     const search = searchParams.get('search');
-
-    // tenant_id is REQUIRED unless role is owner
-    if (!tenantId && user.role !== 'owner') {
-      return NextResponse.json(
-        { error: 'tenant_id is required' },
-        { status: 400 }
-      );
-    }
 
     let query = supabase
       .from('products')
@@ -65,11 +44,6 @@ export async function GET(req: NextRequest) {
 
 // POST /api/products - Create product
 export async function POST(req: NextRequest) {
-  const user = getUserFromToken(req);
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   const supabase = getSupabaseClient();
   
   try {
@@ -105,11 +79,6 @@ export async function POST(req: NextRequest) {
 
 // PUT /api/products - Update product
 export async function PUT(req: NextRequest) {
-  const user = getUserFromToken(req);
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   const supabase = getSupabaseClient();
   
   try {
@@ -145,11 +114,6 @@ export async function PUT(req: NextRequest) {
 
 // DELETE /api/products - Delete product
 export async function DELETE(req: NextRequest) {
-  const user = getUserFromToken(req);
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   const supabase = getSupabaseClient();
   
   try {
