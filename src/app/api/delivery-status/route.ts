@@ -48,6 +48,31 @@ export async function PATCH(req: NextRequest) {
       .single();
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    // If status is delivered, create an invoice
+    if (delivery_status === 'delivered' && data) {
+      try {
+        const { error: invoiceError } = await supabase
+          .from('sales_invoices')
+          .insert({
+            invoice_number: `INV-${data.sales_order_number}`,
+            sales_order_number: data.sales_order_number,
+            tenant_id: data.tenant_id,
+            amount: 0,
+            status: 'unpaid',
+            invoice_date: new Date().toISOString().split('T')[0],
+          });
+
+        if (invoiceError) {
+          console.error('Failed to create invoice:', invoiceError);
+        } else {
+          console.log('Invoice created:', `INV-${data.sales_order_number}`);
+        }
+      } catch (invoiceErr: any) {
+        console.error('Invoice creation error:', invoiceErr.message);
+      }
+    }
+
     return NextResponse.json({ success: true, data });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
@@ -77,6 +102,31 @@ export async function PUT(req: NextRequest) {
       .single();
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    // If status is delivered, create an invoice
+    if (delivery_status === 'delivered' && data) {
+      try {
+        const { error: invoiceError } = await supabase
+          .from('sales_invoices')
+          .insert({
+            invoice_number: `INV-${data.sales_order_number}`,
+            sales_order_number: data.sales_order_number,
+            tenant_id: data.tenant_id,
+            amount: 0,
+            status: 'unpaid',
+            invoice_date: new Date().toISOString().split('T')[0],
+          });
+
+        if (invoiceError) {
+          console.error('Failed to create invoice:', invoiceError);
+        } else {
+          console.log('Invoice created:', `INV-${data.sales_order_number}`);
+        }
+      } catch (invoiceErr: any) {
+        console.error('Invoice creation error:', invoiceErr.message);
+      }
+    }
+
     return NextResponse.json({ success: true, data });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
