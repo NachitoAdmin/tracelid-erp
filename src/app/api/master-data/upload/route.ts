@@ -112,20 +112,14 @@ async function uploadProducts(tenantId: string, data: any) {
         case 'product_name':
           product.name = row[index]
           break
-        case 'uom':
-          product.uom = row[index]
-          break
         case 'price':
           product.sales_price = parseFloat(row[index]) || 0
           break
+        case 'uom':
+          product.uom = row[index]
+          break
         case 'cost':
           product.standard_cost = parseFloat(row[index]) || 0
-          break
-        case 'category':
-          product.category = row[index]
-          break
-        case 'description':
-          product.description = row[index]
           break
       }
     })
