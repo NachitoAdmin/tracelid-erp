@@ -115,11 +115,7 @@ export default function SalesOrdersPage() {
   const fetchOrders = async (tid: string) => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('tracelid-token');
-      const headers: Record<string, string> = {};
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-
-      const res = await fetch(`/api/sales-orders?tenantId=${tid}`, { headers });
+      const res = await fetch(`/api/sales-orders?tenantId=${tid}`);
       if (res.ok) {
         const data = await res.json();
         setOrders(data);
@@ -133,14 +129,10 @@ export default function SalesOrdersPage() {
 
   const fetchMasterData = async (tid: string) => {
     try {
-      const token = localStorage.getItem('tracelid-token');
-      const headers: Record<string, string> = {};
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-
       const [customersRes, productsRes, glRes] = await Promise.all([
-        fetch(`/api/customers?tenantId=${tid}`, { headers }),
-        fetch(`/api/products?tenantId=${tid}`, { headers }),
-        fetch(`/api/gl-accounts?tenantId=${tid}&isPostable=true`, { headers }),
+        fetch(`/api/customers?tenantId=${tid}`),
+        fetch(`/api/products?tenantId=${tid}`),
+        fetch(`/api/gl-accounts?tenantId=${tid}&isPostable=true`),
       ]);
 
       if (customersRes.ok) {
@@ -203,15 +195,11 @@ export default function SalesOrdersPage() {
     setMessage('');
 
     try {
-      const token = localStorage.getItem('tracelid-token');
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-      };
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-
       const res = await fetch('/api/sales-orders', {
         method: 'POST',
-        headers,
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           ...formData,
           total_amount: totalAmount,
