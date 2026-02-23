@@ -38,6 +38,48 @@ export default function MasterDataPage() {
   })
   const [manualSubmitting, setManualSubmitting] = useState(false)
 
+  // Manual product entry form state
+  const [manualProduct, setManualProduct] = useState({
+    product_code: '',
+    name: '',
+    uom: '',
+    sales_price: '',
+    standard_cost: '',
+  })
+  const [manualProductSubmitting, setManualProductSubmitting] = useState(false)
+
+  // Manual cost entry form state
+  const [manualCost, setManualCost] = useState({
+    product_id: '',
+    cost_amount: '',
+    date: '',
+  })
+  const [manualCostSubmitting, setManualCostSubmitting] = useState(false)
+
+  // Manual rebate entry form state
+  const [manualRebate, setManualRebate] = useState({
+    customer_id: '',
+    product_id: '',
+    rebate_amount: '',
+    quantity_target: '',
+    quantity_unit: '',
+    valid_from: '',
+    valid_to: '',
+  })
+  const [manualRebateSubmitting, setManualRebateSubmitting] = useState(false)
+
+  // Manual discount entry form state
+  const [manualDiscount, setManualDiscount] = useState({
+    customer_id: '',
+    product_id: '',
+    discount_amount: '',
+    quantity_target: '',
+    quantity_unit: '',
+    valid_from: '',
+    valid_to: '',
+  })
+  const [manualDiscountSubmitting, setManualDiscountSubmitting] = useState(false)
+
   useEffect(() => {
     const userData = localStorage.getItem('tracelid-user')
     console.log('Master Data - localStorage user:', userData)
@@ -178,6 +220,206 @@ export default function MasterDataPage() {
       setMessage('❌ Error adding customer: ' + err.message)
     } finally {
       setManualSubmitting(false)
+    }
+  }
+
+  // Manual product submit handler
+  const handleManualProductSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!user?.tenant?.id) {
+      setMessage('❌ No tenant selected')
+      return
+    }
+    if (!manualProduct.product_code || !manualProduct.name) {
+      setMessage('❌ Product Code and Name are required')
+      return
+    }
+
+    setManualProductSubmitting(true)
+    setMessage('')
+
+    try {
+      const response = await fetch('/api/products', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          product_code: manualProduct.product_code,
+          name: manualProduct.name,
+          uom: manualProduct.uom,
+          sales_price: parseFloat(manualProduct.sales_price) || 0,
+          standard_cost: parseFloat(manualProduct.standard_cost) || 0,
+          tenant_id: user.tenant.id,
+        }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || result.details || 'Failed to add product')
+      }
+
+      setMessage(`✅ Product "${manualProduct.name}" added successfully!`)
+      setManualProduct({ product_code: '', name: '', uom: '', sales_price: '', standard_cost: '' })
+    } catch (err: any) {
+      setMessage('❌ Error adding product: ' + err.message)
+    } finally {
+      setManualProductSubmitting(false)
+    }
+  }
+
+  // Manual cost submit handler
+  const handleManualCostSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!user?.tenant?.id) {
+      setMessage('❌ No tenant selected')
+      return
+    }
+    if (!manualCost.product_id || !manualCost.cost_amount || !manualCost.date) {
+      setMessage('❌ Product ID, Cost Amount, and Date are required')
+      return
+    }
+
+    setManualCostSubmitting(true)
+    setMessage('')
+
+    try {
+      const response = await fetch('/api/master-data/upload', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'costs',
+          tenantId: user.tenant.id,
+          data: {
+            headers: ['product_id', 'cost_amount', 'date'],
+            rows: [[manualCost.product_id, manualCost.cost_amount, manualCost.date]],
+          },
+        }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || result.details || 'Failed to add cost')
+      }
+
+      setMessage(`✅ Cost entry added successfully!`)
+      setManualCost({ product_id: '', cost_amount: '', date: '' })
+    } catch (err: any) {
+      setMessage('❌ Error adding cost: ' + err.message)
+    } finally {
+      setManualCostSubmitting(false)
+    }
+  }
+
+  // Manual rebate submit handler
+  const handleManualRebateSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!user?.tenant?.id) {
+      setMessage('❌ No tenant selected')
+      return
+    }
+    if (!manualRebate.customer_id || !manualRebate.product_id) {
+      setMessage('❌ Customer ID and Product ID are required')
+      return
+    }
+
+    setManualRebateSubmitting(true)
+    setMessage('')
+
+    try {
+      const response = await fetch('/api/master-data/upload', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'rebates',
+          tenantId: user.tenant.id,
+          data: {
+            headers: ['customer_id', 'product_id', 'rebate_amount', 'quantity_target', 'quantity_unit', 'valid_from', 'valid_to'],
+            rows: [[
+              manualRebate.customer_id,
+              manualRebate.product_id,
+              manualRebate.rebate_amount,
+              manualRebate.quantity_target,
+              manualRebate.quantity_unit,
+              manualRebate.valid_from,
+              manualRebate.valid_to,
+            ]],
+          },
+        }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || result.details || 'Failed to add rebate')
+      }
+
+      setMessage(`✅ Rebate entry added successfully!`)
+      setManualRebate({ customer_id: '', product_id: '', rebate_amount: '', quantity_target: '', quantity_unit: '', valid_from: '', valid_to: '' })
+    } catch (err: any) {
+      setMessage('❌ Error adding rebate: ' + err.message)
+    } finally {
+      setManualRebateSubmitting(false)
+    }
+  }
+
+  // Manual discount submit handler
+  const handleManualDiscountSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!user?.tenant?.id) {
+      setMessage('❌ No tenant selected')
+      return
+    }
+    if (!manualDiscount.customer_id || !manualDiscount.product_id) {
+      setMessage('❌ Customer ID and Product ID are required')
+      return
+    }
+
+    setManualDiscountSubmitting(true)
+    setMessage('')
+
+    try {
+      const response = await fetch('/api/master-data/upload', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'discounts',
+          tenantId: user.tenant.id,
+          data: {
+            headers: ['customer_id', 'product_id', 'discount_amount', 'quantity_target', 'quantity_unit', 'valid_from', 'valid_to'],
+            rows: [[
+              manualDiscount.customer_id,
+              manualDiscount.product_id,
+              manualDiscount.discount_amount,
+              manualDiscount.quantity_target,
+              manualDiscount.quantity_unit,
+              manualDiscount.valid_from,
+              manualDiscount.valid_to,
+            ]],
+          },
+        }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || result.details || 'Failed to add discount')
+      }
+
+      setMessage(`✅ Discount entry added successfully!`)
+      setManualDiscount({ customer_id: '', product_id: '', discount_amount: '', quantity_target: '', quantity_unit: '', valid_from: '', valid_to: '' })
+    } catch (err: any) {
+      setMessage('❌ Error adding discount: ' + err.message)
+    } finally {
+      setManualDiscountSubmitting(false)
     }
   }
 
@@ -415,6 +657,327 @@ export default function MasterDataPage() {
                   style={styles.addCustomerBtn}
                 >
                   {manualSubmitting ? '➕ Adding...' : '➕ Add Customer'}
+                </button>
+              </form>
+            </div>
+          )}
+
+          {/* Manual Product Entry Form - Only show for products tab */}
+          {activeTab === 'products' && (
+            <div style={styles.manualEntrySection}>
+              <h3 style={styles.manualEntryTitle}>➕ Add Product Manually</h3>
+              <form onSubmit={handleManualProductSubmit} style={styles.manualForm}>
+                <div style={styles.formRow}>
+                  <div style={styles.formField}>
+                    <label style={styles.formLabel}>Product Code *</label>
+                    <input
+                      type="text"
+                      value={manualProduct.product_code}
+                      onChange={(e) => setManualProduct({ ...manualProduct, product_code: e.target.value })}
+                      placeholder="e.g., PROD001"
+                      style={styles.formInput}
+                      required
+                    />
+                  </div>
+                  <div style={styles.formField}>
+                    <label style={styles.formLabel}>Name *</label>
+                    <input
+                      type="text"
+                      value={manualProduct.name}
+                      onChange={(e) => setManualProduct({ ...manualProduct, name: e.target.value })}
+                      placeholder="e.g., Widget Pro"
+                      style={styles.formInput}
+                      required
+                    />
+                  </div>
+                </div>
+                <div style={styles.formRow}>
+                  <div style={styles.formField}>
+                    <label style={styles.formLabel}>UOM</label>
+                    <input
+                      type="text"
+                      value={manualProduct.uom}
+                      onChange={(e) => setManualProduct({ ...manualProduct, uom: e.target.value })}
+                      placeholder="e.g., PCS"
+                      style={styles.formInput}
+                    />
+                  </div>
+                  <div style={styles.formField}>
+                    <label style={styles.formLabel}>Sales Price</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={manualProduct.sales_price}
+                      onChange={(e) => setManualProduct({ ...manualProduct, sales_price: e.target.value })}
+                      placeholder="e.g., 99.99"
+                      style={styles.formInput}
+                    />
+                  </div>
+                </div>
+                <div style={styles.formRow}>
+                  <div style={styles.formField}>
+                    <label style={styles.formLabel}>Standard Cost</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={manualProduct.standard_cost}
+                      onChange={(e) => setManualProduct({ ...manualProduct, standard_cost: e.target.value })}
+                      placeholder="e.g., 50.00"
+                      style={styles.formInput}
+                    />
+                  </div>
+                </div>
+                <button
+                  type="submit"
+                  disabled={manualProductSubmitting}
+                  style={styles.addCustomerBtn}
+                >
+                  {manualProductSubmitting ? '➕ Adding...' : '➕ Add Product'}
+                </button>
+              </form>
+            </div>
+          )}
+
+          {/* Manual Cost Entry Form - Only show for costs tab */}
+          {activeTab === 'costs' && (
+            <div style={styles.manualEntrySection}>
+              <h3 style={styles.manualEntryTitle}>➕ Add Cost Entry Manually</h3>
+              <form onSubmit={handleManualCostSubmit} style={styles.manualForm}>
+                <div style={styles.formRow}>
+                  <div style={styles.formField}>
+                    <label style={styles.formLabel}>Product ID *</label>
+                    <input
+                      type="text"
+                      value={manualCost.product_id}
+                      onChange={(e) => setManualCost({ ...manualCost, product_id: e.target.value })}
+                      placeholder="e.g., PROD001"
+                      style={styles.formInput}
+                      required
+                    />
+                  </div>
+                  <div style={styles.formField}>
+                    <label style={styles.formLabel}>Cost Amount *</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={manualCost.cost_amount}
+                      onChange={(e) => setManualCost({ ...manualCost, cost_amount: e.target.value })}
+                      placeholder="e.g., 45.50"
+                      style={styles.formInput}
+                      required
+                    />
+                  </div>
+                </div>
+                <div style={styles.formRow}>
+                  <div style={styles.formField}>
+                    <label style={styles.formLabel}>Date *</label>
+                    <input
+                      type="date"
+                      value={manualCost.date}
+                      onChange={(e) => setManualCost({ ...manualCost, date: e.target.value })}
+                      style={styles.formInput}
+                      required
+                    />
+                  </div>
+                </div>
+                <button
+                  type="submit"
+                  disabled={manualCostSubmitting}
+                  style={styles.addCustomerBtn}
+                >
+                  {manualCostSubmitting ? '➕ Adding...' : '➕ Add Cost Entry'}
+                </button>
+              </form>
+            </div>
+          )}
+
+          {/* Manual Rebate Entry Form - Only show for rebates tab */}
+          {activeTab === 'rebates' && (
+            <div style={styles.manualEntrySection}>
+              <h3 style={styles.manualEntryTitle}>➕ Add Rebate Entry Manually</h3>
+              <form onSubmit={handleManualRebateSubmit} style={styles.manualForm}>
+                <div style={styles.formRow}>
+                  <div style={styles.formField}>
+                    <label style={styles.formLabel}>Customer ID *</label>
+                    <input
+                      type="text"
+                      value={manualRebate.customer_id}
+                      onChange={(e) => setManualRebate({ ...manualRebate, customer_id: e.target.value })}
+                      placeholder="e.g., CUST001"
+                      style={styles.formInput}
+                      required
+                    />
+                  </div>
+                  <div style={styles.formField}>
+                    <label style={styles.formLabel}>Product ID *</label>
+                    <input
+                      type="text"
+                      value={manualRebate.product_id}
+                      onChange={(e) => setManualRebate({ ...manualRebate, product_id: e.target.value })}
+                      placeholder="e.g., PROD001"
+                      style={styles.formInput}
+                      required
+                    />
+                  </div>
+                </div>
+                <div style={styles.formRow}>
+                  <div style={styles.formField}>
+                    <label style={styles.formLabel}>Rebate Amount</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={manualRebate.rebate_amount}
+                      onChange={(e) => setManualRebate({ ...manualRebate, rebate_amount: e.target.value })}
+                      placeholder="e.g., 5.00"
+                      style={styles.formInput}
+                    />
+                  </div>
+                  <div style={styles.formField}>
+                    <label style={styles.formLabel}>Quantity Target</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={manualRebate.quantity_target}
+                      onChange={(e) => setManualRebate({ ...manualRebate, quantity_target: e.target.value })}
+                      placeholder="e.g., 100"
+                      style={styles.formInput}
+                    />
+                  </div>
+                </div>
+                <div style={styles.formRow}>
+                  <div style={styles.formField}>
+                    <label style={styles.formLabel}>Quantity Unit</label>
+                    <input
+                      type="text"
+                      value={manualRebate.quantity_unit}
+                      onChange={(e) => setManualRebate({ ...manualRebate, quantity_unit: e.target.value })}
+                      placeholder="e.g., PCS"
+                      style={styles.formInput}
+                    />
+                  </div>
+                  <div style={styles.formField}>
+                    <label style={styles.formLabel}>Valid From</label>
+                    <input
+                      type="date"
+                      value={manualRebate.valid_from}
+                      onChange={(e) => setManualRebate({ ...manualRebate, valid_from: e.target.value })}
+                      style={styles.formInput}
+                    />
+                  </div>
+                </div>
+                <div style={styles.formRow}>
+                  <div style={styles.formField}>
+                    <label style={styles.formLabel}>Valid To</label>
+                    <input
+                      type="date"
+                      value={manualRebate.valid_to}
+                      onChange={(e) => setManualRebate({ ...manualRebate, valid_to: e.target.value })}
+                      style={styles.formInput}
+                    />
+                  </div>
+                </div>
+                <button
+                  type="submit"
+                  disabled={manualRebateSubmitting}
+                  style={styles.addCustomerBtn}
+                >
+                  {manualRebateSubmitting ? '➕ Adding...' : '➕ Add Rebate Entry'}
+                </button>
+              </form>
+            </div>
+          )}
+
+          {/* Manual Discount Entry Form - Only show for discounts tab */}
+          {activeTab === 'discounts' && (
+            <div style={styles.manualEntrySection}>
+              <h3 style={styles.manualEntryTitle}>➕ Add Discount Entry Manually</h3>
+              <form onSubmit={handleManualDiscountSubmit} style={styles.manualForm}>
+                <div style={styles.formRow}>
+                  <div style={styles.formField}>
+                    <label style={styles.formLabel}>Customer ID *</label>
+                    <input
+                      type="text"
+                      value={manualDiscount.customer_id}
+                      onChange={(e) => setManualDiscount({ ...manualDiscount, customer_id: e.target.value })}
+                      placeholder="e.g., CUST001"
+                      style={styles.formInput}
+                      required
+                    />
+                  </div>
+                  <div style={styles.formField}>
+                    <label style={styles.formLabel}>Product ID *</label>
+                    <input
+                      type="text"
+                      value={manualDiscount.product_id}
+                      onChange={(e) => setManualDiscount({ ...manualDiscount, product_id: e.target.value })}
+                      placeholder="e.g., PROD001"
+                      style={styles.formInput}
+                      required
+                    />
+                  </div>
+                </div>
+                <div style={styles.formRow}>
+                  <div style={styles.formField}>
+                    <label style={styles.formLabel}>Discount Amount</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={manualDiscount.discount_amount}
+                      onChange={(e) => setManualDiscount({ ...manualDiscount, discount_amount: e.target.value })}
+                      placeholder="e.g., 10.00"
+                      style={styles.formInput}
+                    />
+                  </div>
+                  <div style={styles.formField}>
+                    <label style={styles.formLabel}>Quantity Target</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={manualDiscount.quantity_target}
+                      onChange={(e) => setManualDiscount({ ...manualDiscount, quantity_target: e.target.value })}
+                      placeholder="e.g., 200"
+                      style={styles.formInput}
+                    />
+                  </div>
+                </div>
+                <div style={styles.formRow}>
+                  <div style={styles.formField}>
+                    <label style={styles.formLabel}>Quantity Unit</label>
+                    <input
+                      type="text"
+                      value={manualDiscount.quantity_unit}
+                      onChange={(e) => setManualDiscount({ ...manualDiscount, quantity_unit: e.target.value })}
+                      placeholder="e.g., PCS"
+                      style={styles.formInput}
+                    />
+                  </div>
+                  <div style={styles.formField}>
+                    <label style={styles.formLabel}>Valid From</label>
+                    <input
+                      type="date"
+                      value={manualDiscount.valid_from}
+                      onChange={(e) => setManualDiscount({ ...manualDiscount, valid_from: e.target.value })}
+                      style={styles.formInput}
+                    />
+                  </div>
+                </div>
+                <div style={styles.formRow}>
+                  <div style={styles.formField}>
+                    <label style={styles.formLabel}>Valid To</label>
+                    <input
+                      type="date"
+                      value={manualDiscount.valid_to}
+                      onChange={(e) => setManualDiscount({ ...manualDiscount, valid_to: e.target.value })}
+                      style={styles.formInput}
+                    />
+                  </div>
+                </div>
+                <button
+                  type="submit"
+                  disabled={manualDiscountSubmitting}
+                  style={styles.addCustomerBtn}
+                >
+                  {manualDiscountSubmitting ? '➕ Adding...' : '➕ Add Discount Entry'}
                 </button>
               </form>
             </div>
