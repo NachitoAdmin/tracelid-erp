@@ -1,20 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const serviceKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_KEY_DEV;
-
-function getSupabaseClient() {
-  if (!serviceKey) {
-    throw new Error('SUPABASE_SERVICE_KEY or SUPABASE_SERVICE_KEY_DEV must be set');
-  }
-  return createClient(supabaseUrl, serviceKey);
-}
-
 // GET /api/customers - List customers
 export async function GET(req: NextRequest) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const serviceKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_KEY_DEV;
+  const supabase = createClient(supabaseUrl, serviceKey!);
+  
   try {
-    const supabase = getSupabaseClient();
     const { searchParams } = new URL(req.url);
     const tenantId = searchParams.get('tenantId');
     const search = searchParams.get('search');
@@ -46,12 +39,15 @@ export async function GET(req: NextRequest) {
 
 // POST /api/customers - Create customer
 export async function POST(req: NextRequest) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const serviceKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_KEY_DEV;
+  const supabase = createClient(supabaseUrl, serviceKey!);
+  
   console.log('SUPABASE_SERVICE_KEY:', process.env.SUPABASE_SERVICE_KEY ? 'SET' : 'NOT SET');
   console.log('SUPABASE_SERVICE_KEY_DEV:', process.env.SUPABASE_SERVICE_KEY_DEV ? 'SET' : 'NOT SET');
   console.log('NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'SET' : 'NOT SET');
   
   try {
-    const supabase = getSupabaseClient();
     const body = await req.json();
     const {
       customer_code,
@@ -94,8 +90,11 @@ export async function POST(req: NextRequest) {
 
 // PUT /api/customers - Update customer
 export async function PUT(req: NextRequest) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const serviceKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_KEY_DEV;
+  const supabase = createClient(supabaseUrl, serviceKey!);
+  
   try {
-    const supabase = getSupabaseClient();
     const body = await req.json();
     const { id, ...updates } = body;
 
@@ -121,6 +120,38 @@ export async function PUT(req: NextRequest) {
     }
 
     return NextResponse.json(data);
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
+
+// DELETE /api/customers - Delete customer
+export async function DELETE(req: NextRequest) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const serviceKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_KEY_DEV;
+  const supabase = createClient(supabaseUrl, serviceKey!);
+  
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json(
+        { error: 'id is required' },
+        { status: 400 }
+      );
+    }
+
+    const { error } = await supabase
+      .from('customers')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
