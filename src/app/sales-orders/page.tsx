@@ -195,16 +195,19 @@ export default function SalesOrdersPage() {
     setMessage('');
 
     try {
+      const orderData = {
+        ...formData,
+        total_amount: totalAmount,
+        tenant_id: tenantId,
+      };
+      console.log('Creating order with:', JSON.stringify(orderData, null, 2));
+
       const res = await fetch('/api/sales-orders', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...formData,
-          total_amount: totalAmount,
-          tenant_id: tenantId,
-        }),
+        body: JSON.stringify(orderData),
       });
 
       if (res.ok) {
