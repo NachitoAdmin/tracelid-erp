@@ -28,6 +28,15 @@ export default function MasterDataPage() {
   const [message, setMessage] = useState('')
   const [parsedData, setParsedData] = useState<ParsedData | null>(null)
   const [fileName, setFileName] = useState('')
+  
+  // Manual customer entry form state
+  const [manualCustomer, setManualCustomer] = useState({
+    customer_code: '',
+    name: '',
+    country: '',
+    email: '',
+  })
+  const [manualSubmitting, setManualSubmitting] = useState(false)
 
   useEffect(() => {
     const userData = localStorage.getItem('tracelid-user')
@@ -112,7 +121,7 @@ export default function MasterDataPage() {
       const result = await response.json()
 
       if (!response.ok) {
-        throw new Error(result.error || 'Upload failed')
+        throw new Error(result.error || result.details || 'Upload failed')
       }
 
       setMessage(`✅ Successfully saved ${result.count} records!`)
@@ -122,6 +131,48 @@ export default function MasterDataPage() {
       setMessage('❌ Error saving: ' + err.message)
     } finally {
       setUploading(false)
+    }
+  }
+
+  const handleManualSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!user?.tenant?.id) {
+      setMessage('❌ No tenant selected')
+      return
+    }
+    if (!manualCustomer.customer_code || !manualCustomer.name) {
+      setMessage('❌ Customer Code and Name are required')
+      return
+    }
+
+    setManualSubmitting(true)
+    setMessage('')
+
+    try {
+      const response = await fetch('/api/customers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customer_code: manualCustomer.customer_code,
+          name: manualCustomer.name,
+          country: manualCustomer.country,
+          email: manualCustomer.email,
+          tenant_id: user.tenant.id,
+        }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || result.details || 'Failed to add customer')
+      }
+
+      setMessage(`✅ Customer "${manualCustomer.name}" added successfully!`)
+      setManualCustomer({ customer_code: '', name: '', country: '', email: '' })
+    } catch (err: any) {
+      setMessage('❌ Error adding customer: ' + err.message)
+    } finally {
+      setManualSubmitting(false)
     }
   }
 
@@ -290,6 +341,68 @@ export default function MasterDataPage() {
               >
                 {uploading ? '💾 Saving...' : '💾 Save to Database'}
               </button>
+            </div>
+          )}
+
+          {/* Manual Customer Entry Form - Only show for customers tab */}
+          {activeTab === 'customers' && (
+            <div style={styles.manualEntrySection}>
+              <h3 style={styles.manualEntryTitle}>➕ Add Customer Manually</h3>
+              <form onSubmit={handleManualSubmit} style={styles.manualForm}>
+                <div style={styles.formRow}>
+                  <div style={styles.formField}>
+                    <label style={styles.formLabel}>Customer Code *</label>
+                    <input
+                      type="text"
+                      value={manualCustomer.customer_code}
+                      onChange={(e) => setManualCustomer({ ...manualCustomer, customer_code: e.target.value })}
+                      placeholder="e.g., CUST001"
+                      style={styles.formInput}
+                      required
+                    />
+                  </div>
+                  <div style={styles.formField}>
+                    <label style={styles.formLabel}>Name *</label>
+                    <input
+                      type="text"
+                      value={manualCustomer.name}
+                      onChange={(e) => setManualCustomer({ ...manualCustomer, name: e.target.value })}
+                      placeholder="e.g., Acme Corp"
+                      style={styles.formInput}
+                      required
+                    />
+                  </div>
+                </div>
+                <div style={styles.formRow}>
+                  <div style={styles.formField}>
+                    <label style={styles.formLabel}>Country</label>
+                    <input
+                      type="text"
+                      value={manualCustomer.country}
+                      onChange={(e) => setManualCustomer({ ...manualCustomer, country: e.target.value })}
+                      placeholder="e.g., USA"
+                      style={styles.formInput}
+                    />
+                  </div>
+                  <div style={styles.formField}>
+                    <label style={styles.formLabel}>Email</label>
+                    <input
+                      type="email"
+                      value={manualCustomer.email}
+                      onChange={(e) => setManualCustomer({ ...manualCustomer, email: e.target.value })}
+                      placeholder="e.g., contact@acme.com"
+                      style={styles.formInput}
+                    />
+                  </div>
+                </div>
+                <button
+                  type="submit"
+                  disabled={manualSubmitting}
+                  style={styles.addCustomerBtn}
+                >
+                  {manualSubmitting ? '➕ Adding...' : '➕ Add Customer'}
+                </button>
+              </form>
             </div>
           )}
         </div>
@@ -474,5 +587,58 @@ const styles: Record<string, React.CSSProperties> = {
     maxWidth: '500px',
     margin: '100px auto',
     boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+  },
+  manualEntrySection: {
+    marginTop: '40px',
+    paddingTop: '30px',
+    borderTop: '2px solid #E5E7EB',
+  },
+  manualEntryTitle: {
+    color: '#374151',
+    fontSize: '1.1rem',
+    marginBottom: '20px',
+    fontWeight: 600,
+  },
+  manualForm: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '20px',
+  },
+  formRow: {
+    display: 'flex',
+    gap: '20px',
+    flexWrap: 'wrap' as const,
+  },
+  formField: {
+    flex: '1',
+    minWidth: '200px',
+  },
+  formLabel: {
+    display: 'block',
+    color: '#374151',
+    fontSize: '0.9rem',
+    fontWeight: 600,
+    marginBottom: '6px',
+  },
+  formInput: {
+    width: '100%',
+    padding: '10px 14px',
+    border: '1px solid #D1D5DB',
+    borderRadius: '8px',
+    fontSize: '0.95rem',
+    color: '#374151',
+    backgroundColor: 'white',
+    boxSizing: 'border-box' as const,
+  },
+  addCustomerBtn: {
+    padding: '12px 24px',
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    fontSize: '0.95rem',
+    fontWeight: 600,
+    cursor: 'pointer',
+    alignSelf: 'flex-start',
   },
 }

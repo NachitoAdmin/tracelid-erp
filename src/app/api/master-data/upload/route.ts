@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_KEY_DEV
+
+if (!supabaseKey) {
+  throw new Error('SUPABASE_SERVICE_KEY or SUPABASE_SERVICE_KEY_DEV must be set')
+}
 
 const supabase = createClient(supabaseUrl, supabaseKey)
 
@@ -50,6 +54,7 @@ export async function POST(request: NextRequest) {
     })
   } catch (error: any) {
     console.error('Master data upload error:', error)
+    console.error('Error details:', JSON.stringify(error, null, 2))
     return NextResponse.json(
       { error: 'Upload failed', details: error.message },
       { status: 500 }
