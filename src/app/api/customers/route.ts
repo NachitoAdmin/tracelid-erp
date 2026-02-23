@@ -10,6 +10,9 @@ function getSupabaseClient() {
 }
 
 function getUserFromToken(req: NextRequest) {
+  console.log('JWT_SECRET exists:', !!process.env.JWT_SECRET);
+  console.log('JWT_SECRET length:', process.env.JWT_SECRET?.length);
+  
   const authHeader = req.headers.get('authorization');
   if (!authHeader?.startsWith('Bearer ')) return null;
   const token = authHeader.substring(7);
