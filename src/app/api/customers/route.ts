@@ -38,54 +38,21 @@ export async function GET(req: NextRequest) {
 }
 
 // POST /api/customers - Create customer
-export async function POST(req: NextRequest) {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const serviceKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_KEY_DEV;
-  const supabase = createClient(supabaseUrl, serviceKey!);
+export async function POST(request: Request) {
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_KEY!
+  );
   
-  console.log('SUPABASE_SERVICE_KEY:', process.env.SUPABASE_SERVICE_KEY ? 'SET' : 'NOT SET');
-  console.log('SUPABASE_SERVICE_KEY_DEV:', process.env.SUPABASE_SERVICE_KEY_DEV ? 'SET' : 'NOT SET');
-  console.log('NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'SET' : 'NOT SET');
+  const body = await request.json();
+  const { data, error } = await supabase.from('customers').insert([body]);
   
-  try {
-    const body = await req.json();
-    const {
-      customer_code,
-      name,
-      country,
-      city,
-      email,
-      tenant_id,
-    } = body;
-
-    if (!customer_code || !name || !tenant_id) {
-      return NextResponse.json(
-        { error: 'customer_code, name, and tenant_id are required' },
-        { status: 400 }
-      );
-    }
-
-    const { data, error } = await supabase
-      .from('customers')
-      .insert({
-        customer_code,
-        name,
-        country: country || '',
-        city: city || '',
-        email: email || '',
-        tenant_id,
-      })
-      .select()
-      .single();
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    return NextResponse.json(data, { status: 201 });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  if (error) {
+    console.error('Supabase error:', error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
+  
+  return NextResponse.json(data);
 }
 
 // PUT /api/customers - Update customer
