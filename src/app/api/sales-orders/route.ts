@@ -68,6 +68,9 @@ export async function POST(req: NextRequest) {
       customer_id,
       tenant_id,
       status: 'pending',
+      customer_name: body.customer_name || null,
+      product_name: body.product_name || null,
+      quantity_unit: body.quantity_unit || null,
     };
 
     // Only add optional fields if they exist in body
