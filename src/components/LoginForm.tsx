@@ -36,7 +36,8 @@ export default function LoginPage() {
         return;
       }
 
-      // Store user data
+      // Store user data and token
+      localStorage.setItem('tracelid-token', data.token);
       localStorage.setItem('tracelid-user', JSON.stringify(data.user));
       localStorage.setItem('tracelid-selected-tenant', data.user.tenant?.id || '');
       localStorage.setItem('tracelid-selected-tenant-name', data.user.tenant?.name || '');

@@ -87,6 +87,7 @@ export async function POST(req: NextRequest) {
     });
 
     const responseData = {
+      token,
       user: {
         id: user.id,
         email: user.email,

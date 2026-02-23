@@ -108,9 +108,7 @@ export default function MasterDataPage() {
     setMessage('')
 
     try {
-      const userStr = localStorage.getItem('tracelid-user')
-      const userData = userStr ? JSON.parse(userStr) : null
-      const token = userData?.token
+      const token = localStorage.getItem('tracelid-token')
       const response = await fetch('/api/master-data/upload', {
         method: 'POST',
         headers: {
@@ -155,9 +153,7 @@ export default function MasterDataPage() {
     setMessage('')
 
     try {
-      const userStr = localStorage.getItem('tracelid-user')
-      const userData = userStr ? JSON.parse(userStr) : null
-      const token = userData?.token
+      const token = localStorage.getItem('tracelid-token')
       const response = await fetch('/api/customers', {
         method: 'POST',
         headers: {
