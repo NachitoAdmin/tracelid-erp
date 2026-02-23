@@ -47,7 +47,6 @@ export async function POST(req: NextRequest) {
       country,
       cost_center,
       profit_center,
-      sales_order_number,
       customer_id,
       customer_name,
       product_id,
@@ -62,9 +61,12 @@ export async function POST(req: NextRequest) {
       is_damaged_return,
     } = body;
 
-    if (!sales_order_number || !customer_id || !tenant_id) {
+    // Auto-generate sales_order_number if not provided
+    const sales_order_number = body.sales_order_number || `SO-${Date.now()}`;
+
+    if (!customer_id || !tenant_id) {
       return NextResponse.json(
-        { error: 'sales_order_number, customer_id, and tenant_id are required' },
+        { error: 'customer_id and tenant_id are required' },
         { status: 400 }
       );
     }
