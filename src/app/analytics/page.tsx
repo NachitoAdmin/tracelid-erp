@@ -39,7 +39,11 @@ export default function AnalyticsPage() {
     try {
       // Get tenantId from localStorage (set by main page) or use 'all'
       const tenantId = localStorage.getItem('tracelid-selected-tenant') || 'all'
-      const response = await fetch(`/api/transactions?tenantId=${tenantId}`)
+      const token = localStorage.getItem('tracelid-token')
+      const headers: Record<string, string> = {}
+      if (token) headers['Authorization'] = `Bearer ${token}`
+
+      const response = await fetch(`/api/transactions?tenantId=${tenantId}`, { headers })
       if (!response.ok) throw new Error('Failed to fetch')
       const data = await response.json()
       setTransactions(data)
@@ -52,7 +56,14 @@ export default function AnalyticsPage() {
 
   const handleSeed = async () => {
     try {
-      const response = await fetch('/api/seed?tenantId=all', { method: 'POST' })
+      const token = localStorage.getItem('tracelid-token')
+      const headers: Record<string, string> = {}
+      if (token) headers['Authorization'] = `Bearer ${token}`
+
+      const response = await fetch('/api/seed?tenantId=all', { 
+        method: 'POST',
+        headers 
+      })
       if (response.ok) {
         setSeeded(true)
         await fetchAllTransactions()

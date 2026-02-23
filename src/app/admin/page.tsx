@@ -26,7 +26,11 @@ export default function AdminPage() {
 
   const fetchTenants = async () => {
     try {
-      const response = await fetch('/api/tenants')
+      const token = localStorage.getItem('tracelid-token')
+      const headers: Record<string, string> = {}
+      if (token) headers['Authorization'] = `Bearer ${token}`
+
+      const response = await fetch('/api/tenants', { headers })
       if (!response.ok) throw new Error('Failed to fetch tenants')
       const data = await response.json()
       setTenants(data)
@@ -43,9 +47,13 @@ export default function AdminPage() {
     setError('')
 
     try {
+      const token = localStorage.getItem('tracelid-token')
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+      if (token) headers['Authorization'] = `Bearer ${token}`
+
       const response = await fetch('/api/tenants', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(formData),
       })
 

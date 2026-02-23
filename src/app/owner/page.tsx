@@ -30,9 +30,13 @@ export default function OwnerDashboard() {
 
   const fetchData = async () => {
     try {
+      const token = localStorage.getItem('tracelid-token')
+      const headers: Record<string, string> = {}
+      if (token) headers['Authorization'] = `Bearer ${token}`
+
       const [tenantsRes, usersRes] = await Promise.all([
-        fetch('/api/tenants'),
-        fetch('/api/users'),
+        fetch('/api/tenants', { headers }),
+        fetch('/api/users', { headers }),
       ])
       
       if (tenantsRes.ok) {
