@@ -44,18 +44,12 @@ export async function POST(req: NextRequest) {
     console.log('Received body:', JSON.stringify(body, null, 2));
 
     const {
-      country,
-      cost_center,
-      profit_center,
       customer_id,
       product_id,
       quantity,
-      quantity_unit,
       price,
       total_amount,
       tenant_id,
-      transaction_type,
-      is_damaged_return,
     } = body;
 
     // Auto-generate sales_order_number if not provided
@@ -68,29 +62,31 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Build insert object with only core fields
+    const insertData: any = {
+      sales_order_number,
+      customer_id,
+      tenant_id,
+      status: 'pending',
+    };
+
+    // Only add optional fields if they exist in body
+    if (product_id) insertData.product_id = product_id;
+    if (quantity !== undefined) insertData.quantity = quantity;
+    if (price !== undefined) insertData.price = price;
+    if (total_amount !== undefined) insertData.total_amount = total_amount;
+
+    console.log('Inserting:', JSON.stringify(insertData, null, 2));
+
     const { data, error } = await supabase
       .from('sales_orders')
-      .insert({
-        sales_order_number,
-        customer_id,
-        product_id,
-        quantity: quantity || 1,
-        quantity_unit: quantity_unit || 'PCS',
-        price,
-        total_amount,
-        status: 'pending',
-        tenant_id,
-        transaction_type: transaction_type || 'SALE',
-        country: country || 'US',
-        cost_center,
-        profit_center,
-        is_damaged_return: is_damaged_return || false,
-      })
+      .insert(insertData)
       .select()
       .single();
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error('Insert error:', error);
+      return NextResponse.json({ error: error.message, details: error }, { status: 500 });
     }
 
     return NextResponse.json(data, { status: 201 });
