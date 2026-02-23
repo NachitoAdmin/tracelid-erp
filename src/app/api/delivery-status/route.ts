@@ -36,6 +36,7 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: 'id and delivery_status required' }, { status: 400 });
     }
 
+    console.log('Updating delivery_status to:', delivery_status, 'length:', delivery_status?.length);
     const updates: any = { delivery_status, updated_at: new Date().toISOString() };
     if (delivery_date) updates.delivery_date = delivery_date;
 
@@ -64,6 +65,7 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: 'id and delivery_status required' }, { status: 400 });
     }
 
+    console.log('Updating delivery_status to:', delivery_status, 'length:', delivery_status?.length);
     const updates: any = { delivery_status, updated_at: new Date().toISOString() };
     if (delivery_date) updates.delivery_date = delivery_date;
 

@@ -74,6 +74,8 @@ export default function DeliveryStatusPage() {
     setUpdating(id);
     setMessage('');
 
+    console.log('Sending status:', newStatus);
+
     try {
       const token = localStorage.getItem('tracelid-token');
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
