@@ -4,11 +4,18 @@ import { verifyToken } from './lib/auth';
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   
-  // Public routes - no auth required
+  // Public routes - no auth required (exact matches and startsWith)
+  const publicPaths = ['/login', '/register', '/api/auth/login', '/api/auth/logout', '/api/auth/me', '/api/auth/register'];
+  
+  // Check exact matches first
+  if (publicPaths.includes(pathname)) {
+    return NextResponse.next();
+  }
+  
+  // Check startsWith for broader matches
   if (pathname.startsWith('/login') || 
       pathname.startsWith('/register') || 
-      pathname.startsWith('/api/auth') ||
-      pathname === '/api/tenants') {
+      pathname.startsWith('/api/auth/')) {
     return NextResponse.next();
   }
 
