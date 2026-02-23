@@ -184,7 +184,7 @@ async function uploadGlAccounts(tenantId: string, data: any) {
 }
 
 async function uploadCosts(tenantId: string, data: any) {
-  const headers = data.headers.map((h: string) => h.toLowerCase())
+  const headers = data.headers.map((h: string) => h.toLowerCase().trim())
   const rows = data.rows
 
   const costs = rows.map((row: string[]) => {
@@ -219,7 +219,7 @@ async function uploadCosts(tenantId: string, data: any) {
 }
 
 async function uploadRebates(tenantId: string, data: any) {
-  const headers = data.headers.map((h: string) => h.toLowerCase())
+  const headers = data.headers.map((h: string) => h.toLowerCase().trim())
   const rows = data.rows
 
   const rebates = rows.map((row: string[]) => {
