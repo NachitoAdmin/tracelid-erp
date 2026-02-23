@@ -11,6 +11,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { type, tenantId, data } = body
 
+    console.log('tenantId received:', tenantId)
+
     if (!type || !tenantId || !data || !data.rows) {
       return NextResponse.json(
         { error: 'Missing required fields: type, tenantId, data' },
@@ -49,9 +51,9 @@ export async function POST(request: NextRequest) {
       message: `Successfully uploaded ${result.count} ${type}`,
     })
   } catch (error: any) {
-    console.error('Master data upload error:', error)
+    console.error('Upload error full:', JSON.stringify(error, null, 2))
     return NextResponse.json(
-      { error: 'Upload failed', details: error.message },
+      { error: error?.message || error?.toString() || 'Upload failed', details: error },
       { status: 500 }
     )
   }
