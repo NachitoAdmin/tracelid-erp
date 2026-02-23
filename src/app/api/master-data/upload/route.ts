@@ -84,7 +84,7 @@ async function uploadCustomers(tenantId: string, data: any) {
 
   const { data: inserted, error } = await supabase
     .from('customers')
-    .upsert(customers, { onConflict: 'customer_code' })
+    .insert(customers)
     .select()
 
   if (error) {
