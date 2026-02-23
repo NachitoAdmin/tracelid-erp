@@ -23,7 +23,7 @@ interface ParsedData {
 export default function MasterDataPage() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'customers' | 'products' | 'costs' | 'rebates'>('customers')
+  const [activeTab, setActiveTab] = useState<'customers' | 'products' | 'costs' | 'rebates' | 'discounts'>('customers')
   const [uploading, setUploading] = useState(false)
   const [message, setMessage] = useState('')
   const [parsedData, setParsedData] = useState<ParsedData | null>(null)
@@ -56,9 +56,10 @@ export default function MasterDataPage() {
   const downloadTemplate = (type: string) => {
     const templates: Record<string, string> = {
       customers: 'customer_id,customer_name,email,phone,address\nCUST001,Acme Corp,contact@acme.com,+1234567890,123 Main St\nCUST002,Global Inc,info@global.com,+0987654321,456 Oak Ave',
-      products: 'product_id,product_name,price,category,description\nPROD001,Widget Pro,99.99,Electronics,Professional grade widget\nPROD002,Super Gadget,149.99,Tools,Multi-purpose gadget',
+      products: 'product_id,product_name,price,uom,cost\nPROD001,Widget Pro,99.99,PCS,50.00\nPROD002,Super Gadget,149.99,BOX,75.00',
       costs: 'product_id,cost_amount,date\nPROD001,45.50,2024-01-15\nPROD002,67.25,2024-01-15',
-      rebates: 'customer_id,product_id,rebate_amount,discount_amount,valid_from,valid_to\nCUST001,PROD001,5.00,0.00,2024-01-01,2024-12-31\nCUST002,PROD002,0.00,10.00,2024-02-01,2024-03-01',
+      rebates: 'customer_id,product_id,rebate_amount,quantity_target,quantity_unit,valid_from,valid_to\nCUST001,PROD001,5.00,100,PCS,2024-01-01,2024-12-31\nCUST002,PROD002,3.50,50,BOX,2024-02-01,2024-06-30',
+      discounts: 'customer_id,product_id,discount_amount,quantity_target,quantity_unit,valid_from,valid_to\nCUST001,PROD001,10.00,200,PCS,2024-01-01,2024-12-31\nCUST002,PROD002,15.00,100,BOX,2024-03-01,2024-09-30',
     }
 
     const blob = new Blob([templates[type]], { type: 'text/csv' })
@@ -217,11 +218,13 @@ export default function MasterDataPage() {
       case 'customers':
         return 'Required: customer_id, customer_name, email, phone, address'
       case 'products':
-        return 'Required: product_id, product_name, price, category, description'
+        return 'Required: product_id, product_name, price, uom, cost'
       case 'costs':
         return 'Required: product_id, cost_amount, date'
       case 'rebates':
-        return 'Required: customer_id, product_id, rebate_amount, discount_amount, valid_from, valid_to'
+        return 'Required: customer_id, product_id, rebate_amount, quantity_target, quantity_unit, valid_from, valid_to'
+      case 'discounts':
+        return 'Required: customer_id, product_id, discount_amount, quantity_target, quantity_unit, valid_from, valid_to'
       default:
         return ''
     }
@@ -267,7 +270,13 @@ export default function MasterDataPage() {
             onClick={() => { setActiveTab('rebates'); setParsedData(null); setMessage(''); }}
             style={{...styles.tab, ...(activeTab === 'rebates' ? styles.tabActive : {})}}
           >
-            🏷️ Rebates/Discounts
+            🎁 Rebates
+          </button>
+          <button
+            onClick={() => { setActiveTab('discounts'); setParsedData(null); setMessage(''); }}
+            style={{...styles.tab, ...(activeTab === 'discounts' ? styles.tabActive : {})}}
+          >
+            💰 Discounts
           </button>
         </div>
 
@@ -276,7 +285,8 @@ export default function MasterDataPage() {
             {activeTab === 'customers' && '👥 Customer Upload'}
             {activeTab === 'products' && '📦 Product Upload'}
             {activeTab === 'costs' && '💰 Cost Upload'}
-            {activeTab === 'rebates' && '🏷️ Rebate/Discount Upload'}
+            {activeTab === 'rebates' && '🎁 Rebates Upload'}
+            {activeTab === 'discounts' && '💰 Discounts Upload'}
           </h2>
           
           <p style={styles.description}>{getRequiredColumns()}</p>

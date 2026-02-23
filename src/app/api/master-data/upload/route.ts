@@ -41,6 +41,9 @@ export async function POST(request: NextRequest) {
       case 'rebates':
         result = await uploadRebates(tenantId, data)
         break
+      case 'discounts':
+        result = await uploadDiscounts(tenantId, data)
+        break
       default:
         return NextResponse.json(
           { error: `Unknown upload type: ${type}` },
@@ -235,8 +238,11 @@ async function uploadRebates(tenantId: string, data: any) {
         case 'rebate_amount':
           rebate.rebate_amount = parseFloat(row[index]) || 0
           break
-        case 'discount_amount':
-          rebate.discount_amount = parseFloat(row[index]) || 0
+        case 'quantity_target':
+          rebate.quantity_target = parseFloat(row[index]) || 0
+          break
+        case 'quantity_unit':
+          rebate.quantity_unit = row[index]
           break
         case 'valid_from':
           rebate.valid_from = row[index]
@@ -250,7 +256,7 @@ async function uploadRebates(tenantId: string, data: any) {
   })
 
   const { data: inserted, error } = await supabase
-    .from('rebates_discounts')
+    .from('rebates')
     .insert(rebates)
     .select()
 
@@ -260,4 +266,51 @@ async function uploadRebates(tenantId: string, data: any) {
   }
 
   return { count: inserted?.length || rebates.length }
+}
+
+async function uploadDiscounts(tenantId: string, data: any) {
+  const headers = data.headers.map((h: string) => h.toLowerCase().trim())
+  const rows = data.rows
+
+  const discounts = rows.map((row: string[]) => {
+    const discount: any = { tenant_id: tenantId }
+    headers.forEach((header: string, index: number) => {
+      switch (header) {
+        case 'customer_id':
+          discount.customer_id = row[index]
+          break
+        case 'product_id':
+          discount.product_id = row[index]
+          break
+        case 'discount_amount':
+          discount.discount_amount = parseFloat(row[index]) || 0
+          break
+        case 'quantity_target':
+          discount.quantity_target = parseFloat(row[index]) || 0
+          break
+        case 'quantity_unit':
+          discount.quantity_unit = row[index]
+          break
+        case 'valid_from':
+          discount.valid_from = row[index]
+          break
+        case 'valid_to':
+          discount.valid_to = row[index]
+          break
+      }
+    })
+    return discount
+  })
+
+  const { data: inserted, error } = await supabase
+    .from('discounts')
+    .insert(discounts)
+    .select()
+
+  if (error) {
+    console.error('Error inserting discounts:', error)
+    throw error
+  }
+
+  return { count: inserted?.length || discounts.length }
 }
