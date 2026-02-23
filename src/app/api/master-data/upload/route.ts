@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
 }
 
 async function uploadCustomers(tenantId: string, data: any) {
-  const headers = data.headers.map((h: string) => h.toLowerCase())
+  const headers = data.headers.map((h: string) => h.toLowerCase().trim())
   const rows = data.rows
 
   const customers = rows.map((row: string[]) => {
@@ -66,20 +66,15 @@ async function uploadCustomers(tenantId: string, data: any) {
     headers.forEach((header: string, index: number) => {
       switch (header) {
         case 'customer_id':
-          customer.customer_id = row[index]
+          customer.customer_code = row[index]
           break
         case 'customer_name':
-          customer.customer_name = row[index]
+          customer.name = row[index]
           break
         case 'email':
           customer.email = row[index]
           break
-        case 'phone':
-          customer.phone = row[index]
-          break
-        case 'address':
-          customer.address = row[index]
-          break
+        // phone and address columns are ignored (not in customers table)
       }
     })
     return customer
@@ -87,7 +82,7 @@ async function uploadCustomers(tenantId: string, data: any) {
 
   const { data: inserted, error } = await supabase
     .from('customers')
-    .upsert(customers, { onConflict: 'customer_id' })
+    .upsert(customers, { onConflict: 'customer_code' })
     .select()
 
   if (error) {
