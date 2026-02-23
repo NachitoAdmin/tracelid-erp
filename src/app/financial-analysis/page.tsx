@@ -32,7 +32,26 @@ interface FinancialDashboard {
   gross_margin_pct: number;
 }
 
-type TabType = 'dashboard' | 'income-statement' | 'balance-sheet' | 'monthly';
+type TabType = 'dashboard' | 'income-statement' | 'balance-sheet' | 'monthly' | 'journal-entries';
+
+interface JournalEntry {
+  id: string;
+  tenant_id: string;
+  date: string;
+  description: string;
+  account_code: string;
+  debit: number;
+  credit: number;
+  created_by: string;
+  created_at: string;
+}
+
+interface GLAccount {
+  id: string;
+  account_code: string;
+  name: string;
+  type: string;
+}
 
 export default function FinancialAnalysisPage() {
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
@@ -42,26 +61,45 @@ export default function FinancialAnalysisPage() {
   const [incomeStatement, setIncomeStatement] = useState<IncomeStatementItem[]>([]);
   const [balanceSheet, setBalanceSheet] = useState<BalanceSheetItem[]>([]);
   const [dashboard, setDashboard] = useState<FinancialDashboard | null>(null);
+  const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([]);
+  const [glAccounts, setGlAccounts] = useState<GLAccount[]>([]);
+  const [user, setUser] = useState<any>(null);
+  
+  // Journal entry form state
+  const [showJournalForm, setShowJournalForm] = useState(false);
+  const [journalForm, setJournalForm] = useState({
+    date: new Date().toISOString().split('T')[0],
+    description: '',
+    account_code: '',
+    debit: '',
+    credit: '',
+  });
 
   useEffect(() => {
     const stored = localStorage.getItem('tracelid-selected-tenant');
+    const userData = localStorage.getItem('tracelid-user');
+    if (userData) {
+      try {
+        setUser(JSON.parse(userData));
+      } catch (e) {
+        console.error('Failed to parse user data');
+      }
+    }
     if (stored) {
       setTenantId(stored);
       fetchFinancialData(stored);
+      fetchJournalEntries(stored);
+      fetchGLAccounts(stored);
     }
   }, []);
 
   const fetchFinancialData = async (tid: string) => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('tracelid-token');
-      const headers: Record<string, string> = {};
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-
       const [incomeRes, balanceRes, dashRes] = await Promise.all([
-        fetch(`/api/financial/income-statement?tenantId=${tid}`, { headers }),
-        fetch(`/api/financial/balance-sheet?tenantId=${tid}`, { headers }),
-        fetch(`/api/financial/dashboard?tenantId=${tid}`, { headers }),
+        fetch(`/api/financial/income-statement?tenantId=${tid}`),
+        fetch(`/api/financial/balance-sheet?tenantId=${tid}`),
+        fetch(`/api/financial/dashboard?tenantId=${tid}`),
       ]);
 
       if (incomeRes.ok) setIncomeStatement(await incomeRes.json());
@@ -74,6 +112,77 @@ export default function FinancialAnalysisPage() {
       console.error('Failed to fetch financial data:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchJournalEntries = async (tid: string) => {
+    try {
+      const res = await fetch(`/api/journal-entries?tenantId=${tid}`);
+      if (res.ok) {
+        const data = await res.json();
+        setJournalEntries(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch journal entries:', err);
+    }
+  };
+
+  const fetchGLAccounts = async (tid: string) => {
+    try {
+      const res = await fetch(`/api/gl-accounts?tenantId=${tid}`);
+      if (res.ok) {
+        const data = await res.json();
+        setGlAccounts(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch GL accounts:', err);
+    }
+  };
+
+  const handleJournalSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!tenantId || !user) return;
+
+    try {
+      const res = await fetch('/api/journal-entries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tenant_id: tenantId,
+          date: journalForm.date,
+          description: journalForm.description,
+          account_code: journalForm.account_code,
+          debit: parseFloat(journalForm.debit) || 0,
+          credit: parseFloat(journalForm.credit) || 0,
+          created_by: user.email || user.id,
+        }),
+      });
+
+      if (res.ok) {
+        setJournalForm({
+          date: new Date().toISOString().split('T')[0],
+          description: '',
+          account_code: '',
+          debit: '',
+          credit: '',
+        });
+        setShowJournalForm(false);
+        fetchJournalEntries(tenantId);
+      }
+    } catch (err) {
+      console.error('Failed to create journal entry:', err);
+    }
+  };
+
+  const deleteJournalEntry = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this entry?')) return;
+    try {
+      const res = await fetch(`/api/journal-entries?id=${id}`, { method: 'DELETE' });
+      if (res.ok && tenantId) {
+        fetchJournalEntries(tenantId);
+      }
+    } catch (err) {
+      console.error('Failed to delete journal entry:', err);
     }
   };
 
@@ -129,6 +238,7 @@ export default function FinancialAnalysisPage() {
             { key: 'income-statement', label: '📄 Income Statement' },
             { key: 'balance-sheet', label: '⚖️ Balance Sheet' },
             { key: 'monthly', label: '📅 Monthly Trend' },
+            { key: 'journal-entries', label: '📒 Journal Entries' },
           ].map((tab) => (
             <button
               key={tab.key}
@@ -314,6 +424,174 @@ export default function FinancialAnalysisPage() {
               <div style={{ backgroundColor: '#fff', borderRadius: '12px', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
                 <h2 style={{ margin: '0 0 20px 0', fontSize: '1.25rem', color: '#1F2937' }}>Monthly Financial Trend</h2>
                 <p style={{ color: '#6B7280' }}>Monthly breakdown coming soon...</p>
+              </div>
+            )}
+
+            {/* Journal Entries Tab */}
+            {activeTab === 'journal-entries' && (
+              <div style={{ backgroundColor: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                <div style={{ padding: '20px 24px', borderBottom: '1px solid #E5E7EB', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#1F2937' }}>📒 Journal Entries</h2>
+                  <button
+                    onClick={() => setShowJournalForm(!showJournalForm)}
+                    style={{
+                      padding: '10px 20px',
+                      backgroundColor: '#6C5CE7',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      fontWeight: 600,
+                    }}
+                  >
+                    {showJournalForm ? 'Cancel' : '+ Add Entry'}
+                  </button>
+                </div>
+
+                {/* Add Entry Form */}
+                {showJournalForm && (
+                  <form onSubmit={handleJournalSubmit} style={{ padding: '20px 24px', borderBottom: '1px solid #E5E7EB', backgroundColor: '#F9FAFB' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '16px' }}>
+                      <div>
+                        <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>Date</label>
+                        <input
+                          type="date"
+                          value={journalForm.date}
+                          onChange={(e) => setJournalForm({ ...journalForm, date: e.target.value })}
+                          required
+                          style={{ width: '100%', padding: '10px', border: '1px solid #E5E7EB', borderRadius: '8px' }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>Account</label>
+                        <select
+                          value={journalForm.account_code}
+                          onChange={(e) => setJournalForm({ ...journalForm, account_code: e.target.value })}
+                          required
+                          style={{ width: '100%', padding: '10px', border: '1px solid #E5E7EB', borderRadius: '8px' }}
+                        >
+                          <option value="">Select account...</option>
+                          {glAccounts.map((acc) => (
+                            <option key={acc.id} value={acc.account_code}>
+                              {acc.account_code} - {acc.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>Debit</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={journalForm.debit}
+                          onChange={(e) => setJournalForm({ ...journalForm, debit: e.target.value })}
+                          placeholder="0.00"
+                          style={{ width: '100%', padding: '10px', border: '1px solid #E5E7EB', borderRadius: '8px' }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>Credit</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={journalForm.credit}
+                          onChange={(e) => setJournalForm({ ...journalForm, credit: e.target.value })}
+                          placeholder="0.00"
+                          style={{ width: '100%', padding: '10px', border: '1px solid #E5E7EB', borderRadius: '8px' }}
+                        />
+                      </div>
+                    </div>
+                    <div style={{ marginTop: '16px' }}>
+                      <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>Description</label>
+                      <input
+                        type="text"
+                        value={journalForm.description}
+                        onChange={(e) => setJournalForm({ ...journalForm, description: e.target.value })}
+                        placeholder="Enter description..."
+                        required
+                        style={{ width: '100%', padding: '10px', border: '1px solid #E5E7EB', borderRadius: '8px' }}
+                      />
+                    </div>
+                    <div style={{ marginTop: '16px' }}>
+                      <button
+                        type="submit"
+                        style={{
+                          padding: '12px 24px',
+                          backgroundColor: '#10B981',
+                          color: '#fff',
+                          border: 'none',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          fontWeight: 600,
+                        }}
+                      >
+                        Save Entry
+                      </button>
+                    </div>
+                  </form>
+                )}
+
+                {/* Journal Entries Table */}
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ backgroundColor: '#F9FAFB' }}>
+                      <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Date</th>
+                      <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Description</th>
+                      <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Account</th>
+                      <th style={{ padding: '16px', textAlign: 'right', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Debit</th>
+                      <th style={{ padding: '16px', textAlign: 'right', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Credit</th>
+                      <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Created By</th>
+                      {(user?.role === 'admin' || user?.role === 'owner') && (
+                        <th style={{ padding: '16px', textAlign: 'center', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Action</th>
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {journalEntries.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} style={{ padding: '40px', textAlign: 'center', color: '#6B7280' }}>
+                          No journal entries found. Click "Add Entry" to create one.
+                        </td>
+                      </tr>
+                    ) : (
+                      journalEntries.map((entry) => (
+                        <tr key={entry.id} style={{ borderBottom: '1px solid #F3F4F6' }}>
+                          <td style={{ padding: '16px', color: '#1F2937' }}>{new Date(entry.date).toLocaleDateString()}</td>
+                          <td style={{ padding: '16px', color: '#1F2937' }}>{entry.description}</td>
+                          <td style={{ padding: '16px', color: '#6B7280', fontFamily: 'monospace' }}>{entry.account_code}</td>
+                          <td style={{ padding: '16px', textAlign: 'right', fontWeight: 600, fontFamily: 'monospace', color: entry.debit > 0 ? '#1F2937' : '#9CA3AF' }}>
+                            {entry.debit > 0 ? formatCurrency(entry.debit) : '-'}
+                          </td>
+                          <td style={{ padding: '16px', textAlign: 'right', fontWeight: 600, fontFamily: 'monospace', color: entry.credit > 0 ? '#1F2937' : '#9CA3AF' }}>
+                            {entry.credit > 0 ? formatCurrency(entry.credit) : '-'}
+                          </td>
+                          <td style={{ padding: '16px', color: '#6B7280', fontSize: '0.875rem' }}>{entry.created_by}</td>
+                          {(user?.role === 'admin' || user?.role === 'owner') && (
+                            <td style={{ padding: '16px', textAlign: 'center' }}>
+                              <button
+                                onClick={() => deleteJournalEntry(entry.id)}
+                                style={{
+                                  padding: '6px 12px',
+                                  backgroundColor: '#FEE2E2',
+                                  color: '#991B1B',
+                                  border: 'none',
+                                  borderRadius: '6px',
+                                  cursor: 'pointer',
+                                  fontSize: '0.8rem',
+                                  fontWeight: 600,
+                                }}
+                              >
+                                Delete
+                              </button>
+                            </td>
+                          )}
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
               </div>
             )}
           </>

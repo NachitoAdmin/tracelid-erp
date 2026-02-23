@@ -32,6 +32,9 @@ export async function POST(request: NextRequest) {
       case 'products':
         result = await uploadProducts(tenantId, data)
         break
+      case 'gl_accounts':
+        result = await uploadGlAccounts(tenantId, data)
+        break
       case 'costs':
         result = await uploadCosts(tenantId, data)
         break
@@ -96,7 +99,7 @@ async function uploadCustomers(tenantId: string, data: any) {
 }
 
 async function uploadProducts(tenantId: string, data: any) {
-  const headers = data.headers.map((h: string) => h.toLowerCase())
+  const headers = data.headers.map((h: string) => h.toLowerCase().trim())
   const rows = data.rows
 
   const products = rows.map((row: string[]) => {
@@ -104,13 +107,19 @@ async function uploadProducts(tenantId: string, data: any) {
     headers.forEach((header: string, index: number) => {
       switch (header) {
         case 'product_id':
-          product.product_id = row[index]
+          product.product_code = row[index]
           break
         case 'product_name':
-          product.product_name = row[index]
+          product.name = row[index]
+          break
+        case 'uom':
+          product.uom = row[index]
           break
         case 'price':
-          product.price = parseFloat(row[index]) || 0
+          product.sales_price = parseFloat(row[index]) || 0
+          break
+        case 'cost':
+          product.standard_cost = parseFloat(row[index]) || 0
           break
         case 'category':
           product.category = row[index]
@@ -125,7 +134,7 @@ async function uploadProducts(tenantId: string, data: any) {
 
   const { data: inserted, error } = await supabase
     .from('products')
-    .upsert(products, { onConflict: 'product_id' })
+    .insert(products)
     .select()
 
   if (error) {
@@ -134,6 +143,50 @@ async function uploadProducts(tenantId: string, data: any) {
   }
 
   return { count: inserted?.length || products.length }
+}
+
+async function uploadGlAccounts(tenantId: string, data: any) {
+  const headers = data.headers.map((h: string) => h.toLowerCase().trim())
+  const rows = data.rows
+
+  const accounts = rows.map((row: string[]) => {
+    const account: any = { tenant_id: tenantId }
+    headers.forEach((header: string, index: number) => {
+      switch (header) {
+        case 'account_code':
+          account.account_code = row[index]
+          break
+        case 'account_name':
+          account.name = row[index]
+          break
+        case 'type':
+          account.type = row[index]
+          break
+        case 'pl_section':
+          account.pl_section = row[index]
+          break
+        case 'is_postable':
+          account.is_postable = row[index]?.toLowerCase() === 'true' || row[index] === '1'
+          break
+        case 'normal_balance':
+          account.normal_balance = row[index]?.toUpperCase() || 'DEBIT'
+          break
+      }
+    })
+    return account
+  })
+
+  const { data: inserted, error } = await supabase
+    .from('gl_accounts')
+    .insert(accounts)
+    .select()
+
+  if (error) {
+    console.error('Error inserting gl_accounts:', error)
+    throw error
+  }
+
+  return { count: inserted?.length || accounts.length }
 }
 
 async function uploadCosts(tenantId: string, data: any) {
