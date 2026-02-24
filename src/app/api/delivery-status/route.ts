@@ -87,6 +87,9 @@ export async function PATCH(req: NextRequest) {
 
           if (!existingInvoice) {
             // Create invoice with all required fields from sales order
+            console.log('SUPABASE URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
+            console.log('HAS SERVICE KEY:', !!process.env.SUPABASE_SERVICE_KEY);
+            console.log('HAS DEV KEY:', !!process.env.SUPABASE_SERVICE_KEY_DEV);
             const invoiceNumber = `INV-${Date.now()}`;
             const { data: invoiceResult, error: insertError } = await supabase
               .from('sales_invoices')
@@ -192,6 +195,9 @@ export async function PUT(req: NextRequest) {
 
           if (!existingInvoice) {
             // Create invoice with all required fields from sales order
+            console.log('SUPABASE URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
+            console.log('HAS SERVICE KEY:', !!process.env.SUPABASE_SERVICE_KEY);
+            console.log('HAS DEV KEY:', !!process.env.SUPABASE_SERVICE_KEY_DEV);
             const invoiceNumber = `INV-${Date.now()}`;
             const { data: invoiceResult, error: insertError } = await supabase
               .from('sales_invoices')
