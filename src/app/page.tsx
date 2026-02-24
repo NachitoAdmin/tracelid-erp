@@ -161,7 +161,8 @@ export default function Home() {
         salesOrders: sales.length,
         pendingDeliveries: deliveries.length,
         unpaidInvoices: receivables.length,
-        totalReceivables: receivables.reduce((sum: number, r: any) => sum + (r.amount || 0), 0)
+        totalReceivables: receivables.reduce((sum: number, r: any) => sum + (r.amount || 0), 0),
+        costsExpenses: 0
       })
     } catch (err) {
       console.error('Error fetching stats:', err)
