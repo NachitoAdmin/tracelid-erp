@@ -42,6 +42,7 @@ interface Stats {
 export default function Home() {
   const { t } = useLanguage()
   const [theme, setTheme] = useState('light')
+  const [isMobile, setIsMobile] = useState(false)
   const [tenants, setTenants] = useState<Tenant[]>([])
   const [selectedTenantId, setSelectedTenantId] = useState('')
   const [tenantInput, setTenantInput] = useState('')
@@ -63,6 +64,11 @@ export default function Home() {
   useEffect(() => {
     const saved = localStorage.getItem('tracelid-theme')
     if (saved) setTheme(saved)
+    
+    // Check if mobile
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
     
     const userData = localStorage.getItem('tracelid-user')
     let parsedUser = null
@@ -280,18 +286,21 @@ export default function Home() {
               
               {(isOwner || isAdmin) && (
                 <a href="/master-data" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)'}}>
-                  📊 Master Data
+                  {isMobile ? '📊' : '📊 Master'}
                 </a>
               )}
               
-              {/* Financial Analysis Button - GREEN GRADIENT */}
               <a href="/financial-analysis" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #10B981 0%, #34D399 100%)'}}>
-                📊 Financial
+                {isMobile ? '📈' : '📈 Financial'}
               </a>
               
               <a href="/analytics" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #6C5CE7 0%, #764ba2 100%)'}}>
-                📈 Analytics
+                {isMobile ? '📉' : '📉 Analytics'}
               </a>
+              
+              <button onClick={handleLogout} style={{...styles.headerBtnCompact, background: '#EF4444'}}>
+                {isMobile ? '🚪' : '🚪 Logout'}
+              </button>
               
               <button onClick={handleLogout} style={{...styles.headerBtnCompact, background: '#EF4444'}}>
                 🚪 Logout
