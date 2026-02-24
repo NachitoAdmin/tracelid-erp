@@ -295,7 +295,7 @@ export default function Home() {
               alignItems: 'center',
               justifyContent: 'center',
               gap: '16px',
-            }}>>
+            }}>
               {selectedTenant?.name && (
                 <div style={styles.headerItem}>
                   <span style={{...styles.headerLabel, color: mutedColor}}>TENANT</span>
