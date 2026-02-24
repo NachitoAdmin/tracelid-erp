@@ -147,21 +147,23 @@ export default function Home() {
       const headers: Record<string, string> = {}
       if (token) headers.Authorization = `Bearer ${token}`
       
-      const [salesRes, deliveryRes, receivablesRes] = await Promise.all([
+      const [salesRes, deliveryRes, invoicesRes] = await Promise.all([
         fetch(`/api/sales-orders?tenantId=${tenantId}`, { headers }),
         fetch(`/api/delivery-status?tenantId=${tenantId}&status=pending`, { headers }),
-        fetch(`/api/receivables?tenantId=${tenantId}&paid=false`, { headers })
+        fetch(`/api/invoices?tenantId=${tenantId}`, { headers })
       ])
       
       const sales = salesRes.ok ? await salesRes.json() : []
       const deliveries = deliveryRes.ok ? await deliveryRes.json() : []
-      const receivables = receivablesRes.ok ? await receivablesRes.json() : []
+      const invoices = invoicesRes.ok ? await invoicesRes.json() : []
+      
+      const unpaidInvoices = invoices.filter((inv: any) => inv.status === 'unpaid')
       
       setStats({
         salesOrders: sales.length,
         pendingDeliveries: deliveries.length,
-        unpaidInvoices: receivables.length,
-        totalReceivables: receivables.reduce((sum: number, r: any) => sum + (r.amount || 0), 0),
+        unpaidInvoices: unpaidInvoices.length,
+        totalReceivables: unpaidInvoices.reduce((sum: number, inv: any) => sum + (inv.total_amount || 0), 0),
         costsExpenses: 0
       })
     } catch (err) {
