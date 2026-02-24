@@ -222,7 +222,25 @@ export default function Home() {
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      <div style={{...styles.page, backgroundColor: bgColor}}>
+      <>
+        <style>{`
+          @media (max-width: 768px) {
+            .header-content {
+              flex-direction: column !important;
+              gap: 8px !important;
+            }
+            .header-buttons {
+              flex-wrap: wrap !important;
+              justify-content: center !important;
+              max-width: 100% !important;
+            }
+            .header-buttons a, .header-buttons button {
+              font-size: 0.7rem !important;
+              padding: 4px 8px !important;
+            }
+          }
+        `}</style>
+        <div style={{...styles.page, backgroundColor: bgColor}}>
         {isDev && (
           <div style={styles.devBanner}>
             🚧 DEV ENVIRONMENT - {envName.toUpperCase()} 🚧
@@ -231,15 +249,14 @@ export default function Home() {
         
         {/* Header */}
         <header style={{...styles.header, backgroundColor: cardBg, borderBottomColor: borderColor}}>
-          <div style={{
+          <div className="header-content" style={{
             maxWidth: '1400px',
             margin: '0 auto',
             display: 'flex',
-            flexDirection: isMobile ? 'column' : 'row',
+            flexDirection: 'row',
             justifyContent: 'space-between',
-            alignItems: isMobile ? 'center' : 'center',
+            alignItems: 'center',
             gap: '12px',
-            padding: isMobile ? '12px' : '0',
           }}>
             <div style={styles.logo}>
               <svg width="160" height="44" viewBox="0 0 200 50">
@@ -288,13 +305,13 @@ export default function Home() {
               )}
             </div>
             
-            <div style={{
+            <div className="header-buttons" style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '6px',
               flexWrap: 'wrap',
-              maxWidth: isMobile ? '100%' : 'auto',
+              maxWidth: '100%',
             }}>
               <div style={styles.headerControlCompact}>
                 <LanguageSwitcher />
@@ -468,6 +485,7 @@ export default function Home() {
 
         <ChatBot />
       </div>
+      </>
     </ThemeContext.Provider>
   )
 }
