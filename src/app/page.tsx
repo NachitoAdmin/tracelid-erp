@@ -578,7 +578,7 @@ const styles: Record<string, React.CSSProperties> = {
   headerRight: {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: isMobile ? 'center' : 'flex-end',
+    justifyContent: 'flex-end',
     gap: '6px',
     flexWrap: 'wrap',
   },
