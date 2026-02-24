@@ -7,6 +7,23 @@ import MaintenanceCheck from '@/components/MaintenanceCheck'
 export const metadata: Metadata = {
   title: 'Tracelid - Business Intelligence & Analytics',
   description: 'Advanced ERP system for business intelligence, analytics, and transaction management',
+  manifest: '/manifest.json',
+  icons: {
+    icon: [
+      { url: '/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icon-512x512.png', sizes: '512x512', type: 'image/png' }
+    ],
+    apple: [
+      { url: '/icon-192x192.png', sizes: '192x192' }
+    ]
+  },
+  themeColor: '#6C5CE7',
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false
+  }
 }
 
 export default function RootLayout({
@@ -16,6 +33,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Tracelid" />
+      </head>
       <body>
         <LanguageProvider>
           <CurrencyProvider>
@@ -24,6 +47,17 @@ export default function RootLayout({
             </MaintenanceCheck>
           </CurrencyProvider>
         </LanguageProvider>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/service-worker.js');
+                });
+              }
+            `
+          }}
+        />
       </body>
     </html>
   )
