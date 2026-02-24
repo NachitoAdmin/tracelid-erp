@@ -109,9 +109,11 @@ export async function PATCH(req: NextRequest) {
               .single();
 
             if (insertError) {
-              console.log('Invoice insert error:', insertError.message);
+              console.log('INVOICE INSERT FAILED:', JSON.stringify(insertError));
+            } else if (invoiceResult) {
+              console.log('Invoice created successfully:', invoiceNumber);
             } else {
-              console.log('Invoice created:', invoiceNumber, 'Result:', JSON.stringify(invoiceResult));
+              console.log('Invoice insert returned no result and no error');
             }
           } else {
             console.log('Invoice already exists for sales order:', existingDelivery.sales_order_number);
@@ -212,9 +214,11 @@ export async function PUT(req: NextRequest) {
               .single();
 
             if (insertError) {
-              console.log('Invoice insert error:', insertError.message);
+              console.log('INVOICE INSERT FAILED:', JSON.stringify(insertError));
+            } else if (invoiceResult) {
+              console.log('Invoice created successfully:', invoiceNumber);
             } else {
-              console.log('Invoice created:', invoiceNumber, 'Result:', JSON.stringify(invoiceResult));
+              console.log('Invoice insert returned no result and no error');
             }
           } else {
             console.log('Invoice already exists for sales order:', existingDelivery.sales_order_number);
