@@ -320,7 +320,7 @@ export default function Home() {
               )}
             </div>
             
-            <div className="mobile-header-buttons" style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'center' }}>>
+            <div className="mobile-header-buttons" style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'center' }}>
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'center' }}>
                 <div style={styles.headerControlCompact}>
                   <LanguageSwitcher />
