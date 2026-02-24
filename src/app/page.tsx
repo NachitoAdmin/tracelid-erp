@@ -37,6 +37,7 @@ interface Stats {
   pendingDeliveries: number
   unpaidInvoices: number
   totalReceivables: number
+  costsExpenses: number
 }
 
 export default function Home() {
@@ -55,7 +56,8 @@ export default function Home() {
     salesOrders: 0,
     pendingDeliveries: 0,
     unpaidInvoices: 0,
-    totalReceivables: 0
+    totalReceivables: 0,
+    costsExpenses: 0
   })
   
   const envName = process.env.NEXT_PUBLIC_ENV_NAME || 'production'
@@ -417,6 +419,11 @@ export default function Home() {
               <div style={{...styles.statLabel, color: mutedColor}}>Sales Orders</div>
             </div>
             <div style={{...styles.statCard, backgroundColor: cardBg, borderColor}}>
+              <div style={styles.statIcon}>💸</div>
+              <div style={{...styles.statValue, color: '#EC4899'}}>{stats.costsExpenses}</div>
+              <div style={{...styles.statLabel, color: mutedColor}}>Costs/Expenses</div>
+            </div>
+            <div style={{...styles.statCard, backgroundColor: cardBg, borderColor}}>
               <div style={styles.statIcon}>🚚</div>
               <div style={{...styles.statValue, color: '#F59E0B'}}>{stats.pendingDeliveries}</div>
               <div style={{...styles.statLabel, color: mutedColor}}>Pending Deliveries</div>
@@ -443,6 +450,17 @@ export default function Home() {
                   Create and manage sales orders. Track order status from pending to delivered.
                 </p>
                 <span style={{...styles.navLink, color: '#6C5CE7'}}>Go to Sales Orders →</span>
+              </div>
+            </Link>
+            
+            <Link href="/costs-expenses" style={{textDecoration: 'none'}}>
+              <div style={{...styles.navCard, backgroundColor: cardBg, borderColor}}>
+                <div style={{...styles.navIcon, backgroundColor: '#EC489920', color: '#EC4899'}}>💸</div>
+                <h3 style={{...styles.navTitle, color: textColor}}>Costs/Expenses</h3>
+                <p style={{...styles.navDesc, color: mutedColor}}>
+                  Track and manage costs, expenses, and overhead.
+                </p>
+                <span style={{...styles.navLink, color: '#EC4899'}}>Go to Costs →</span>
               </div>
             </Link>
             
@@ -649,8 +667,8 @@ const styles: Record<string, React.CSSProperties> = {
   },
   statsGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-    gap: '16px',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+    gap: '12px',
     marginBottom: '32px',
   },
   statCard: {
@@ -674,8 +692,8 @@ const styles: Record<string, React.CSSProperties> = {
   },
   navGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-    gap: '24px',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+    gap: '20px',
   },
   navCard: {
     border: '1px solid',
