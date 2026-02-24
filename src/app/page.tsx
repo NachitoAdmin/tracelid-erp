@@ -285,7 +285,7 @@ export default function Home() {
               alignItems: 'center',
               justifyContent: 'center',
               gap: '16px',
-            }}>>
+            }}>
               {selectedTenant?.name && (
                 <div style={styles.headerItem}>
                   <span style={{...styles.headerLabel, color: mutedColor}}>TENANT</span>
@@ -310,41 +310,38 @@ export default function Home() {
               )}
             </div>
             
-            <div className="header-buttons" style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '6px',
-              flexWrap: 'wrap',
-              maxWidth: '100%',
-            }}>
-              <div style={styles.headerControlCompact}>
-                <LanguageSwitcher />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                <div style={styles.headerControlCompact}>
+                  <LanguageSwitcher />
+                </div>
+                <div style={styles.headerControlCompact}>
+                  <CurrencySelector />
+                </div>
+                <button onClick={toggleTheme} style={{...styles.themeBtnCompact, backgroundColor: isDark ? '#374151' : '#F3F4F6', color: textColor}}>
+                  {isDark ? '☀️' : '🌙'}
+                </button>
               </div>
-              <div style={styles.headerControlCompact}>
-                <CurrencySelector />
-              </div>
-              <button onClick={toggleTheme} style={{...styles.themeBtnCompact, backgroundColor: isDark ? '#374151' : '#F3F4F6', color: textColor}}>
-                {isDark ? '☀️' : '🌙'}
-              </button>
               
-              {(isOwner || isAdmin) && (
-                <a href="/master-data" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)'}}>
-                  {isMobile ? 'Data' : 'Master Data'}
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                {(isOwner || isAdmin) && (
+                  <a href="/master-data" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)'}}>
+                    Data
+                  </a>
+                )}
+                
+                <a href="/financial-analysis" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #10B981 0%, #34D399 100%)'}}>
+                  Finance
                 </a>
-              )}
-              
-              <a href="/financial-analysis" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #10B981 0%, #34D399 100%)'}}>
-                {isMobile ? 'Finance' : 'Financial'}
-              </a>
-              
-              <a href="/analytics" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #6C5CE7 0%, #764ba2 100%)'}}>
-                {isMobile ? 'Stats' : 'Analytics'}
-              </a>
-              
-              <button onClick={handleLogout} style={{...styles.headerBtnCompact, background: '#EF4444'}}>
-                Logout
-              </button>
+                
+                <a href="/analytics" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #6C5CE7 0%, #764ba2 100%)'}}>
+                  Stats
+                </a>
+                
+                <button onClick={handleLogout} style={{...styles.headerBtnCompact, background: '#EF4444'}}>
+                  Logout
+                </button>
+              </div>
             </div>
           </div>
         </header>
