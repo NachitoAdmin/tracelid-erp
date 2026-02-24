@@ -273,38 +273,38 @@ export default function Home() {
               )}
             </div>
             
-            <div style={styles.headerRight}>
-              <div style={styles.headerControlCompact}>
-                <LanguageSwitcher />
+            <div style={{...styles.headerRight, flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? '4px' : '16px'}}>
+              <div style={{display: 'flex', gap: isMobile ? '4px' : '16px', flexWrap: 'wrap', justifyContent: isMobile ? 'center' : 'flex-end'}}>
+                <div style={styles.headerControlCompact}>
+                  <LanguageSwitcher />
+                </div>
+                <div style={styles.headerControlCompact}>
+                  <CurrencySelector />
+                </div>
+                <button onClick={toggleTheme} style={{...styles.themeBtnCompact, backgroundColor: isDark ? '#374151' : '#F3F4F6', color: textColor}}>
+                  {isDark ? '☀️' : '🌙'}
+                </button>
               </div>
-              <div style={styles.headerControlCompact}>
-                <CurrencySelector />
-              </div>
-              <button onClick={toggleTheme} style={{...styles.themeBtnCompact, backgroundColor: isDark ? '#374151' : '#F3F4F6', color: textColor}}>
-                {isDark ? '☀️' : '🌙'}
-              </button>
               
-              {(isOwner || isAdmin) && (
-                <a href="/master-data" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)'}}>
-                  {isMobile ? '📊' : '📊 Master'}
+              <div style={{display: 'flex', gap: isMobile ? '4px' : '16px', flexWrap: 'wrap', justifyContent: isMobile ? 'center' : 'flex-end'}}>
+                {(isOwner || isAdmin) && (
+                  <a href="/master-data" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)'}}>
+                    {isMobile ? '📊 Data' : '📊 Master Data'}
+                  </a>
+                )}
+                
+                <a href="/financial-analysis" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #10B981 0%, #34D399 100%)'}}>
+                  {isMobile ? '📈 Finance' : '📈 Financial'}
                 </a>
-              )}
-              
-              <a href="/financial-analysis" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #10B981 0%, #34D399 100%)'}}>
-                {isMobile ? '📈' : '📈 Financial'}
-              </a>
-              
-              <a href="/analytics" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #6C5CE7 0%, #764ba2 100%)'}}>
-                {isMobile ? '📉' : '📉 Analytics'}
-              </a>
-              
-              <button onClick={handleLogout} style={{...styles.headerBtnCompact, background: '#EF4444'}}>
-                {isMobile ? '🚪' : '🚪 Logout'}
-              </button>
-              
-              <button onClick={handleLogout} style={{...styles.headerBtnCompact, background: '#EF4444'}}>
-                🚪 Logout
-              </button>
+                
+                <a href="/analytics" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #6C5CE7 0%, #764ba2 100%)'}}>
+                  {isMobile ? '📉 Stats' : '📉 Analytics'}
+                </a>
+                
+                <button onClick={handleLogout} style={{...styles.headerBtnCompact, background: '#EF4444'}}>
+                  🚪 Logout
+                </button>
+              </div>
             </div>
           </div>
         </header>
