@@ -6,11 +6,12 @@ import Link from 'next/link';
 interface Receivable {
   id: string;
   customer_id: string;
+  customer_name: string;
   sales_order_number: string;
+  amount_due: number;
   amount_received: number;
-  bank_id: string | null;
-  account_id: string | null;
-  received_date: string;
+  status: string;
+  due_date: string;
   created_at: string;
 }
 
@@ -20,8 +21,6 @@ export default function ReceivablesPage() {
   const [tenantId, setTenantId] = useState('');
   const [selectedRec, setSelectedRec] = useState<Receivable | null>(null);
   const [paymentAmount, setPaymentAmount] = useState('');
-  const [bankId, setBankId] = useState('');
-  const [accountId, setAccountId] = useState('');
 
   useEffect(() => {
     const stored = localStorage.getItem('tracelid-selected-tenant');
@@ -58,22 +57,22 @@ export default function ReceivablesPage() {
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
+      const newAmountReceived = selectedRec.amount_received + parseFloat(paymentAmount);
+      const newStatus = newAmountReceived >= selectedRec.amount_due ? 'paid' : 'partial';
+
       const res = await fetch('/api/receivables', {
         method: 'PATCH',
         headers,
         body: JSON.stringify({
           id: selectedRec.id,
-          amount_received: parseFloat(paymentAmount),
-          bank_id: bankId || null,
-          account_id: accountId || null,
+          amount_received: newAmountReceived,
+          status: newStatus,
         }),
       });
 
       if (res.ok) {
         setSelectedRec(null);
         setPaymentAmount('');
-        setBankId('');
-        setAccountId('');
         fetchReceivables(tenantId);
       }
     } catch (err) {
@@ -81,25 +80,31 @@ export default function ReceivablesPage() {
     }
   };
 
-  const getStatusBadge = (amount: number) => {
-    const isPaid = amount > 0;
+  const getStatusBadge = (status: string) => {
+    const colors: Record<string, { bg: string; color: string }> = {
+      paid: { bg: '#10B98120', color: '#10B981' },
+      partial: { bg: '#F59E0B20', color: '#F59E0B' },
+      unpaid: { bg: '#EF444420', color: '#EF4444' },
+    };
+    const style = colors[status] || colors.unpaid;
     return (
       <span style={{
         padding: '4px 12px',
         borderRadius: '12px',
-        backgroundColor: isPaid ? '#10B98120' : '#F59E0B20',
-        color: isPaid ? '#10B981' : '#F59E0B',
+        backgroundColor: style.bg,
+        color: style.color,
         fontSize: '0.75rem',
         fontWeight: 600,
         textTransform: 'uppercase',
       }}>
-        {isPaid ? 'Paid' : 'Unpaid'}
+        {status}
       </span>
     );
   };
 
-  const totalUnpaid = receivables.filter(r => r.amount_received === 0).length;
-  const totalPaid = receivables.filter(r => r.amount_received > 0).length;
+  const totalUnpaid = receivables.filter(r => r.status === 'unpaid').length;
+  const totalPartial = receivables.filter(r => r.status === 'partial').length;
+  const totalPaid = receivables.filter(r => r.status === 'paid').length;
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#F1F5F9', fontFamily: 'Inter, sans-serif' }}>
@@ -111,8 +116,12 @@ export default function ReceivablesPage() {
           </div>
           <div style={{ display: 'flex', gap: '16px' }}>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#F59E0B' }}>{totalUnpaid}</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#EF4444' }}>{totalUnpaid}</div>
               <div style={{ fontSize: '0.75rem', color: '#6B7280' }}>Unpaid</div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#F59E0B' }}>{totalPartial}</div>
+              <div style={{ fontSize: '0.75rem', color: '#6B7280' }}>Partial</div>
             </div>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#10B981' }}>{totalPaid}</div>
@@ -134,24 +143,24 @@ export default function ReceivablesPage() {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ backgroundColor: '#F9FAFB' }}>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Customer</th>
                   <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Order #</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Customer ID</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Amount Received</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Amount Due</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Received</th>
                   <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Status</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Date</th>
                   <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Action</th>
                 </tr>
               </thead>
               <tbody>
                 {receivables.map((rec) => (
                   <tr key={rec.id} style={{ borderTop: '1px solid #F3F4F6' }}>
+                    <td style={{ padding: '16px', color: '#1F2937' }}>{rec.customer_name || rec.customer_id}</td>
                     <td style={{ padding: '16px', fontFamily: 'monospace', fontWeight: 600, color: '#6C5CE7' }}>{rec.sales_order_number}</td>
-                    <td style={{ padding: '16px', color: '#1F2937' }}>{rec.customer_id}</td>
-                    <td style={{ padding: '16px', fontWeight: 600, color: rec.amount_received > 0 ? '#10B981' : '#6B7280' }}>${rec.amount_received?.toFixed(2)}</td>
-                    <td style={{ padding: '16px' }}>{getStatusBadge(rec.amount_received)}</td>
-                    <td style={{ padding: '16px', color: '#6B7280', fontSize: '0.875rem' }}>{new Date(rec.received_date).toLocaleDateString()}</td>
+                    <td style={{ padding: '16px', fontWeight: 600 }}>${rec.amount_due?.toFixed(2)}</td>
+                    <td style={{ padding: '16px', color: rec.amount_received > 0 ? '#10B981' : '#6B7280' }}>${rec.amount_received?.toFixed(2)}</td>
+                    <td style={{ padding: '16px' }}>{getStatusBadge(rec.status)}</td>
                     <td style={{ padding: '16px' }}>
-                      {rec.amount_received === 0 && (
+                      {rec.status !== 'paid' && (
                         <button
                           onClick={() => setSelectedRec(rec)}
                           style={{
@@ -181,37 +190,18 @@ export default function ReceivablesPage() {
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
           <div style={{ backgroundColor: '#fff', padding: '24px', borderRadius: '12px', width: '90%', maxWidth: '400px' }}>
             <h3 style={{ margin: '0 0 16px 0' }}>Record Payment</h3>
+            <p style={{ color: '#6B7280', marginBottom: '8px' }}>Customer: {selectedRec.customer_name || selectedRec.customer_id}</p>
             <p style={{ color: '#6B7280', marginBottom: '16px' }}>Order: {selectedRec.sales_order_number}</p>
+            <p style={{ color: '#6B7280', marginBottom: '16px' }}>Amount Due: ${selectedRec.amount_due?.toFixed(2)}</p>
+            <p style={{ color: '#6B7280', marginBottom: '16px' }}>Already Paid: ${selectedRec.amount_received?.toFixed(2)}</p>
             
             <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', marginBottom: '4px', fontSize: '0.875rem', fontWeight: 600 }}>Amount Received</label>
+              <label style={{ display: 'block', marginBottom: '4px', fontSize: '0.875rem', fontWeight: 600 }}>Payment Amount</label>
               <input
                 type="number"
                 value={paymentAmount}
                 onChange={(e) => setPaymentAmount(e.target.value)}
                 placeholder="0.00"
-                style={{ width: '100%', padding: '8px 12px', border: '1px solid #E5E7EB', borderRadius: '6px' }}
-              />
-            </div>
-            
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', marginBottom: '4px', fontSize: '0.875rem', fontWeight: 600 }}>Bank ID (optional)</label>
-              <input
-                type="text"
-                value={bankId}
-                onChange={(e) => setBankId(e.target.value)}
-                placeholder="BANK-001"
-                style={{ width: '100%', padding: '8px 12px', border: '1px solid #E5E7EB', borderRadius: '6px' }}
-              />
-            </div>
-            
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', marginBottom: '4px', fontSize: '0.875rem', fontWeight: 600 }}>Account ID (optional)</label>
-              <input
-                type="text"
-                value={accountId}
-                onChange={(e) => setAccountId(e.target.value)}
-                placeholder="ACC-001"
                 style={{ width: '100%', padding: '8px 12px', border: '1px solid #E5E7EB', borderRadius: '6px' }}
               />
             </div>

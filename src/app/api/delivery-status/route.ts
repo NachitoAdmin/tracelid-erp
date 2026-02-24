@@ -69,7 +69,7 @@ export async function PATCH(req: NextRequest) {
 
           if (!existingInvoice) {
             const invoiceNumber = `INV-${Date.now()}`;
-            await supabase
+            const { data: newInvoice } = await supabase
               .from('sales_invoices')
               .insert({
                 invoice_number: invoiceNumber,
@@ -85,7 +85,28 @@ export async function PATCH(req: NextRequest) {
                 total_amount: salesOrder.total_amount || null,
                 invoice_date: new Date().toISOString().split('T')[0],
                 status: 'unpaid',
-              });
+              })
+              .select()
+              .single();
+
+            // Create receivable for the new invoice
+            if (newInvoice) {
+              const dueDate = new Date();
+              dueDate.setDate(dueDate.getDate() + 30);
+              
+              await supabase
+                .from('receivables')
+                .insert({
+                  sales_order_number: newInvoice.sales_order_number,
+                  tenant_id: newInvoice.tenant_id,
+                  customer_id: newInvoice.customer_id,
+                  customer_name: newInvoice.customer_name,
+                  amount_due: newInvoice.total_amount,
+                  amount_received: 0,
+                  status: 'unpaid',
+                  due_date: dueDate.toISOString().split('T')[0],
+                });
+            }
           }
         }
       } catch (invoiceErr: any) {
@@ -143,7 +164,7 @@ export async function PUT(req: NextRequest) {
 
           if (!existingInvoice) {
             const invoiceNumber = `INV-${Date.now()}`;
-            await supabase
+            const { data: newInvoice } = await supabase
               .from('sales_invoices')
               .insert({
                 invoice_number: invoiceNumber,
@@ -159,7 +180,28 @@ export async function PUT(req: NextRequest) {
                 total_amount: salesOrder.total_amount || null,
                 invoice_date: new Date().toISOString().split('T')[0],
                 status: 'unpaid',
-              });
+              })
+              .select()
+              .single();
+
+            // Create receivable for the new invoice
+            if (newInvoice) {
+              const dueDate = new Date();
+              dueDate.setDate(dueDate.getDate() + 30);
+              
+              await supabase
+                .from('receivables')
+                .insert({
+                  sales_order_number: newInvoice.sales_order_number,
+                  tenant_id: newInvoice.tenant_id,
+                  customer_id: newInvoice.customer_id,
+                  customer_name: newInvoice.customer_name,
+                  amount_due: newInvoice.total_amount,
+                  amount_received: 0,
+                  status: 'unpaid',
+                  due_date: dueDate.toISOString().split('T')[0],
+                });
+            }
           }
         }
       } catch (invoiceErr: any) {
