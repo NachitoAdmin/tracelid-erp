@@ -224,25 +224,30 @@ export default function Home() {
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       <>
         <style>{`
-          @media (max-width: 900px), (max-device-width: 900px) {
-            .header-content {
+          @media screen and (max-width: 600px) {
+            .mobile-header-container {
               flex-direction: column !important;
               align-items: center !important;
-              gap: 8px !important;
+              padding: 8px !important;
             }
-            .header-center {
-              order: -1 !important;
+            .mobile-header-logo {
+              margin-bottom: 4px !important;
             }
-            .header-buttons {
-              flex-wrap: wrap !important;
-              justify-content: center !important;
+            .mobile-header-center {
+              order: 2 !important;
+              margin-bottom: 4px !important;
+            }
+            .mobile-header-buttons {
+              order: 3 !important;
               width: 100% !important;
+              flex-direction: column !important;
               gap: 4px !important;
             }
-            .header-buttons a, .header-buttons button {
-              font-size: 11px !important;
-              padding: 3px 6px !important;
-              min-height: 28px !important;
+            .mobile-header-buttons > div {
+              display: flex !important;
+              justify-content: center !important;
+              gap: 4px !important;
+              flex-wrap: wrap !important;
             }
           }
         `}</style>
@@ -255,16 +260,16 @@ export default function Home() {
         
         {/* Header */}
         <header style={{...styles.header, backgroundColor: cardBg, borderBottomColor: borderColor}}>
-          <div style={{
+          <div className="mobile-header-container" style={{
             maxWidth: '1400px',
             margin: '0 auto',
             display: 'flex',
-            flexDirection: 'column',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
             alignItems: 'center',
-            gap: '8px',
-            padding: '12px',
+            gap: '12px',
           }}>
-            <div style={styles.logo}>
+            <div className="mobile-header-logo" style={styles.logo}>
               <svg width="160" height="44" viewBox="0 0 200 50">
                 <defs>
                   <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -280,12 +285,12 @@ export default function Home() {
               </svg>
             </div>
             
-            <div className="header-center" style={{
+            <div className="mobile-header-center" style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '16px',
-            }}>
+            }}>>
               {selectedTenant?.name && (
                 <div style={styles.headerItem}>
                   <span style={{...styles.headerLabel, color: mutedColor}}>TENANT</span>
@@ -310,7 +315,7 @@ export default function Home() {
               )}
             </div>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'center' }}>
+            <div className="mobile-header-buttons" style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'center' }}>>
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'center' }}>
                 <div style={styles.headerControlCompact}>
                   <LanguageSwitcher />
