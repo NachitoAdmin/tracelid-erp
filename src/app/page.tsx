@@ -481,16 +481,17 @@ const styles: Record<string, React.CSSProperties> = {
     maxWidth: '1400px',
     margin: '0 auto',
     display: 'flex',
+    flexDirection: isMobile ? 'column' : 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: '20px',
+    alignItems: isMobile ? 'stretch' : 'center',
+    gap: '12px',
   },
   headerCenter: {
     display: 'flex',
     alignItems: 'center',
     gap: '16px',
-    flex: 1,
-    justifyContent: 'center',
+    flex: isMobile ? 'none' : 1,
+    justifyContent: isMobile ? 'center' : 'center',
   },
   headerItem: {
     display: 'flex',
@@ -509,10 +510,9 @@ const styles: Record<string, React.CSSProperties> = {
   headerRight: {
     display: 'flex',
     alignItems: 'center',
+    justifyContent: isMobile ? 'center' : 'flex-end',
     gap: '6px',
     flexWrap: 'wrap',
-    maxWidth: '200px',
-    justifyContent: 'flex-end',
   },
   headerLabel: {
     fontSize: '0.625rem',
