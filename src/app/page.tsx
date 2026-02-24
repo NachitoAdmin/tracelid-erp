@@ -255,14 +255,14 @@ export default function Home() {
         
         {/* Header */}
         <header style={{...styles.header, backgroundColor: cardBg, borderBottomColor: borderColor}}>
-          <div className="header-content" style={{
+          <div style={{
             maxWidth: '1400px',
             margin: '0 auto',
             display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'space-between',
+            flexDirection: 'column',
             alignItems: 'center',
-            gap: '12px',
+            gap: '8px',
+            padding: '12px',
           }}>
             <div style={styles.logo}>
               <svg width="160" height="44" viewBox="0 0 200 50">
