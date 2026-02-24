@@ -81,6 +81,7 @@ export async function PATCH(req: NextRequest) {
     const updates: any = {};
     if (amount_received !== undefined) updates.amount_received = amount_received;
     if (status) updates.status = status;
+    updates.updated_at = new Date().toISOString();
 
     const { data, error } = await supabase
       .from('receivables')

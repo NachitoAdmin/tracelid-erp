@@ -91,10 +91,11 @@ export async function PATCH(req: NextRequest) {
 
             // Create receivable for the new invoice
             if (newInvoice) {
+              console.log('Creating receivable for invoice:', invoiceNumber);
               const dueDate = new Date();
               dueDate.setDate(dueDate.getDate() + 30);
               
-              await supabase
+              const { data: receivableResult, error: receivableError } = await supabase
                 .from('receivables')
                 .insert({
                   sales_order_number: newInvoice.sales_order_number,
@@ -105,7 +106,12 @@ export async function PATCH(req: NextRequest) {
                   amount_received: 0,
                   status: 'unpaid',
                   due_date: dueDate.toISOString().split('T')[0],
-                });
+                })
+                .select()
+                .single();
+              
+              console.log('Receivable insert error:', JSON.stringify(receivableError));
+              console.log('Receivable insert result:', JSON.stringify(receivableResult));
             }
           }
         }
@@ -186,10 +192,11 @@ export async function PUT(req: NextRequest) {
 
             // Create receivable for the new invoice
             if (newInvoice) {
+              console.log('Creating receivable for invoice (PUT):', invoiceNumber);
               const dueDate = new Date();
               dueDate.setDate(dueDate.getDate() + 30);
               
-              await supabase
+              const { data: receivableResult, error: receivableError } = await supabase
                 .from('receivables')
                 .insert({
                   sales_order_number: newInvoice.sales_order_number,
@@ -200,7 +207,12 @@ export async function PUT(req: NextRequest) {
                   amount_received: 0,
                   status: 'unpaid',
                   due_date: dueDate.toISOString().split('T')[0],
-                });
+                })
+                .select()
+                .single();
+              
+              console.log('Receivable insert error (PUT):', JSON.stringify(receivableError));
+              console.log('Receivable insert result (PUT):', JSON.stringify(receivableResult));
             }
           }
         }
