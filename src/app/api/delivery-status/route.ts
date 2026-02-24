@@ -86,10 +86,18 @@ export async function PATCH(req: NextRequest) {
           }
 
           if (!existingInvoice) {
+            // Test direct insert first
+            console.log('SUPABASE URL:', process.env.NEXT_PUBLIC_SUPABASE_URL?.substring(0, 40));
+            const testResult = await supabase.from('sales_invoices').insert({
+              invoice_number: 'TEST-' + Date.now(),
+              tenant_id: '3dd30c50-06b5-42a1-af38-9a8cf3c10447',
+              invoice_date: new Date().toISOString().split('T')[0],
+              status: 'unpaid'
+            }).select().single();
+            console.log('TEST INSERT ERROR:', JSON.stringify(testResult.error));
+            console.log('TEST INSERT DATA:', JSON.stringify(testResult.data));
+
             // Create invoice with all required fields from sales order
-            console.log('SUPABASE URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
-            console.log('HAS SERVICE KEY:', !!process.env.SUPABASE_SERVICE_KEY);
-            console.log('HAS DEV KEY:', !!process.env.SUPABASE_SERVICE_KEY_DEV);
             const invoiceNumber = `INV-${Date.now()}`;
             const { data: invoiceResult, error: insertError } = await supabase
               .from('sales_invoices')
@@ -194,10 +202,18 @@ export async function PUT(req: NextRequest) {
           }
 
           if (!existingInvoice) {
+            // Test direct insert first
+            console.log('SUPABASE URL:', process.env.NEXT_PUBLIC_SUPABASE_URL?.substring(0, 40));
+            const testResult = await supabase.from('sales_invoices').insert({
+              invoice_number: 'TEST-' + Date.now(),
+              tenant_id: '3dd30c50-06b5-42a1-af38-9a8cf3c10447',
+              invoice_date: new Date().toISOString().split('T')[0],
+              status: 'unpaid'
+            }).select().single();
+            console.log('TEST INSERT ERROR:', JSON.stringify(testResult.error));
+            console.log('TEST INSERT DATA:', JSON.stringify(testResult.data));
+
             // Create invoice with all required fields from sales order
-            console.log('SUPABASE URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
-            console.log('HAS SERVICE KEY:', !!process.env.SUPABASE_SERVICE_KEY);
-            console.log('HAS DEV KEY:', !!process.env.SUPABASE_SERVICE_KEY_DEV);
             const invoiceNumber = `INV-${Date.now()}`;
             const { data: invoiceResult, error: insertError } = await supabase
               .from('sales_invoices')
