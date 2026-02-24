@@ -61,45 +61,63 @@ export async function PATCH(req: NextRequest) {
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-    console.log('Delivery updated to:', delivery_status);
-    console.log('Fetched delivery record:', JSON.stringify(existingDelivery));
-
-    // If status is delivered, check if invoice exists and create one if not
+    // If status is delivered, create an invoice
     if (delivery_status === 'delivered' && existingDelivery) {
       try {
-        // Check if invoice already exists for this sales_order_number
-        const { data: existingInvoice, error: existingError } = await supabase
-          .from('sales_invoices')
-          .select('id')
+        // Fetch the sales order to get all required invoice fields
+        const { data: salesOrder, error: soError } = await supabase
+          .from('sales_orders')
+          .select('*')
           .eq('sales_order_number', existingDelivery.sales_order_number)
           .single();
 
-        console.log('Existing invoice check:', JSON.stringify(existingInvoice));
-        if (existingError) {
-          console.log('Existing invoice check error:', existingError.message);
-        }
-
-        if (!existingInvoice) {
-          // No invoice exists, create one
-          const invoiceNumber = `INV-${Date.now()}`;
-          const { data: invoiceResult, error: insertError } = await supabase
+        if (soError || !salesOrder) {
+          console.log('Could not fetch sales order:', soError?.message);
+        } else {
+          // Check if invoice already exists
+          const { data: existingInvoice, error: existingError } = await supabase
             .from('sales_invoices')
-            .insert({
-              invoice_number: invoiceNumber,
-              sales_order_number: existingDelivery.sales_order_number,
-              tenant_id: existingDelivery.tenant_id,
-              invoice_date: new Date().toISOString().split('T')[0],
-            })
-            .select()
+            .select('id')
+            .eq('sales_order_number', existingDelivery.sales_order_number)
             .single();
 
-          console.log('Invoice insert result:', JSON.stringify(invoiceResult));
-          if (insertError) {
-            console.log('Invoice insert error:', insertError.message);
+          if (existingError && existingError.code !== 'PGRST116') {
+            console.log('Error checking existing invoice:', existingError.message);
           }
-          console.log('Invoice created:', invoiceNumber);
-        } else {
-          console.log('Invoice already exists for sales order:', existingDelivery.sales_order_number);
+
+          if (!existingInvoice) {
+            // Create invoice with all required fields from sales order
+            const invoiceNumber = `INV-${Date.now()}`;
+            const { data: invoiceResult, error: insertError } = await supabase
+              .from('sales_invoices')
+              .insert({
+                invoice_number: invoiceNumber,
+                sales_order_number: salesOrder.sales_order_number,
+                customer_id: salesOrder.customer_id,
+                customer_name: salesOrder.customer_name,
+                product_id: salesOrder.product_id,
+                product_name: salesOrder.product_name,
+                quantity: salesOrder.quantity,
+                quantity_unit: salesOrder.quantity_unit,
+                price: salesOrder.price,
+                total_amount: salesOrder.total_amount,
+                invoice_date: new Date().toISOString().split('T')[0],
+                country: salesOrder.country,
+                cost_center: salesOrder.cost_center,
+                profit_center: salesOrder.profit_center,
+                tenant_id: salesOrder.tenant_id,
+              })
+              .select()
+              .single();
+
+            if (insertError) {
+              console.log('Invoice insert error:', insertError.message);
+            } else {
+              console.log('Invoice created:', invoiceNumber, 'Result:', JSON.stringify(invoiceResult));
+            }
+          } else {
+            console.log('Invoice already exists for sales order:', existingDelivery.sales_order_number);
+          }
         }
       } catch (invoiceErr: any) {
         console.error('Invoice creation error:', invoiceErr.message);
@@ -148,45 +166,63 @@ export async function PUT(req: NextRequest) {
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-    console.log('Delivery updated to:', delivery_status);
-    console.log('Fetched delivery record:', JSON.stringify(existingDelivery));
-
-    // If status is delivered, check if invoice exists and create one if not
+    // If status is delivered, create an invoice
     if (delivery_status === 'delivered' && existingDelivery) {
       try {
-        // Check if invoice already exists for this sales_order_number
-        const { data: existingInvoice, error: existingError } = await supabase
-          .from('sales_invoices')
-          .select('id')
+        // Fetch the sales order to get all required invoice fields
+        const { data: salesOrder, error: soError } = await supabase
+          .from('sales_orders')
+          .select('*')
           .eq('sales_order_number', existingDelivery.sales_order_number)
           .single();
 
-        console.log('Existing invoice check:', JSON.stringify(existingInvoice));
-        if (existingError) {
-          console.log('Existing invoice check error:', existingError.message);
-        }
-
-        if (!existingInvoice) {
-          // No invoice exists, create one
-          const invoiceNumber = `INV-${Date.now()}`;
-          const { data: invoiceResult, error: insertError } = await supabase
+        if (soError || !salesOrder) {
+          console.log('Could not fetch sales order:', soError?.message);
+        } else {
+          // Check if invoice already exists
+          const { data: existingInvoice, error: existingError } = await supabase
             .from('sales_invoices')
-            .insert({
-              invoice_number: invoiceNumber,
-              sales_order_number: existingDelivery.sales_order_number,
-              tenant_id: existingDelivery.tenant_id,
-              invoice_date: new Date().toISOString().split('T')[0],
-            })
-            .select()
+            .select('id')
+            .eq('sales_order_number', existingDelivery.sales_order_number)
             .single();
 
-          console.log('Invoice insert result:', JSON.stringify(invoiceResult));
-          if (insertError) {
-            console.log('Invoice insert error:', insertError.message);
+          if (existingError && existingError.code !== 'PGRST116') {
+            console.log('Error checking existing invoice:', existingError.message);
           }
-          console.log('Invoice created:', invoiceNumber);
-        } else {
-          console.log('Invoice already exists for sales order:', existingDelivery.sales_order_number);
+
+          if (!existingInvoice) {
+            // Create invoice with all required fields from sales order
+            const invoiceNumber = `INV-${Date.now()}`;
+            const { data: invoiceResult, error: insertError } = await supabase
+              .from('sales_invoices')
+              .insert({
+                invoice_number: invoiceNumber,
+                sales_order_number: salesOrder.sales_order_number,
+                customer_id: salesOrder.customer_id,
+                customer_name: salesOrder.customer_name,
+                product_id: salesOrder.product_id,
+                product_name: salesOrder.product_name,
+                quantity: salesOrder.quantity,
+                quantity_unit: salesOrder.quantity_unit,
+                price: salesOrder.price,
+                total_amount: salesOrder.total_amount,
+                invoice_date: new Date().toISOString().split('T')[0],
+                country: salesOrder.country,
+                cost_center: salesOrder.cost_center,
+                profit_center: salesOrder.profit_center,
+                tenant_id: salesOrder.tenant_id,
+              })
+              .select()
+              .single();
+
+            if (insertError) {
+              console.log('Invoice insert error:', insertError.message);
+            } else {
+              console.log('Invoice created:', invoiceNumber, 'Result:', JSON.stringify(invoiceResult));
+            }
+          } else {
+            console.log('Invoice already exists for sales order:', existingDelivery.sales_order_number);
+          }
         }
       } catch (invoiceErr: any) {
         console.error('Invoice creation error:', invoiceErr.message);
