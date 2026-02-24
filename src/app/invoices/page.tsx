@@ -44,9 +44,11 @@ export default function InvoicesPage() {
       const headers: Record<string, string> = {};
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
+      console.log('Fetching invoices with tenantId:', tid);
       const res = await fetch(`/api/invoices?tenantId=${tid}`, { headers });
       if (res.ok) {
         const data = await res.json();
+        console.log('Invoices response:', JSON.stringify(data));
         setInvoices(data);
       }
     } catch (err) {
