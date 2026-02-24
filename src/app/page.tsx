@@ -231,7 +231,16 @@ export default function Home() {
         
         {/* Header */}
         <header style={{...styles.header, backgroundColor: cardBg, borderBottomColor: borderColor}}>
-          <div style={styles.headerContent}>
+          <div style={{
+            maxWidth: '1400px',
+            margin: '0 auto',
+            display: 'flex',
+            flexDirection: isMobile ? 'column' : 'row',
+            justifyContent: 'space-between',
+            alignItems: isMobile ? 'center' : 'center',
+            gap: '12px',
+            padding: isMobile ? '12px' : '0',
+          }}>
             <div style={styles.logo}>
               <svg width="160" height="44" viewBox="0 0 200 50">
                 <defs>
@@ -248,7 +257,13 @@ export default function Home() {
               </svg>
             </div>
             
-            <div style={styles.headerCenter}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '16px',
+              flex: isMobile ? 'none' : 1,
+            }}>
               {selectedTenant?.name && (
                 <div style={styles.headerItem}>
                   <span style={{...styles.headerLabel, color: mutedColor}}>TENANT</span>
@@ -273,7 +288,14 @@ export default function Home() {
               )}
             </div>
             
-            <div style={styles.headerRight}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              flexWrap: 'wrap',
+              maxWidth: isMobile ? '100%' : 'auto',
+            }}>
               <div style={styles.headerControlCompact}>
                 <LanguageSwitcher />
               </div>
