@@ -33,15 +33,16 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const {
       customer_id,
+      customer_name,
       sales_order_number,
+      amount_due,
       amount_received,
-      bank_id,
-      account_id,
-      received_date,
+      status,
+      due_date,
       tenant_id,
     } = body;
 
-    if (!customer_id || !sales_order_number || !tenant_id) {
+    if (!sales_order_number || !tenant_id) {
       return NextResponse.json({ error: 'Required fields missing' }, { status: 400 });
     }
 
@@ -49,11 +50,12 @@ export async function POST(req: NextRequest) {
       .from('receivables')
       .insert({
         customer_id,
+        customer_name,
         sales_order_number,
+        amount_due: amount_due || 0,
         amount_received: amount_received || 0,
-        bank_id,
-        account_id,
-        received_date,
+        status: status || 'unpaid',
+        due_date,
         tenant_id,
       })
       .select()
@@ -61,6 +63,34 @@ export async function POST(req: NextRequest) {
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json(data, { status: 201 });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
+
+export async function PATCH(req: NextRequest) {
+  try {
+    const supabase = getSupabaseClient();
+    const body = await req.json();
+    const { id, amount_received, status } = body;
+
+    if (!id) {
+      return NextResponse.json({ error: 'ID required' }, { status: 400 });
+    }
+
+    const updates: any = {};
+    if (amount_received !== undefined) updates.amount_received = amount_received;
+    if (status) updates.status = status;
+
+    const { data, error } = await supabase
+      .from('receivables')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(data);
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
