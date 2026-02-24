@@ -479,7 +479,6 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'space-between',
     alignItems: 'center',
     gap: '20px',
-    flexWrap: 'wrap',
   },
   headerCenter: {
     display: 'flex',
@@ -505,9 +504,7 @@ const styles: Record<string, React.CSSProperties> = {
   headerRight: {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
-    flexWrap: 'wrap',
-    justifyContent: 'flex-end',
+    gap: '16px',
   },
   headerLabel: {
     fontSize: '0.625rem',
@@ -523,12 +520,12 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '0.9rem',
   },
   headerBtnCompact: {
-    padding: '4px 8px',
+    padding: '6px 12px',
     color: 'white',
     borderRadius: '6px',
     textDecoration: 'none',
     fontWeight: 600,
-    fontSize: '0.75rem',
+    fontSize: '0.8rem',
     whiteSpace: 'nowrap',
   },
   headerControlCompact: {
