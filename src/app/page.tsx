@@ -224,19 +224,25 @@ export default function Home() {
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       <>
         <style>{`
-          @media (max-width: 768px) {
+          @media (max-width: 900px), (max-device-width: 900px) {
             .header-content {
               flex-direction: column !important;
+              align-items: center !important;
               gap: 8px !important;
+            }
+            .header-center {
+              order: -1 !important;
             }
             .header-buttons {
               flex-wrap: wrap !important;
               justify-content: center !important;
-              max-width: 100% !important;
+              width: 100% !important;
+              gap: 4px !important;
             }
             .header-buttons a, .header-buttons button {
-              font-size: 0.7rem !important;
-              padding: 4px 8px !important;
+              font-size: 11px !important;
+              padding: 3px 6px !important;
+              min-height: 28px !important;
             }
           }
         `}</style>
@@ -274,13 +280,12 @@ export default function Home() {
               </svg>
             </div>
             
-            <div style={{
+            <div className="header-center" style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '16px',
-              flex: isMobile ? 'none' : 1,
-            }}>
+            }}>>
               {selectedTenant?.name && (
                 <div style={styles.headerItem}>
                   <span style={{...styles.headerLabel, color: mutedColor}}>TENANT</span>
