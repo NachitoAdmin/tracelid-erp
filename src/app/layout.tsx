@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { LanguageProvider } from '@/lib/LanguageContext'
 import { CurrencyProvider } from '@/lib/CurrencyContext'
+import MaintenanceCheck from '@/components/MaintenanceCheck'
 
 export const metadata: Metadata = {
   title: 'Tracelid - Business Intelligence & Analytics',
@@ -18,7 +19,9 @@ export default function RootLayout({
       <body>
         <LanguageProvider>
           <CurrencyProvider>
-            {children}
+            <MaintenanceCheck>
+              {children}
+            </MaintenanceCheck>
           </CurrencyProvider>
         </LanguageProvider>
       </body>
