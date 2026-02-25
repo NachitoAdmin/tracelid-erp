@@ -232,10 +232,10 @@ export default function Home() {
         <style>{`
           @media screen and (max-width: 600px) {
             .mobile-header-container {
-              flex-direction: column !important;
+              flex-direction: row !important;
               align-items: center !important;
-              padding: 8px !important;
-              gap: 6px !important;
+              padding: 8px 12px !important;
+              gap: 8px !important;
             }
             .mobile-header-logo {
               margin-bottom: 0 !important;
@@ -248,29 +248,52 @@ export default function Home() {
               font-size: 18px !important;
             }
             .mobile-header-center {
-              order: 2 !important;
-              gap: 12px !important;
-              font-size: 0.85rem !important;
-            }
-            .mobile-header-center .headerItem {
-              padding: 2px 6px !important;
+              display: none !important;
             }
             .mobile-header-buttons {
-              order: 3 !important;
-              width: 100% !important;
-              flex-direction: row !important;
-              gap: 4px !important;
+              display: none !important;
             }
-            .mobile-header-buttons > div {
+            .mobile-layout {
               display: flex !important;
-              justify-content: center !important;
-              gap: 4px !important;
-              flex-wrap: nowrap !important;
+              flex-direction: row !important;
             }
-            .mobile-menu-btn {
-              padding: 4px 8px !important;
-              font-size: 0.7rem !important;
-              min-width: auto !important;
+            .mobile-sidebar {
+              display: flex !important;
+              flex-direction: column !important;
+              width: 60px !important;
+              min-height: calc(100vh - 60px) !important;
+              background-color: ${cardBg} !important;
+              border-right: 1px solid ${borderColor} !important;
+              padding: 8px 4px !important;
+              gap: 8px !important;
+              position: fixed !important;
+              left: 0 !important;
+              top: 60px !important;
+              z-index: 100 !important;
+            }
+            .mobile-sidebar-btn {
+              writing-mode: vertical-rl !important;
+              text-orientation: mixed !important;
+              transform: rotate(180deg) !important;
+              padding: 8px 4px !important;
+              font-size: 0.65rem !important;
+              border-radius: 4px !important;
+              color: white !important;
+              text-decoration: none !important;
+              text-align: center !important;
+              min-height: 60px !important;
+              display: flex !important;
+              align-items: center !important;
+              justify-content: center !important;
+            }
+            .mobile-main {
+              margin-left: 60px !important;
+              width: calc(100% - 60px) !important;
+            }
+          }
+          @media screen and (min-width: 601px) {
+            .mobile-sidebar {
+              display: none !important;
             }
           }
         `}</style>
@@ -353,20 +376,20 @@ export default function Home() {
               
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'center' }}>
                 {(isOwner || isAdmin) && (
-                  <a href="/master-data" className="mobile-menu-btn" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)'}}>
+                  <a href="/master-data" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)'}}>
                     Data
                   </a>
                 )}
                 
-                <a href="/financial-analysis" className="mobile-menu-btn" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #10B981 0%, #34D399 100%)'}}>
+                <a href="/financial-analysis" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #10B981 0%, #34D399 100%)'}}>
                   Finance
                 </a>
                 
-                <a href="/analytics" className="mobile-menu-btn" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #6C5CE7 0%, #764ba2 100%)'}}>
+                <a href="/analytics" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #6C5CE7 0%, #764ba2 100%)'}}>
                   Stats
                 </a>
                 
-                <button onClick={handleLogout} className="mobile-menu-btn" style={{...styles.headerBtnCompact, background: '#EF4444'}}>
+                <button onClick={handleLogout} style={{...styles.headerBtnCompact, background: '#EF4444'}}>
                   Logout
                 </button>
               </div>
@@ -374,7 +397,25 @@ export default function Home() {
           </div>
         </header>
 
-        <main style={styles.main}>
+        {/* Mobile Sidebar - Only visible on mobile */}
+        <div className="mobile-sidebar">
+          {(isOwner || isAdmin) && (
+            <a href="/master-data" className="mobile-sidebar-btn" style={{background: 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)'}}>
+              Data
+            </a>
+          )}
+          <a href="/financial-analysis" className="mobile-sidebar-btn" style={{background: 'linear-gradient(135deg, #10B981 0%, #34D399 100%)'}}>
+            Finance
+          </a>
+          <a href="/analytics" className="mobile-sidebar-btn" style={{background: 'linear-gradient(135deg, #6C5CE7 0%, #764ba2 100%)'}}>
+            Stats
+          </a>
+          <button onClick={handleLogout} className="mobile-sidebar-btn" style={{background: '#EF4444', border: 'none', cursor: 'pointer'}}>
+            Logout
+          </button>
+        </div>
+
+        <main className="mobile-main" style={styles.main}>
           {/* Tenant Bar */}
           {isOwner && (
             <div style={{...styles.tenantBar, backgroundColor: cardBg, borderColor}}>
