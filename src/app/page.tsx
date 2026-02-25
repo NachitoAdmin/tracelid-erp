@@ -147,15 +147,17 @@ export default function Home() {
       const headers: Record<string, string> = {}
       if (token) headers.Authorization = `Bearer ${token}`
       
-      const [salesRes, deliveryRes, invoicesRes] = await Promise.all([
+      const [salesRes, deliveryRes, invoicesRes, costsRes] = await Promise.all([
         fetch(`/api/sales-orders?tenantId=${tenantId}`, { headers }),
         fetch(`/api/delivery-status?tenantId=${tenantId}&status=pending`, { headers }),
-        fetch(`/api/invoices?tenantId=${tenantId}`, { headers })
+        fetch(`/api/invoices?tenantId=${tenantId}`, { headers }),
+        fetch(`/api/costs-expenses?tenantId=${tenantId}`, { headers })
       ])
       
       const sales = salesRes.ok ? await salesRes.json() : []
       const deliveries = deliveryRes.ok ? await deliveryRes.json() : []
       const invoices = invoicesRes.ok ? await invoicesRes.json() : []
+      const costs = costsRes.ok ? await costsRes.json() : []
       
       const unpaidInvoices = invoices.filter((inv: any) => inv.status === 'unpaid')
       const paidInvoices = invoices.filter((inv: any) => inv.status === 'paid')
@@ -165,7 +167,7 @@ export default function Home() {
         pendingDeliveries: deliveries.length,
         unpaidInvoices: unpaidInvoices.length,
         totalReceivables: paidInvoices.length,
-        costsExpenses: 0
+        costsExpenses: costs.length
       })
     } catch (err) {
       console.error('Error fetching stats:', err)
@@ -518,11 +520,11 @@ export default function Home() {
             <Link href="/costs-expenses" style={{textDecoration: 'none'}}>
               <div style={{...styles.navCard, backgroundColor: cardBg, borderColor}}>
                 <div style={{...styles.navIcon, backgroundColor: '#EC489920', color: '#EC4899'}}>💸</div>
-                <h3 style={{...styles.navTitle, color: textColor}}>Costs/Expenses</h3>
+                <h3 style={{...styles.navTitle, color: textColor}}>Costs / Expenses</h3>
                 <p style={{...styles.navDesc, color: mutedColor}}>
-                  Track and manage costs, expenses, and overhead.
+                  Track and manage business costs and expenses.
                 </p>
-                <span style={{...styles.navLink, color: '#EC4899'}}>Go to Costs →</span>
+                <span style={{...styles.navLink, color: '#EC4899'}}>Go to Costs/Expenses →</span>
               </div>
             </Link>
             
