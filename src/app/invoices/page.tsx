@@ -16,6 +16,7 @@ interface Invoice {
   price: number;
   total_amount: number;
   invoice_date: string;
+  status?: string;
   country: string;
   cost_center: string;
   profit_center: string;
@@ -73,6 +74,65 @@ export default function InvoicesPage() {
       }
     } catch (err) {
       console.error('Error deleting invoice:', err);
+    }
+  };
+
+  const handleMarkAsPaid = async (inv: Invoice) => {
+    if (!confirm('Mark this invoice as paid?')) return;
+
+    try {
+      const token = localStorage.getItem('tracelid-token');
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      // Update invoice status
+      const invoiceRes = await fetch('/api/invoices', {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({ id: inv.id, status: 'paid' }),
+      });
+
+      if (!invoiceRes.ok) {
+        console.error('Failed to update invoice');
+        return;
+      }
+
+      // Update receivable
+      await fetch('/api/receivables', {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({
+          sales_order_number: inv.sales_order_number,
+          status: 'paid',
+          amount_received: inv.total_amount,
+        }),
+      });
+
+      fetchInvoices(tenantId);
+    } catch (err) {
+      console.error('Error marking invoice as paid:', err);
+    }
+  };
+
+  const handleStatusChange = async (id: string, newStatus: string) => {
+    try {
+      const token = localStorage.getItem('tracelid-token');
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch('/api/invoices', {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({ id, status: newStatus }),
+      });
+
+      if (res.ok) {
+        fetchInvoices(tenantId);
+      } else {
+        console.error('Failed to update status');
+      }
+    } catch (err) {
+      console.error('Error updating status:', err);
     }
   };
 
@@ -185,10 +245,8 @@ export default function InvoicesPage() {
                   <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Order #</th>
                   <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Customer</th>
                   <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Product</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Qty</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Unit</th>
                   <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Amount</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Date</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Status</th>
                   <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Actions</th>
                 </tr>
               </thead>
@@ -206,11 +264,44 @@ export default function InvoicesPage() {
                     </td>
                     <td style={{ padding: '16px', color: '#1F2937' }}>{inv.customer_name}</td>
                     <td style={{ padding: '16px', color: '#6B7280' }}>{inv.product_name}</td>
-                    <td style={{ padding: '16px', color: '#6B7280' }}>{inv.quantity}</td>
-                    <td style={{ padding: '16px', color: '#6B7280' }}>{inv.quantity_unit}</td>
                     <td style={{ padding: '16px', fontWeight: 600, color: '#1F2937' }}>${inv.total_amount?.toFixed(2)}</td>
-                    <td style={{ padding: '16px', color: '#6B7280', fontSize: '0.875rem' }}>{new Date(inv.invoice_date).toLocaleDateString()}</td>
                     <td style={{ padding: '16px' }}>
+                      <select
+                        value={inv.status || 'unpaid'}
+                        onChange={(e) => handleStatusChange(inv.id, e.target.value)}
+                        style={{
+                          padding: '6px 10px',
+                          borderRadius: '6px',
+                          border: '1px solid #E5E7EB',
+                          fontSize: '0.875rem',
+                          backgroundColor: inv.status === 'paid' ? '#D1FAE5' : '#FEF3C7',
+                          color: inv.status === 'paid' ? '#065F46' : '#92400E',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <option value="unpaid">Unpaid</option>
+                        <option value="paid">Paid</option>
+                      </select>
+                    </td>
+                    <td style={{ padding: '16px' }}>
+                      {inv.status !== 'paid' && (
+                        <button
+                          onClick={() => handleMarkAsPaid(inv)}
+                          style={{
+                            padding: '6px 12px',
+                            backgroundColor: '#10B981',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontSize: '0.875rem',
+                            fontWeight: 600,
+                            marginRight: '8px',
+                          }}
+                        >
+                          Mark as Paid
+                        </button>
+                      )}
                       <button
                         onClick={() => handleDelete(inv.id)}
                         style={{

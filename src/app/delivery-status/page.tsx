@@ -90,6 +90,41 @@ export default function DeliveryStatusPage() {
     }
   };
 
+  const handleStatusChange = async (id: string, newStatus: string) => {
+    setUpdating(id);
+    setMessage('');
+
+    try {
+      const token = localStorage.getItem('tracelid-token');
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch('/api/delivery-status', {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify({
+          id,
+          delivery_status: newStatus,
+          delivery_date: newStatus === 'delivered' ? new Date().toISOString() : null,
+        }),
+      });
+
+      if (res.ok) {
+        if (newStatus === 'delivered') {
+          setMessage(`✅ Delivery marked as ${newStatus.replace('_', ' ')}! Invoice auto-generated.`);
+        }
+        fetchData(tenantId);
+      } else {
+        const err = await res.json();
+        setMessage(`❌ Error: ${err.error || 'Failed to update status'}`);
+      }
+    } catch (err) {
+      console.error('Error updating status:', err);
+    } finally {
+      setUpdating(null);
+    }
+  };
+
   const updateStatus = async (id: string, newStatus: string) => {
     setUpdating(id);
     setMessage('');
@@ -269,7 +304,6 @@ export default function DeliveryStatusPage() {
                   <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Qty</th>
                   <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Status</th>
                   <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Delivery Date</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Action</th>
                   <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Actions</th>
                 </tr>
               </thead>
@@ -282,31 +316,28 @@ export default function DeliveryStatusPage() {
                       <td style={{ padding: '16px', color: '#1F2937' }}>{order?.customer_name || '-'}</td>
                       <td style={{ padding: '16px', color: '#6B7280' }}>{order?.product_name || '-'}</td>
                       <td style={{ padding: '16px', color: '#6B7280' }}>{order?.quantity || '-'}</td>
-                      <td style={{ padding: '16px' }}>{getStatusBadge(d.delivery_status)}</td>
-                      <td style={{ padding: '16px', color: '#6B7280' }}>{d.delivery_date ? new Date(d.delivery_date).toLocaleDateString() : '-'}</td>
                       <td style={{ padding: '16px' }}>
-                        {d.delivery_status !== 'delivered' ? (
-                          <button
-                            onClick={() => updateStatus(d.id, getNextStatus(d.delivery_status))}
-                            disabled={updating === d.id}
-                            style={{
-                              padding: '8px 16px',
-                              backgroundColor: d.delivery_status === 'pending' ? '#F59E0B' : '#6C5CE7',
-                              color: '#fff',
-                              border: 'none',
-                              borderRadius: '6px',
-                              cursor: updating === d.id ? 'not-allowed' : 'pointer',
-                              fontSize: '0.875rem',
-                              fontWeight: 600,
-                              opacity: updating === d.id ? 0.6 : 1,
-                            }}
-                          >
-                            {updating === d.id ? 'Updating...' : getNextStatusLabel(d.delivery_status)}
-                          </button>
-                        ) : (
-                          <span style={{ color: '#10B981', fontSize: '0.875rem', fontWeight: 600 }}>✓ Completed</span>
-                        )}
+                        <select
+                          value={d.delivery_status}
+                          onChange={(e) => handleStatusChange(d.id, e.target.value)}
+                          disabled={updating === d.id}
+                          style={{
+                            padding: '6px 10px',
+                            borderRadius: '6px',
+                            border: '1px solid #E5E7EB',
+                            fontSize: '0.875rem',
+                            backgroundColor: d.delivery_status === 'delivered' ? '#D1FAE5' : d.delivery_status === 'in_transit' ? '#DBEAFE' : '#FEF3C7',
+                            color: d.delivery_status === 'delivered' ? '#065F46' : d.delivery_status === 'in_transit' ? '#1E40AF' : '#92400E',
+                            cursor: updating === d.id ? 'not-allowed' : 'pointer',
+                            opacity: updating === d.id ? 0.6 : 1,
+                          }}
+                        >
+                          <option value="pending">Pending</option>
+                          <option value="in_transit">In Transit</option>
+                          <option value="delivered">Delivered</option>
+                        </select>
                       </td>
+                      <td style={{ padding: '16px', color: '#6B7280' }}>{d.delivery_date ? new Date(d.delivery_date).toLocaleDateString() : '-'}</td>
                       <td style={{ padding: '16px' }}>
                         <button
                           onClick={() => handleDelete(d.id)}
@@ -322,6 +353,8 @@ export default function DeliveryStatusPage() {
                           title="Delete"
                         >
                           🗑️
+                        </button>
+                      </td>
                         </button>
                       </td>
                     </tr>

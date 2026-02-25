@@ -104,6 +104,35 @@ export default function ReceivablesPage() {
     }
   };
 
+  const handleStatusChange = async (rec: Receivable, newStatus: string) => {
+    try {
+      const token = localStorage.getItem('tracelid-token');
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const newAmountReceived = newStatus === 'paid' ? rec.amount_due : 
+                               newStatus === 'partial' ? rec.amount_received : 0;
+
+      const res = await fetch('/api/receivables', {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({
+          id: rec.id,
+          status: newStatus,
+          amount_received: newAmountReceived,
+        }),
+      });
+
+      if (res.ok) {
+        fetchReceivables(tenantId);
+      } else {
+        console.error('Failed to update status');
+      }
+    } catch (err) {
+      console.error('Error updating status:', err);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const colors: Record<string, { bg: string; color: string }> = {
       paid: { bg: '#10B98120', color: '#10B981' },
@@ -172,7 +201,6 @@ export default function ReceivablesPage() {
                   <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Amount Due</th>
                   <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Received</th>
                   <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Status</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Action</th>
                   <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Actions</th>
                 </tr>
               </thead>
@@ -183,7 +211,25 @@ export default function ReceivablesPage() {
                     <td style={{ padding: '16px', fontFamily: 'monospace', fontWeight: 600, color: '#6C5CE7' }}>{rec.sales_order_number}</td>
                     <td style={{ padding: '16px', fontWeight: 600 }}>${rec.amount_due?.toFixed(2)}</td>
                     <td style={{ padding: '16px', color: rec.amount_received > 0 ? '#10B981' : '#6B7280' }}>${rec.amount_received?.toFixed(2)}</td>
-                    <td style={{ padding: '16px' }}>{getStatusBadge(rec.status)}</td>
+                    <td style={{ padding: '16px' }}>
+                      <select
+                        value={rec.status}
+                        onChange={(e) => handleStatusChange(rec, e.target.value)}
+                        style={{
+                          padding: '6px 10px',
+                          borderRadius: '6px',
+                          border: '1px solid #E5E7EB',
+                          fontSize: '0.875rem',
+                          backgroundColor: rec.status === 'paid' ? '#D1FAE5' : rec.status === 'partial' ? '#FEF3C7' : '#FEE2E2',
+                          color: rec.status === 'paid' ? '#065F46' : rec.status === 'partial' ? '#92400E' : '#991B1B',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <option value="unpaid">Unpaid</option>
+                        <option value="partial">Partial</option>
+                        <option value="paid">Paid</option>
+                      </select>
+                    </td>
                     <td style={{ padding: '16px' }}>
                       {rec.status !== 'paid' && (
                         <button
@@ -196,13 +242,28 @@ export default function ReceivablesPage() {
                             borderRadius: '6px',
                             cursor: 'pointer',
                             fontSize: '0.875rem',
+                            marginRight: '8px',
                           }}
                         >
                           Record Payment
                         </button>
                       )}
+                      <button
+                        onClick={() => handleDelete(rec.id)}
+                        style={{
+                          padding: '6px 10px',
+                          backgroundColor: 'transparent',
+                          color: '#EF4444',
+                          border: 'none',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          fontSize: '0.875rem',
+                        }}
+                        title="Delete"
+                      >
+                        🗑️
+                      </button>
                     </td>
-                    <td style={{ padding: '16px' }}>
                       <button
                         onClick={() => handleDelete(rec.id)}
                         style={{

@@ -52,3 +52,34 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
+
+// PATCH /api/invoices - Update invoice status
+export async function PATCH(req: NextRequest) {
+  try {
+    const supabase = getSupabaseClient();
+    const body = await req.json();
+    const { id, status } = body;
+
+    if (!id || !status) {
+      return NextResponse.json(
+        { error: 'id and status are required' },
+        { status: 400 }
+      );
+    }
+
+    const { data, error } = await supabase
+      .from('sales_invoices')
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json(data);
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}

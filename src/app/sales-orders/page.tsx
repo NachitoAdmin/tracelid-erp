@@ -43,7 +43,7 @@ interface SalesOrder {
   country: string;
   cost_center: string;
   profit_center: string;
-  status: 'pending' | 'delivered' | 'invoiced';
+  status: 'pending' | 'processing' | 'cancelled' | 'delivered' | 'invoiced';
   transaction_type: 'SALE' | 'COST' | 'RETURN';
   created_at: string;
 }
@@ -144,6 +144,28 @@ export default function SalesOrdersPage() {
       }
     } catch (err) {
       console.error('Error deleting sales order:', err);
+    }
+  };
+
+  const handleStatusChange = async (id: string, newStatus: string) => {
+    try {
+      const token = localStorage.getItem('tracelid-token');
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch('/api/sales-orders', {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({ id, status: newStatus }),
+      });
+
+      if (res.ok) {
+        fetchOrders(tenantId);
+      } else {
+        console.error('Failed to update status');
+      }
+    } catch (err) {
+      console.error('Error updating status:', err);
     }
   };
 
@@ -404,7 +426,25 @@ export default function SalesOrdersPage() {
                     <td style={{ padding: '16px', color: '#6B7280' }}>{order.quantity} {order.quantity_unit}</td>
                     <td style={{ padding: '16px', color: '#6B7280' }}>${order.price?.toFixed(2)}</td>
                     <td style={{ padding: '16px', fontWeight: 600, color: '#1F2937' }}>${order.total_amount?.toFixed(2)}</td>
-                    <td style={{ padding: '16px' }}>{getStatusBadge(order.status)}</td>
+                    <td style={{ padding: '16px' }}>
+                      <select
+                        value={order.status}
+                        onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                        style={{
+                          padding: '6px 10px',
+                          borderRadius: '6px',
+                          border: '1px solid #E5E7EB',
+                          fontSize: '0.875rem',
+                          backgroundColor: order.status === 'cancelled' ? '#FEE2E2' : order.status === 'processing' ? '#DBEAFE' : '#FEF3C7',
+                          color: order.status === 'cancelled' ? '#991B1B' : order.status === 'processing' ? '#1E40AF' : '#92400E',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="processing">Processing</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
+                    </td>
                     <td style={{ padding: '16px', color: '#6B7280', fontSize: '0.875rem' }}>{new Date(order.created_at).toLocaleDateString()}</td>
                     <td style={{ padding: '16px' }}>
                       <button
