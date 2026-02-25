@@ -8,10 +8,15 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
   use: {
-    baseURL: process.env.BASE_URL || 'https://erp-nextjs-jqbv317l2-nachitoadmins-projects.vercel.app',
+    baseURL: process.env.BASE_URL || 'https://tracelid-j8am7ly4v-nachitoadmins-projects.vercel.app',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     headless: true,
+    extraHTTPHeaders: {
+      ...(process.env.VERCEL_AUTOMATION_BYPASS_SECRET
+        ? { 'x-vercel-protection-bypass': process.env.VERCEL_AUTOMATION_BYPASS_SECRET }
+        : {}),
+    },
   },
   projects: [
     {
