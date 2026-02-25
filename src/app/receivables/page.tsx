@@ -264,22 +264,6 @@ export default function ReceivablesPage() {
                         🗑️
                       </button>
                     </td>
-                      <button
-                        onClick={() => handleDelete(rec.id)}
-                        style={{
-                          padding: '6px 10px',
-                          backgroundColor: 'transparent',
-                          color: '#EF4444',
-                          border: 'none',
-                          borderRadius: '6px',
-                          cursor: 'pointer',
-                          fontSize: '0.875rem',
-                        }}
-                        title="Delete"
-                      >
-                        🗑️
-                      </button>
-                    </td>
                   </tr>
                 ))}
               </tbody>
