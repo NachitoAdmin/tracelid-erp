@@ -355,8 +355,6 @@ export default function DeliveryStatusPage() {
                           🗑️
                         </button>
                       </td>
-                        </button>
-                      </td>
                     </tr>
                   );
                 })}
