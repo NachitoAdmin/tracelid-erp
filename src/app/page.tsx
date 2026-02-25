@@ -158,12 +158,13 @@ export default function Home() {
       const invoices = invoicesRes.ok ? await invoicesRes.json() : []
       
       const unpaidInvoices = invoices.filter((inv: any) => inv.status === 'unpaid')
+      const paidInvoices = invoices.filter((inv: any) => inv.status === 'paid')
       
       setStats({
         salesOrders: sales.length,
         pendingDeliveries: deliveries.length,
         unpaidInvoices: unpaidInvoices.length,
-        totalReceivables: unpaidInvoices.reduce((sum: number, inv: any) => sum + (inv.total_amount || 0), 0),
+        totalReceivables: paidInvoices.length,
         costsExpenses: 0
       })
     } catch (err) {
@@ -438,8 +439,8 @@ export default function Home() {
             </div>
             <div style={{...styles.statCard, backgroundColor: cardBg, borderColor}}>
               <div style={styles.statIcon}>💰</div>
-              <div style={{...styles.statValue, color: '#10B981'}}>${stats.totalReceivables.toFixed(2)}</div>
-              <div style={{...styles.statLabel, color: mutedColor}}>Total Receivables</div>
+              <div style={{...styles.statValue, color: '#10B981'}}>{stats.totalReceivables}</div>
+              <div style={{...styles.statLabel, color: mutedColor}}>Paid Invoices</div>
             </div>
           </div>
 
