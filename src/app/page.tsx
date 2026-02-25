@@ -235,25 +235,42 @@ export default function Home() {
               flex-direction: column !important;
               align-items: center !important;
               padding: 8px !important;
+              gap: 6px !important;
             }
             .mobile-header-logo {
-              margin-bottom: 4px !important;
+              margin-bottom: 0 !important;
+            }
+            .mobile-header-logo svg {
+              width: 120px !important;
+              height: 32px !important;
+            }
+            .mobile-header-logo text {
+              font-size: 18px !important;
             }
             .mobile-header-center {
               order: 2 !important;
-              margin-bottom: 4px !important;
+              gap: 12px !important;
+              font-size: 0.85rem !important;
+            }
+            .mobile-header-center .headerItem {
+              padding: 2px 6px !important;
             }
             .mobile-header-buttons {
               order: 3 !important;
               width: 100% !important;
-              flex-direction: column !important;
+              flex-direction: row !important;
               gap: 4px !important;
             }
             .mobile-header-buttons > div {
               display: flex !important;
               justify-content: center !important;
               gap: 4px !important;
-              flex-wrap: wrap !important;
+              flex-wrap: nowrap !important;
+            }
+            .mobile-menu-btn {
+              padding: 4px 8px !important;
+              font-size: 0.7rem !important;
+              min-width: auto !important;
             }
           }
         `}</style>
@@ -336,20 +353,20 @@ export default function Home() {
               
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'center' }}>
                 {(isOwner || isAdmin) && (
-                  <a href="/master-data" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)'}}>
+                  <a href="/master-data" className="mobile-menu-btn" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)'}}>
                     Data
                   </a>
                 )}
                 
-                <a href="/financial-analysis" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #10B981 0%, #34D399 100%)'}}>
+                <a href="/financial-analysis" className="mobile-menu-btn" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #10B981 0%, #34D399 100%)'}}>
                   Finance
                 </a>
                 
-                <a href="/analytics" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #6C5CE7 0%, #764ba2 100%)'}}>
+                <a href="/analytics" className="mobile-menu-btn" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #6C5CE7 0%, #764ba2 100%)'}}>
                   Stats
                 </a>
                 
-                <button onClick={handleLogout} style={{...styles.headerBtnCompact, background: '#EF4444'}}>
+                <button onClick={handleLogout} className="mobile-menu-btn" style={{...styles.headerBtnCompact, background: '#EF4444'}}>
                   Logout
                 </button>
               </div>

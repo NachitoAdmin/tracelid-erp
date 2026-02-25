@@ -83,7 +83,7 @@ export async function PATCH(req: NextRequest) {
     if (status) updates.status = status;
     updates.updated_at = new Date().toISOString();
 
-    const { data, error } = await supabase
+    const { data: receivable, error } = await supabase
       .from('receivables')
       .update(updates)
       .eq('id', id)
@@ -91,7 +91,17 @@ export async function PATCH(req: NextRequest) {
       .single();
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json(data);
+
+    // Also update the corresponding invoice status
+    if (receivable && receivable.sales_order_number) {
+      const invoiceStatus = status === 'paid' ? 'paid' : (status === 'partial' ? 'partial' : 'unpaid');
+      await supabase
+        .from('sales_invoices')
+        .update({ status: invoiceStatus, updated_at: new Date().toISOString() })
+        .eq('sales_order_number', receivable.sales_order_number);
+    }
+
+    return NextResponse.json(receivable);
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
