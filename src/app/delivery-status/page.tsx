@@ -70,6 +70,26 @@ export default function DeliveryStatusPage() {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this item?')) return;
+
+    try {
+      const res = await fetch('/api/delivery-status', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+
+      if (res.ok) {
+        fetchData(tenantId);
+      } else {
+        console.error('Failed to delete delivery');
+      }
+    } catch (err) {
+      console.error('Error deleting delivery:', err);
+    }
+  };
+
   const updateStatus = async (id: string, newStatus: string) => {
     setUpdating(id);
     setMessage('');
@@ -250,6 +270,7 @@ export default function DeliveryStatusPage() {
                   <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Status</th>
                   <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Delivery Date</th>
                   <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Action</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -285,6 +306,23 @@ export default function DeliveryStatusPage() {
                         ) : (
                           <span style={{ color: '#10B981', fontSize: '0.875rem', fontWeight: 600 }}>✓ Completed</span>
                         )}
+                      </td>
+                      <td style={{ padding: '16px' }}>
+                        <button
+                          onClick={() => handleDelete(d.id)}
+                          style={{
+                            padding: '6px 10px',
+                            backgroundColor: 'transparent',
+                            color: '#EF4444',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontSize: '0.875rem',
+                          }}
+                          title="Delete"
+                        >
+                          🗑️
+                        </button>
                       </td>
                     </tr>
                   );

@@ -56,6 +56,26 @@ export default function InvoicesPage() {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this item?')) return;
+
+    try {
+      const res = await fetch('/api/invoices', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+
+      if (res.ok) {
+        fetchInvoices(tenantId);
+      } else {
+        console.error('Failed to delete invoice');
+      }
+    } catch (err) {
+      console.error('Error deleting invoice:', err);
+    }
+  };
+
   const filteredInvoices = invoices.filter(inv => {
     if (filter === 'all') return true;
     const invDate = new Date(inv.invoice_date);
@@ -169,6 +189,7 @@ export default function InvoicesPage() {
                   <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Unit</th>
                   <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Amount</th>
                   <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Date</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -189,6 +210,23 @@ export default function InvoicesPage() {
                     <td style={{ padding: '16px', color: '#6B7280' }}>{inv.quantity_unit}</td>
                     <td style={{ padding: '16px', fontWeight: 600, color: '#1F2937' }}>${inv.total_amount?.toFixed(2)}</td>
                     <td style={{ padding: '16px', color: '#6B7280', fontSize: '0.875rem' }}>{new Date(inv.invoice_date).toLocaleDateString()}</td>
+                    <td style={{ padding: '16px' }}>
+                      <button
+                        onClick={() => handleDelete(inv.id)}
+                        style={{
+                          padding: '6px 10px',
+                          backgroundColor: 'transparent',
+                          color: '#EF4444',
+                          border: 'none',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          fontSize: '0.875rem',
+                        }}
+                        title="Delete"
+                      >
+                        🗑️
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>

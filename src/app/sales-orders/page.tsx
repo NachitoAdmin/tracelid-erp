@@ -127,6 +127,26 @@ export default function SalesOrdersPage() {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this item?')) return;
+
+    try {
+      const res = await fetch('/api/sales-orders', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+
+      if (res.ok) {
+        fetchOrders(tenantId);
+      } else {
+        console.error('Failed to delete sales order');
+      }
+    } catch (err) {
+      console.error('Error deleting sales order:', err);
+    }
+  };
+
   const fetchMasterData = async (tid: string) => {
     try {
       const [customersRes, productsRes, glRes] = await Promise.all([
@@ -371,6 +391,7 @@ export default function SalesOrdersPage() {
                   <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Total</th>
                   <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Status</th>
                   <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Created</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -385,6 +406,23 @@ export default function SalesOrdersPage() {
                     <td style={{ padding: '16px', fontWeight: 600, color: '#1F2937' }}>${order.total_amount?.toFixed(2)}</td>
                     <td style={{ padding: '16px' }}>{getStatusBadge(order.status)}</td>
                     <td style={{ padding: '16px', color: '#6B7280', fontSize: '0.875rem' }}>{new Date(order.created_at).toLocaleDateString()}</td>
+                    <td style={{ padding: '16px' }}>
+                      <button
+                        onClick={() => handleDelete(order.id)}
+                        style={{
+                          padding: '6px 10px',
+                          backgroundColor: 'transparent',
+                          color: '#EF4444',
+                          border: 'none',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          fontSize: '0.875rem',
+                        }}
+                        title="Delete"
+                      >
+                        🗑️
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>

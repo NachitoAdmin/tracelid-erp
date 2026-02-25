@@ -80,6 +80,30 @@ export default function ReceivablesPage() {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this receivable?')) return;
+
+    try {
+      const token = localStorage.getItem('tracelid-token');
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch('/api/receivables', {
+        method: 'DELETE',
+        headers,
+        body: JSON.stringify({ id }),
+      });
+
+      if (res.ok) {
+        fetchReceivables(tenantId);
+      } else {
+        console.error('Failed to delete receivable');
+      }
+    } catch (err) {
+      console.error('Error deleting receivable:', err);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const colors: Record<string, { bg: string; color: string }> = {
       paid: { bg: '#10B98120', color: '#10B981' },
@@ -149,6 +173,7 @@ export default function ReceivablesPage() {
                   <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Received</th>
                   <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Status</th>
                   <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Action</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -176,6 +201,23 @@ export default function ReceivablesPage() {
                           Record Payment
                         </button>
                       )}
+                    </td>
+                    <td style={{ padding: '16px' }}>
+                      <button
+                        onClick={() => handleDelete(rec.id)}
+                        style={{
+                          padding: '6px 10px',
+                          backgroundColor: 'transparent',
+                          color: '#EF4444',
+                          border: 'none',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          fontSize: '0.875rem',
+                        }}
+                        title="Delete"
+                      >
+                        🗑️
+                      </button>
                     </td>
                   </tr>
                 ))}
