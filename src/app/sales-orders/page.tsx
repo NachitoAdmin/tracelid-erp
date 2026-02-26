@@ -76,6 +76,7 @@ export default function SalesOrdersPage() {
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [statusMessage, setStatusMessage] = useState('');
 
   // Searchable dropdown states
   const [customerSearch, setCustomerSearch] = useState('');
@@ -186,11 +187,17 @@ export default function SalesOrdersPage() {
         if (savedTenantId) {
           fetchOrders(savedTenantId);
         }
+        setStatusMessage('Status updated successfully');
+        setTimeout(() => setStatusMessage(''), 3000);
       } else {
         console.error('Failed to update status');
+        setStatusMessage('Failed to update status');
+        setTimeout(() => setStatusMessage(''), 3000);
       }
     } catch (err) {
       console.error('Error updating status:', err);
+      setStatusMessage('Failed to update status');
+      setTimeout(() => setStatusMessage(''), 3000);
     }
   };
 
@@ -401,6 +408,20 @@ export default function SalesOrdersPage() {
             {message}
           </div>
         )}
+        
+        {statusMessage && (
+          <div
+            style={{
+              padding: '12px 16px',
+              borderRadius: '8px',
+              marginBottom: '16px',
+              backgroundColor: statusMessage.includes('success') ? '#D1FAE5' : '#FEE2E2',
+              color: statusMessage.includes('success') ? '#065F46' : '#991B1B',
+            }}
+          >
+            {statusMessage}
+          </div>
+        )}
 
         {loading ? (
           <div style={{ textAlign: 'center', padding: '40px', color: '#6B7280' }}>{t('loading')}</div>
@@ -429,16 +450,16 @@ export default function SalesOrdersPage() {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ backgroundColor: inputBg }}>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>{t('orderNumber')}</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Type</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>{t('customer')}</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>{t('product')}</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>{t('quantity')}</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>{t('price')}</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>{t('total')}</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>{t('status')}</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>{t('date')}</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>{t('actions')}</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: textColor, textTransform: 'uppercase' }}>{t('orderNumber')}</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: textColor, textTransform: 'uppercase' }}>Type</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: textColor, textTransform: 'uppercase' }}>{t('customer')}</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: textColor, textTransform: 'uppercase' }}>{t('product')}</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: textColor, textTransform: 'uppercase' }}>{t('quantity')}</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: textColor, textTransform: 'uppercase' }}>{t('price')}</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: textColor, textTransform: 'uppercase' }}>{t('total')}</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: textColor, textTransform: 'uppercase' }}>{t('status')}</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: textColor, textTransform: 'uppercase' }}>{t('date')}</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: textColor, textTransform: 'uppercase' }}>{t('actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -447,9 +468,9 @@ export default function SalesOrdersPage() {
                     <td style={{ padding: '16px', fontFamily: 'monospace', fontWeight: 600, color: '#6C5CE7' }}>{order.sales_order_number}</td>
                     <td style={{ padding: '16px' }}>{getTransactionTypeBadge(order.transaction_type || 'SALE')}</td>
                     <td style={{ padding: '16px', color: textColor }}>{order.customer_name}</td>
-                    <td style={{ padding: '16px', color: mutedColor }}>{order.product_name}</td>
-                    <td style={{ padding: '16px', color: mutedColor }}>{order.quantity} {order.quantity_unit}</td>
-                    <td style={{ padding: '16px', color: mutedColor }}>{formatCurrency(order.price, currency)}</td>
+                    <td style={{ padding: '16px', color: textColor }}>{order.product_name}</td>
+                    <td style={{ padding: '16px', color: textColor }}>{order.quantity} {order.quantity_unit}</td>
+                    <td style={{ padding: '16px', color: textColor }}>{formatCurrency(order.price, currency)}</td>
                     <td style={{ padding: '16px', fontWeight: 600, color: textColor }}>{formatCurrency(order.total_amount, currency)}</td>
                     <td style={{ padding: '16px' }}>
                       <select
@@ -458,10 +479,10 @@ export default function SalesOrdersPage() {
                         style={{
                           padding: '6px 10px',
                           borderRadius: '6px',
-                          border: '1px solid #E5E7EB',
+                          border: `1px solid ${borderColor}`,
                           fontSize: '0.875rem',
-                          backgroundColor: order.status === 'cancelled' ? '#FEE2E2' : order.status === 'processing' ? '#DBEAFE' : '#FEF3C7',
-                          color: order.status === 'cancelled' ? '#991B1B' : order.status === 'processing' ? '#1E40AF' : '#92400E',
+                          backgroundColor: inputBg,
+                          color: textColor,
                           cursor: 'pointer',
                         }}
                       >
@@ -470,7 +491,7 @@ export default function SalesOrdersPage() {
                         <option value="cancelled">{t('cancelled')}</option>
                       </select>
                     </td>
-                    <td style={{ padding: '16px', color: '#6B7280', fontSize: '0.875rem' }}>{new Date(order.created_at).toLocaleDateString()}</td>
+                    <td style={{ padding: '16px', color: textColor, fontSize: '0.875rem' }}>{new Date(order.created_at).toLocaleDateString()}</td>
                     <td style={{ padding: '16px' }}>
                       {deleteConfirmId === order.id ? (
                         <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
@@ -563,7 +584,7 @@ export default function SalesOrdersPage() {
                 
                 {/* Transaction Type */}
                 <div style={{ gridColumn: 'span 2' }}>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>
+                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600, color: textColor }}>
                     Transaction Type *
                   </label>
                   <div style={{ display: 'flex', gap: '12px' }}>
@@ -592,7 +613,7 @@ export default function SalesOrdersPage() {
 
                 {/* Customer Searchable Dropdown */}
                 <div style={{ gridColumn: 'span 2' }} ref={customerDropdownRef}>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>
+                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600, color: textColor }}>
                     {t('customer')} *
                   </label>
                   <input
@@ -608,9 +629,11 @@ export default function SalesOrdersPage() {
                     style={{
                       width: '100%',
                       padding: '10px 14px',
-                      border: '1px solid #E5E7EB',
+                      border: `1px solid ${borderColor}`,
                       borderRadius: '8px',
                       fontSize: '0.95rem',
+                      backgroundColor: inputBg,
+                      color: textColor,
                     }}
                   />
                   {showCustomerDropdown && filteredCustomers.length > 0 && (
@@ -657,7 +680,7 @@ export default function SalesOrdersPage() {
 
                 {/* Product Searchable Dropdown */}
                 <div style={{ gridColumn: 'span 2' }} ref={productDropdownRef}>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>
+                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600, color: textColor }}>
                     {t('product')} *
                   </label>
                   <input
@@ -673,9 +696,11 @@ export default function SalesOrdersPage() {
                     style={{
                       width: '100%',
                       padding: '10px 14px',
-                      border: '1px solid #E5E7EB',
+                      border: `1px solid ${borderColor}`,
                       borderRadius: '8px',
                       fontSize: '0.95rem',
+                      backgroundColor: inputBg,
+                      color: textColor,
                     }}
                   />
                   {showProductDropdown && filteredProducts.length > 0 && (
@@ -723,7 +748,7 @@ export default function SalesOrdersPage() {
                 {/* GL Account Dropdown - Only for COST transactions */}
                 {formData.transaction_type === 'COST' && (
                   <div style={{ gridColumn: 'span 2' }}>
-                    <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>
+                    <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600, color: textColor }}>
                       GL Account (COGS/OPEX) *
                     </label>
                     <select
@@ -733,10 +758,11 @@ export default function SalesOrdersPage() {
                       style={{
                         width: '100%',
                         padding: '10px 14px',
-                        border: '1px solid #E5E7EB',
+                        border: `1px solid ${borderColor}`,
                         borderRadius: '8px',
                         fontSize: '0.95rem',
-                        backgroundColor: '#fff',
+                        backgroundColor: inputBg,
+                        color: textColor,
                       }}
                     >
                       <option value="">Select GL account...</option>
@@ -786,7 +812,7 @@ export default function SalesOrdersPage() {
 
                 {/* Quantity */}
                 <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>
+                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600, color: textColor }}>
                     {t('quantity')} *
                   </label>
                   <input
@@ -798,16 +824,18 @@ export default function SalesOrdersPage() {
                     style={{
                       width: '100%',
                       padding: '10px 14px',
-                      border: '1px solid #E5E7EB',
+                      border: `1px solid ${borderColor}`,
                       borderRadius: '8px',
                       fontSize: '0.95rem',
+                      backgroundColor: inputBg,
+                      color: textColor,
                     }}
                   />
                 </div>
 
                 {/* Quantity Unit */}
                 <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>
+                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600, color: textColor }}>
                     Unit *
                   </label>
                   <select
@@ -817,10 +845,11 @@ export default function SalesOrdersPage() {
                     style={{
                       width: '100%',
                       padding: '10px 14px',
-                      border: '1px solid #E5E7EB',
+                      border: `1px solid ${borderColor}`,
                       borderRadius: '8px',
                       fontSize: '0.95rem',
-                      backgroundColor: '#fff',
+                      backgroundColor: inputBg,
+                      color: textColor,
                     }}
                   >
                     <option value="PCS">PCS (Pieces)</option>
@@ -835,7 +864,7 @@ export default function SalesOrdersPage() {
 
                 {/* Price */}
                 <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>
+                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600, color: textColor }}>
                     {t('price')} *
                   </label>
                   <input
@@ -848,16 +877,18 @@ export default function SalesOrdersPage() {
                     style={{
                       width: '100%',
                       padding: '10px 14px',
-                      border: '1px solid #E5E7EB',
+                      border: `1px solid ${borderColor}`,
                       borderRadius: '8px',
                       fontSize: '0.95rem',
+                      backgroundColor: inputBg,
+                      color: textColor,
                     }}
                   />
                 </div>
 
                 {/* Total Amount (Read-only) */}
                 <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>
+                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600, color: textColor }}>
                     {t('total')}
                   </label>
                   <input
@@ -867,10 +898,10 @@ export default function SalesOrdersPage() {
                     style={{
                       width: '100%',
                       padding: '10px 14px',
-                      border: '1px solid #E5E7EB',
+                      border: `1px solid ${borderColor}`,
                       borderRadius: '8px',
                       fontSize: '0.95rem',
-                      backgroundColor: '#F3F4F6',
+                      backgroundColor: inputBg,
                       fontWeight: 600,
                       color: '#6C5CE7',
                     }}
@@ -879,7 +910,7 @@ export default function SalesOrdersPage() {
 
                 {/* Country */}
                 <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>
+                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600, color: textColor }}>
                     Country
                   </label>
                   <select
@@ -888,10 +919,11 @@ export default function SalesOrdersPage() {
                     style={{
                       width: '100%',
                       padding: '10px 14px',
-                      border: '1px solid #E5E7EB',
+                      border: `1px solid ${borderColor}`,
                       borderRadius: '8px',
                       fontSize: '0.95rem',
-                      backgroundColor: '#fff',
+                      backgroundColor: inputBg,
+                      color: textColor,
                     }}
                   >
                     <option value="US">United States</option>
@@ -913,7 +945,7 @@ export default function SalesOrdersPage() {
 
                 {/* Cost Center */}
                 <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>
+                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600, color: textColor }}>
                     Cost Center
                   </label>
                   <input
@@ -924,16 +956,18 @@ export default function SalesOrdersPage() {
                     style={{
                       width: '100%',
                       padding: '10px 14px',
-                      border: '1px solid #E5E7EB',
+                      border: `1px solid ${borderColor}`,
                       borderRadius: '8px',
                       fontSize: '0.95rem',
+                      backgroundColor: inputBg,
+                      color: textColor,
                     }}
                   />
                 </div>
 
                 {/* Profit Center */}
                 <div style={{ gridColumn: 'span 2' }}>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>
+                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600, color: textColor }}>
                     Profit Center
                   </label>
                   <input
@@ -944,9 +978,11 @@ export default function SalesOrdersPage() {
                     style={{
                       width: '100%',
                       padding: '10px 14px',
-                      border: '1px solid #E5E7EB',
+                      border: `1px solid ${borderColor}`,
                       borderRadius: '8px',
                       fontSize: '0.95rem',
+                      backgroundColor: inputBg,
+                      color: textColor,
                     }}
                   />
                 </div>

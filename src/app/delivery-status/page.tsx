@@ -313,13 +313,13 @@ export default function DeliveryStatusPage() {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ backgroundColor: inputBg }}>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Order #</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Customer</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Product</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Qty</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Status</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Delivery Date</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Actions</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: textColor, textTransform: 'uppercase' }}>Order #</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: textColor, textTransform: 'uppercase' }}>Customer</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: textColor, textTransform: 'uppercase' }}>Product</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: textColor, textTransform: 'uppercase' }}>Qty</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: textColor, textTransform: 'uppercase' }}>Status</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: textColor, textTransform: 'uppercase' }}>Delivery Date</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: textColor, textTransform: 'uppercase' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -328,9 +328,9 @@ export default function DeliveryStatusPage() {
                   return (
                     <tr key={d.id} style={{ borderTop: `1px solid ${borderColor}` }}>
                       <td style={{ padding: '16px', fontFamily: 'monospace', fontWeight: 600, color: '#6C5CE7' }}>{d.sales_order_number}</td>
-                      <td style={{ padding: '16px', color: '#1F2937' }}>{order?.customer_name || '-'}</td>
-                      <td style={{ padding: '16px', color: '#6B7280' }}>{order?.product_name || '-'}</td>
-                      <td style={{ padding: '16px', color: '#6B7280' }}>{order?.quantity || '-'}</td>
+                      <td style={{ padding: '16px', color: textColor }}>{order?.customer_name || '-'}</td>
+                      <td style={{ padding: '16px', color: textColor }}>{order?.product_name || '-'}</td>
+                      <td style={{ padding: '16px', color: textColor }}>{order?.quantity || '-'}</td>
                       <td style={{ padding: '16px' }}>
                         <select
                           value={d.delivery_status}
@@ -339,10 +339,10 @@ export default function DeliveryStatusPage() {
                           style={{
                             padding: '6px 10px',
                             borderRadius: '6px',
-                            border: '1px solid #E5E7EB',
+                            border: `1px solid ${borderColor}`,
                             fontSize: '0.875rem',
-                            backgroundColor: d.delivery_status === 'delivered' ? '#D1FAE5' : d.delivery_status === 'in_transit' ? '#DBEAFE' : '#FEF3C7',
-                            color: d.delivery_status === 'delivered' ? '#065F46' : d.delivery_status === 'in_transit' ? '#1E40AF' : '#92400E',
+                            backgroundColor: inputBg,
+                            color: textColor,
                             cursor: updating === d.id ? 'not-allowed' : 'pointer',
                             opacity: updating === d.id ? 0.6 : 1,
                           }}
@@ -352,7 +352,7 @@ export default function DeliveryStatusPage() {
                           <option value="delivered">Delivered</option>
                         </select>
                       </td>
-                      <td style={{ padding: '16px', color: '#6B7280' }}>{d.delivery_date ? new Date(d.delivery_date).toLocaleDateString() : '-'}</td>
+                      <td style={{ padding: '16px', color: textColor }}>{d.delivery_date ? new Date(d.delivery_date).toLocaleDateString() : '-'}</td>
                       <td style={{ padding: '16px' }}>
                         <button
                           onClick={() => handleDelete(d.id)}

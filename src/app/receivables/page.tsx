@@ -211,21 +211,21 @@ export default function ReceivablesPage() {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ backgroundColor: inputBg }}>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Customer</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Order #</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Amount Due</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Received</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Status</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Actions</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: textColor, textTransform: 'uppercase' }}>Customer</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: textColor, textTransform: 'uppercase' }}>Order #</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: textColor, textTransform: 'uppercase' }}>Amount Due</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: textColor, textTransform: 'uppercase' }}>Received</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: textColor, textTransform: 'uppercase' }}>Status</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: textColor, textTransform: 'uppercase' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {receivables.map((rec) => (
                   <tr key={rec.id} style={{ borderTop: `1px solid ${borderColor}` }}>
-                    <td style={{ padding: '16px', color: '#1F2937' }}>{rec.customer_name || rec.customer_id}</td>
+                    <td style={{ padding: '16px', color: textColor }}>{rec.customer_name || rec.customer_id}</td>
                     <td style={{ padding: '16px', fontFamily: 'monospace', fontWeight: 600, color: '#6C5CE7' }}>{rec.sales_order_number}</td>
-                    <td style={{ padding: '16px', fontWeight: 600 }}>${rec.amount_due?.toFixed(2)}</td>
-                    <td style={{ padding: '16px', color: rec.amount_received > 0 ? '#10B981' : '#6B7280' }}>${rec.amount_received?.toFixed(2)}</td>
+                    <td style={{ padding: '16px', fontWeight: 600, color: textColor }}>${rec.amount_due?.toFixed(2)}</td>
+                    <td style={{ padding: '16px', color: rec.amount_received > 0 ? '#10B981' : textColor }}>${rec.amount_received?.toFixed(2)}</td>
                     <td style={{ padding: '16px' }}>
                       <select
                         value={rec.status}
@@ -233,10 +233,10 @@ export default function ReceivablesPage() {
                         style={{
                           padding: '6px 10px',
                           borderRadius: '6px',
-                          border: '1px solid #E5E7EB',
+                          border: `1px solid ${borderColor}`,
                           fontSize: '0.875rem',
-                          backgroundColor: rec.status === 'paid' ? '#D1FAE5' : rec.status === 'partial' ? '#FEF3C7' : '#FEE2E2',
-                          color: rec.status === 'paid' ? '#065F46' : rec.status === 'partial' ? '#92400E' : '#991B1B',
+                          backgroundColor: inputBg,
+                          color: textColor,
                           cursor: 'pointer',
                         }}
                       >

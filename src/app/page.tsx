@@ -566,11 +566,6 @@ export default function Home() {
               </div>
             </Link>
           </div>
-          
-          {/* Build Version Footer */}
-          <p style={{fontSize: '0.7rem', color: '#666', textAlign: 'center', marginTop: '2rem'}}>
-            Build: 20260226-v3
-          </p>
         </main>
 
         {showLogin && selectedTenant && (

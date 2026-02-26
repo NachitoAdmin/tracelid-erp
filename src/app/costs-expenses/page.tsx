@@ -211,10 +211,10 @@ export default function CostsExpensesPage() {
   }
 
   return (
-    <div style={styles.container}>
-      <header style={styles.header}>
+    <div style={{...styles.container, backgroundColor: bgColor}}>
+      <header style={{...styles.header, backgroundColor: cardBg, borderBottom: `1px solid ${borderColor}`}}>
         <div style={styles.headerContent}>
-          <h1>💸 Costs & Expenses</h1>
+          <h1 style={{color: textColor}}>💸 Costs & Expenses</h1>
           <div style={styles.headerRight}>
             {tenantName && (
               <span style={styles.tenantBadge}>
@@ -240,9 +240,9 @@ export default function CostsExpensesPage() {
         )}
 
         {/* File Upload Section */}
-        <div style={styles.uploadSection}>
-          <h3>📥 Upload CSV</h3>
-          <div style={styles.uploadBox}>
+        <div style={{...styles.uploadSection, backgroundColor: cardBg}}>
+          <h3 style={{color: textColor}}>📥 Upload CSV</h3>
+          <div style={{...styles.uploadBox, borderColor: borderColor}}>
             <input
               type="file"
               accept=".csv"
@@ -278,31 +278,31 @@ export default function CostsExpensesPage() {
         </div>
 
         {/* Table */}
-        <div style={styles.tableWrapper}>
+        <div style={{...styles.tableWrapper, backgroundColor: cardBg}}>
           <table style={styles.table}>
             <thead>
               <tr>
-                <th style={styles.th}>Date</th>
-                <th style={styles.th}>Description</th>
-                <th style={styles.th}>Category</th>
-                <th style={styles.th}>Amount</th>
-                <th style={styles.th}>Vendor</th>
-                {isOwnerOrAdmin && <th style={styles.th}>Actions</th>}
+                <th style={{...styles.th, backgroundColor: inputBg, color: textColor}}>Date</th>
+                <th style={{...styles.th, backgroundColor: inputBg, color: textColor}}>Description</th>
+                <th style={{...styles.th, backgroundColor: inputBg, color: textColor}}>Category</th>
+                <th style={{...styles.th, backgroundColor: inputBg, color: textColor}}>Amount</th>
+                <th style={{...styles.th, backgroundColor: inputBg, color: textColor}}>Vendor</th>
+                {isOwnerOrAdmin && <th style={{...styles.th, backgroundColor: inputBg, color: textColor}}>Actions</th>}
               </tr>
             </thead>
             <tbody>
               {costs.length === 0 ? (
                 <tr>
-                  <td colSpan={isOwnerOrAdmin ? 6 : 5} style={styles.emptyCell}>
+                  <td colSpan={isOwnerOrAdmin ? 6 : 5} style={{...styles.emptyCell, color: mutedColor}}>
                     No costs/expenses found. {isOwnerOrAdmin && 'Click "Add Cost/Expense" to create one.'}
                   </td>
                 </tr>
               ) : (
                 costs.map((cost) => (
                   <tr key={cost.id}>
-                    <td style={styles.td}>{new Date(cost.date).toLocaleDateString()}</td>
-                    <td style={styles.td}>{cost.description || '-'}</td>
-                    <td style={styles.td}>
+                    <td style={{...styles.td, borderTop: `1px solid ${borderColor}`, color: textColor}}>{new Date(cost.date).toLocaleDateString()}</td>
+                    <td style={{...styles.td, borderTop: `1px solid ${borderColor}`, color: textColor}}>{cost.description || '-'}</td>
+                    <td style={{...styles.td, borderTop: `1px solid ${borderColor}`, color: textColor}}>
                       <span style={{
                         ...styles.categoryBadge,
                         backgroundColor: getCategoryColor(cost.category),
@@ -310,10 +310,10 @@ export default function CostsExpensesPage() {
                         {cost.category}
                       </span>
                     </td>
-                    <td style={styles.td}>${parseFloat(String(cost.amount)).toFixed(2)}</td>
-                    <td style={styles.td}>{cost.vendor_name || '-'}</td>
+                    <td style={{...styles.td, borderTop: `1px solid ${borderColor}`, color: textColor}}>${parseFloat(String(cost.amount)).toFixed(2)}</td>
+                    <td style={{...styles.td, borderTop: `1px solid ${borderColor}`, color: textColor}}>{cost.vendor_name || '-'}</td>
                     {isOwnerOrAdmin && (
-                      <td style={styles.td}>
+                      <td style={{...styles.td, borderTop: `1px solid ${borderColor}`, color: textColor}}>
                         <button
                           onClick={() => handleDelete(cost.id)}
                           style={styles.deleteBtn}
@@ -333,38 +333,38 @@ export default function CostsExpensesPage() {
       {/* Create Modal */}
       {showCreateModal && (
         <div style={styles.modalOverlay} onClick={() => setShowCreateModal(false)}>
-          <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <h2 style={styles.modalTitle}>Add Cost/Expense</h2>
+          <div style={{...styles.modal, backgroundColor: cardBg}} onClick={(e) => e.stopPropagation()}>
+            <h2 style={{...styles.modalTitle, color: textColor}}>Add Cost/Expense</h2>
             <form onSubmit={handleSubmit} style={styles.form}>
               <div style={styles.formGroup}>
-                <label style={styles.label}>Date</label>
+                <label style={{...styles.label, color: textColor}}>Date</label>
                 <input
                   type="date"
                   value={formData.date}
                   onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                   required
-                  style={styles.input}
+                  style={{...styles.input, backgroundColor: inputBg, color: textColor, borderColor: borderColor}}
                 />
               </div>
 
               <div style={styles.formGroup}>
-                <label style={styles.label}>Description</label>
+                <label style={{...styles.label, color: textColor}}>Description</label>
                 <input
                   type="text"
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Brief description"
-                  style={styles.input}
+                  style={{...styles.input, backgroundColor: inputBg, color: textColor, borderColor: borderColor}}
                 />
               </div>
 
               <div style={styles.formGroup}>
-                <label style={styles.label}>Category</label>
+                <label style={{...styles.label, color: textColor}}>Category</label>
                 <select
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value as Category })}
                   required
-                  style={styles.input}
+                  style={{...styles.input, backgroundColor: inputBg, color: textColor, borderColor: borderColor}}
                 >
                   <option value="materials">Materials</option>
                   <option value="services">Services</option>
@@ -375,7 +375,7 @@ export default function CostsExpensesPage() {
               </div>
 
               <div style={styles.formGroup}>
-                <label style={styles.label}>Amount</label>
+                <label style={{...styles.label, color: textColor}}>Amount</label>
                 <input
                   type="number"
                   step="0.01"
@@ -383,18 +383,18 @@ export default function CostsExpensesPage() {
                   value={formData.amount}
                   onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
                   required
-                  style={styles.input}
+                  style={{...styles.input, backgroundColor: inputBg, color: textColor, borderColor: borderColor}}
                 />
               </div>
 
               <div style={styles.formGroup}>
-                <label style={styles.label}>Vendor Name</label>
+                <label style={{...styles.label, color: textColor}}>Vendor Name</label>
                 <input
                   type="text"
                   value={formData.vendor_name}
                   onChange={(e) => setFormData({ ...formData, vendor_name: e.target.value })}
                   placeholder="Vendor/supplier name"
-                  style={styles.input}
+                  style={{...styles.input, backgroundColor: inputBg, color: textColor, borderColor: borderColor}}
                 />
               </div>
 

@@ -256,13 +256,13 @@ export default function InvoicesPage() {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ backgroundColor: inputBg }}>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>{t('invoiceNumber')}</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>{t('orderNumber')}</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>{t('customer')}</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>{t('product')}</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>{t('amount')}</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>{t('status')}</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>{t('actions')}</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: textColor, textTransform: 'uppercase' }}>{t('invoiceNumber')}</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: textColor, textTransform: 'uppercase' }}>{t('orderNumber')}</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: textColor, textTransform: 'uppercase' }}>{t('customer')}</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: textColor, textTransform: 'uppercase' }}>{t('product')}</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: textColor, textTransform: 'uppercase' }}>{t('amount')}</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: textColor, textTransform: 'uppercase' }}>{t('status')}</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: textColor, textTransform: 'uppercase' }}>{t('actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -277,9 +277,9 @@ export default function InvoicesPage() {
                         {inv.sales_order_number}
                       </Link>
                     </td>
-                    <td style={{ padding: '16px', color: '#1F2937' }}>{inv.customer_name}</td>
-                    <td style={{ padding: '16px', color: '#6B7280' }}>{inv.product_name}</td>
-                    <td style={{ padding: '16px', fontWeight: 600, color: '#1F2937' }}>{formatCurrency(inv.total_amount, currency)}</td>
+                    <td style={{ padding: '16px', color: textColor }}>{inv.customer_name}</td>
+                    <td style={{ padding: '16px', color: textColor }}>{inv.product_name}</td>
+                    <td style={{ padding: '16px', fontWeight: 600, color: textColor }}>{formatCurrency(inv.total_amount, currency)}</td>
                     <td style={{ padding: '16px' }}>
                       <select
                         value={inv.status || 'unpaid'}
@@ -287,10 +287,10 @@ export default function InvoicesPage() {
                         style={{
                           padding: '6px 10px',
                           borderRadius: '6px',
-                          border: '1px solid #E5E7EB',
+                          border: `1px solid ${borderColor}`,
                           fontSize: '0.875rem',
-                          backgroundColor: inv.status === 'paid' ? '#D1FAE5' : '#FEF3C7',
-                          color: inv.status === 'paid' ? '#065F46' : '#92400E',
+                          backgroundColor: inputBg,
+                          color: textColor,
                           cursor: 'pointer',
                         }}
                       >

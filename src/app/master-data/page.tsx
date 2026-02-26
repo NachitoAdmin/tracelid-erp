@@ -585,7 +585,7 @@ export default function MasterDataPage() {
                   <thead>
                     <tr>
                       {parsedData.headers.map((header, i) => (
-                        <th key={i} style={styles.th}>{header}</th>
+                        <th key={i} style={{...styles.th, backgroundColor: inputBg, color: textColor}}>{header}</th>
                       ))}
                     </tr>
                   </thead>
@@ -593,7 +593,7 @@ export default function MasterDataPage() {
                     {parsedData.rows.slice(0, 10).map((row, i) => (
                       <tr key={i}>
                         {row.map((cell, j) => (
-                          <td key={j} style={styles.td}>{cell}</td>
+                          <td key={j} style={{...styles.td, borderBottom: `1px solid ${borderColor}`, color: textColor}}>{cell}</td>
                         ))}
                       </tr>
                     ))}

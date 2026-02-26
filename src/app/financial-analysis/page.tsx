@@ -552,37 +552,37 @@ export default function FinancialAnalysisPage() {
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
                     <tr style={{ backgroundColor: inputBg }}>
-                      <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Date</th>
-                      <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Description</th>
-                      <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Account</th>
-                      <th style={{ padding: '16px', textAlign: 'right', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Debit</th>
-                      <th style={{ padding: '16px', textAlign: 'right', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Credit</th>
-                      <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Created By</th>
+                      <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: textColor, textTransform: 'uppercase' }}>Date</th>
+                      <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: textColor, textTransform: 'uppercase' }}>Description</th>
+                      <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: textColor, textTransform: 'uppercase' }}>Account</th>
+                      <th style={{ padding: '16px', textAlign: 'right', fontSize: '0.75rem', fontWeight: 600, color: textColor, textTransform: 'uppercase' }}>Debit</th>
+                      <th style={{ padding: '16px', textAlign: 'right', fontSize: '0.75rem', fontWeight: 600, color: textColor, textTransform: 'uppercase' }}>Credit</th>
+                      <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: textColor, textTransform: 'uppercase' }}>Created By</th>
                       {(user?.role === 'admin' || user?.role === 'owner') && (
-                        <th style={{ padding: '16px', textAlign: 'center', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Action</th>
+                        <th style={{ padding: '16px', textAlign: 'center', fontSize: '0.75rem', fontWeight: 600, color: textColor, textTransform: 'uppercase' }}>Action</th>
                       )}
                     </tr>
                   </thead>
                   <tbody>
                     {journalEntries.length === 0 ? (
                       <tr>
-                        <td colSpan={7} style={{ padding: '40px', textAlign: 'center', color: '#6B7280' }}>
+                        <td colSpan={7} style={{ padding: '40px', textAlign: 'center', color: textColor }}>
                           No journal entries found. Click "Add Entry" to create one.
                         </td>
                       </tr>
                     ) : (
                       journalEntries.map((entry) => (
                         <tr key={entry.id} style={{ borderBottom: `1px solid ${borderColor}` }}>
-                          <td style={{ padding: '16px', color: '#1F2937' }}>{new Date(entry.date).toLocaleDateString()}</td>
-                          <td style={{ padding: '16px', color: '#1F2937' }}>{entry.description}</td>
-                          <td style={{ padding: '16px', color: '#6B7280', fontFamily: 'monospace' }}>{entry.account_code}</td>
-                          <td style={{ padding: '16px', textAlign: 'right', fontWeight: 600, fontFamily: 'monospace', color: entry.debit > 0 ? '#1F2937' : '#9CA3AF' }}>
+                          <td style={{ padding: '16px', color: textColor }}>{new Date(entry.date).toLocaleDateString()}</td>
+                          <td style={{ padding: '16px', color: textColor }}>{entry.description}</td>
+                          <td style={{ padding: '16px', color: textColor, fontFamily: 'monospace' }}>{entry.account_code}</td>
+                          <td style={{ padding: '16px', textAlign: 'right', fontWeight: 600, fontFamily: 'monospace', color: entry.debit > 0 ? textColor : mutedColor }}>
                             {entry.debit > 0 ? formatCurrency(entry.debit) : '-'}
                           </td>
-                          <td style={{ padding: '16px', textAlign: 'right', fontWeight: 600, fontFamily: 'monospace', color: entry.credit > 0 ? '#1F2937' : '#9CA3AF' }}>
+                          <td style={{ padding: '16px', textAlign: 'right', fontWeight: 600, fontFamily: 'monospace', color: entry.credit > 0 ? textColor : mutedColor }}>
                             {entry.credit > 0 ? formatCurrency(entry.credit) : '-'}
                           </td>
-                          <td style={{ padding: '16px', color: '#6B7280', fontSize: '0.875rem' }}>{entry.created_by}</td>
+                          <td style={{ padding: '16px', color: textColor, fontSize: '0.875rem' }}>{entry.created_by}</td>
                           {(user?.role === 'admin' || user?.role === 'owner') && (
                             <td style={{ padding: '16px', textAlign: 'center' }}>
                               <button
