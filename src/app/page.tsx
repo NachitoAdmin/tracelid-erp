@@ -79,23 +79,25 @@ export default function Home() {
       try {
         parsedUser = JSON.parse(userData)
         setUser(parsedUser)
-        if (parsedUser?.role && parsedUser.role !== 'owner' && parsedUser.tenant?.id) {
-          setSelectedTenantId(parsedUser.tenant.id)
-          setTenantInput(parsedUser.tenant.id)
-          localStorage.setItem('tracelid-selected-tenant', parsedUser.tenant.id)
-          localStorage.setItem('tracelid-selected-tenant-name', parsedUser.tenant.name)
-        }
       } catch (e) {
         console.error('Failed to parse user data')
       }
     }
     
+    // BUGFIX: Always check saved tenant first, regardless of user role
+    const savedTenantId = localStorage.getItem('tracelid-selected-tenant')
+    if (savedTenantId) {
+      setSelectedTenantId(savedTenantId)
+      setTenantInput(savedTenantId)
+    } else if (parsedUser?.tenant?.id) {
+      // No saved tenant, use user's default tenant
+      setSelectedTenantId(parsedUser.tenant.id)
+      setTenantInput(parsedUser.tenant.id)
+      localStorage.setItem('tracelid-selected-tenant', parsedUser.tenant.id)
+      localStorage.setItem('tracelid-selected-tenant-name', parsedUser.tenant.name)
+    }
+    
     if (!parsedUser || parsedUser.role === 'owner') {
-      const savedTenantId = localStorage.getItem('tracelid-selected-tenant')
-      if (savedTenantId) {
-        setSelectedTenantId(savedTenantId)
-        setTenantInput(savedTenantId)
-      }
       fetchTenants()
     } else {
       setLoading(false)
