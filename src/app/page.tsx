@@ -127,7 +127,9 @@ export default function Home() {
       const tenantList = Array.isArray(data) ? data : (data.tenants || [])
       setTenants(tenantList)
       
-      if (tenantList.length > 0 && !selectedTenantId) {
+      // BUGFIX: Check localStorage, not state variable, to avoid overwriting saved tenant
+      const savedTenantId = localStorage.getItem('tracelid-selected-tenant')
+      if (tenantList.length > 0 && !savedTenantId) {
         const firstTenant = tenantList[0]
         setSelectedTenantId(firstTenant.id)
         setTenantInput(firstTenant.id)
