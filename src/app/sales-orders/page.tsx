@@ -57,6 +57,8 @@ export default function SalesOrdersPage() {
   const cardBg = isDark ? '#1F2937' : '#FFFFFF';
   const textColor = isDark ? '#F9FAFB' : '#1F2937';
   const borderColor = isDark ? '#374151' : '#E5E7EB';
+  const inputBg = isDark ? '#374151' : '#F9FAFB';
+  const mutedColor = isDark ? '#9CA3AF' : '#6B7280';
 
   const [orders, setOrders] = useState<SalesOrder[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -138,12 +140,13 @@ export default function SalesOrdersPage() {
   const handleDelete = async (id: string) => {
     try {
       const token = localStorage.getItem('tracelid-token');
-      const headers: Record<string, string> = {};
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const res = await fetch(`/api/sales-orders?id=${id}`, {
+      const res = await fetch('/api/sales-orders', {
         method: 'DELETE',
         headers,
+        body: JSON.stringify({ id }),
       });
 
       if (res.ok) {
@@ -173,7 +176,10 @@ export default function SalesOrdersPage() {
       });
 
       if (res.ok) {
-        fetchOrders(tenantId);
+        const savedTenantId = localStorage.getItem('tracelid-selected-tenant');
+        if (savedTenantId) {
+          fetchOrders(savedTenantId);
+        }
       } else {
         console.error('Failed to update status');
       }
@@ -413,32 +419,32 @@ export default function SalesOrdersPage() {
             </button>
           </div>
         ) : (
-          <div style={{ backgroundColor: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+          <div style={{ backgroundColor: cardBg, borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
-                <tr style={{ backgroundColor: '#F9FAFB' }}>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Order #</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Type</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Customer</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Product</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Qty</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Price</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Total</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Status</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Created</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Actions</th>
+                <tr style={{ backgroundColor: inputBg }}>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Order #</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Type</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Customer</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Product</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Qty</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Price</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Total</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Status</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Created</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {orders.map((order) => (
-                  <tr key={order.id} style={{ borderTop: '1px solid #F3F4F6' }}>
+                  <tr key={order.id} style={{ borderTop: `1px solid ${borderColor}` }}>
                     <td style={{ padding: '16px', fontFamily: 'monospace', fontWeight: 600, color: '#6C5CE7' }}>{order.sales_order_number}</td>
                     <td style={{ padding: '16px' }}>{getTransactionTypeBadge(order.transaction_type || 'SALE')}</td>
-                    <td style={{ padding: '16px', color: '#1F2937' }}>{order.customer_name}</td>
-                    <td style={{ padding: '16px', color: '#6B7280' }}>{order.product_name}</td>
-                    <td style={{ padding: '16px', color: '#6B7280' }}>{order.quantity} {order.quantity_unit}</td>
-                    <td style={{ padding: '16px', color: '#6B7280' }}>${order.price?.toFixed(2)}</td>
-                    <td style={{ padding: '16px', fontWeight: 600, color: '#1F2937' }}>${order.total_amount?.toFixed(2)}</td>
+                    <td style={{ padding: '16px', color: textColor }}>{order.customer_name}</td>
+                    <td style={{ padding: '16px', color: mutedColor }}>{order.product_name}</td>
+                    <td style={{ padding: '16px', color: mutedColor }}>{order.quantity} {order.quantity_unit}</td>
+                    <td style={{ padding: '16px', color: mutedColor }}>${order.price?.toFixed(2)}</td>
+                    <td style={{ padding: '16px', fontWeight: 600, color: textColor }}>${order.total_amount?.toFixed(2)}</td>
                     <td style={{ padding: '16px' }}>
                       <select
                         value={order.status}
@@ -535,7 +541,7 @@ export default function SalesOrdersPage() {
         >
           <div
             style={{
-              backgroundColor: '#fff',
+              backgroundColor: cardBg,
               padding: '32px',
               borderRadius: '16px',
               width: '100%',
@@ -544,7 +550,7 @@ export default function SalesOrdersPage() {
               overflow: 'auto',
             }}
           >
-            <h2 style={{ margin: '0 0 24px 0', color: '#1F2937' }}>Create Sales Order</h2>
+            <h2 style={{ margin: '0 0 24px 0', color: textColor }}>Create Sales Order</h2>
 
             <form onSubmit={handleSubmit}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
