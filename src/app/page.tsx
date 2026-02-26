@@ -378,22 +378,26 @@ export default function Home() {
                 </button>
               </div>
               
-              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'center' }}>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
                 {(isOwner || isAdmin) && (
-                  <a href="/master-data" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)'}}>
-                    Data
+                  <a href="/master-data" style={{...styles.headerBtn, background: 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)'}}>
+                    <span style={{ marginRight: '6px' }}>📊</span>
+                    Master Data
                   </a>
                 )}
                 
-                <a href="/financial-analysis" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #10B981 0%, #34D399 100%)'}}>
-                  Finance
+                <a href="/financial-analysis" style={{...styles.headerBtn, background: 'linear-gradient(135deg, #10B981 0%, #34D399 100%)'}}>
+                  <span style={{ marginRight: '6px' }}>💰</span>
+                  Financial
                 </a>
                 
-                <a href="/analytics" style={{...styles.headerBtnCompact, background: 'linear-gradient(135deg, #6C5CE7 0%, #764ba2 100%)'}}>
-                  Stats
+                <a href="/analytics" style={{...styles.headerBtn, background: 'linear-gradient(135deg, #6C5CE7 0%, #764ba2 100%)'}}>
+                  <span style={{ marginRight: '6px' }}>📈</span>
+                  Analytics
                 </a>
                 
-                <button onClick={handleLogout} style={{...styles.headerBtnCompact, background: '#EF4444'}}>
+                <button onClick={handleLogout} style={{...styles.headerBtn, background: '#EF4444', border: 'none', cursor: 'pointer'}}>
+                  <span style={{ marginRight: '6px' }}>🚪</span>
                   Logout
                 </button>
               </div>
@@ -666,6 +670,18 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 600,
     fontSize: '0.7rem',
     whiteSpace: 'nowrap',
+  },
+  headerBtn: {
+    padding: '8px 16px',
+    color: 'white',
+    borderRadius: '8px',
+    textDecoration: 'none',
+    fontWeight: 600,
+    fontSize: '0.9rem',
+    whiteSpace: 'nowrap',
+    display: 'flex',
+    alignItems: 'center',
+    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
   },
   headerControlCompact: {
     display: 'flex',
