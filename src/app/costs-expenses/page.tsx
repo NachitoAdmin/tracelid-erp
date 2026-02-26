@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useTheme } from '@/lib/ThemeContext';
 
 interface CostExpense {
   id: string;
@@ -29,6 +30,12 @@ interface User {
 type Category = 'materials' | 'services' | 'logistics' | 'overhead' | 'other';
 
 export default function CostsExpensesPage() {
+  const { isDark } = useTheme();
+  const bgColor = isDark ? '#111827' : '#F1F5F9';
+  const cardBg = isDark ? '#1F2937' : '#FFFFFF';
+  const textColor = isDark ? '#F9FAFB' : '#1F2937';
+  const borderColor = isDark ? '#374151' : '#E5E7EB';
+
   const [costs, setCosts] = useState<CostExpense[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);

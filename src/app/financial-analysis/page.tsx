@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useTheme } from '@/lib/ThemeContext';
 
 interface IncomeStatementItem {
   line_item: string;
@@ -54,6 +55,12 @@ interface GLAccount {
 }
 
 export default function FinancialAnalysisPage() {
+  const { isDark } = useTheme();
+  const bgColor = isDark ? '#111827' : '#F1F5F9';
+  const cardBg = isDark ? '#1F2937' : '#FFFFFF';
+  const textColor = isDark ? '#F9FAFB' : '#1F2937';
+  const borderColor = isDark ? '#374151' : '#E5E7EB';
+
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
   const [tenantId, setTenantId] = useState('');
   const [loading, setLoading] = useState(true);
@@ -218,9 +225,9 @@ export default function FinancialAnalysisPage() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#F1F5F9', fontFamily: 'Inter, sans-serif' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: bgColor, fontFamily: 'Inter, sans-serif' }}>
       {/* Header */}
-      <header style={{ backgroundColor: '#fff', borderBottom: '1px solid #E5E7EB', padding: '16px 24px' }}>
+      <header style={{ backgroundColor: cardBg, borderBottom: '1px solid #E5E7EB', padding: '16px 24px' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <Link href="/" style={{ color: '#6C5CE7', textDecoration: 'none', fontSize: '0.9rem' }}>← Back to Dashboard</Link>

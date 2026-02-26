@@ -5,6 +5,7 @@ import { useLanguage } from '@/lib/LanguageContext'
 import { useCurrency } from '@/lib/CurrencyContext'
 import { formatCurrency } from '@/lib/currency'
 import Link from 'next/link'
+import { useTheme } from '@/lib/ThemeContext'
 
 interface Transaction {
   id: string
@@ -22,6 +23,12 @@ interface CustomerData {
 }
 
 export default function AnalyticsPage() {
+  const { isDark } = useTheme();
+  const bgColor = isDark ? '#111827' : '#F1F5F9';
+  const cardBg = isDark ? '#1F2937' : '#FFFFFF';
+  const textColor = isDark ? '#F9FAFB' : '#1F2937';
+  const borderColor = isDark ? '#374151' : '#E5E7EB';
+
   const { t } = useLanguage()
   const { currency } = useCurrency()
   const [transactions, setTransactions] = useState<Transaction[]>([])

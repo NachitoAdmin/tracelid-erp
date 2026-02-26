@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useTheme } from '@/lib/ThemeContext'
 
 interface User {
   id: string
@@ -21,6 +22,12 @@ interface ParsedData {
 }
 
 export default function MasterDataPage() {
+  const { isDark } = useTheme();
+  const bgColor = isDark ? '#111827' : '#F1F5F9';
+  const cardBg = isDark ? '#1F2937' : '#FFFFFF';
+  const textColor = isDark ? '#F9FAFB' : '#1F2937';
+  const borderColor = isDark ? '#374151' : '#E5E7EB';
+
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'customers' | 'products' | 'costs' | 'rebates' | 'discounts'>('customers')
