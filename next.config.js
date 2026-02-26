@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // No experimental features needed for Next.js 14
+  generateBuildId: async () => {
+    return Date.now().toString()
+  },
   async headers() {
     return [
       {

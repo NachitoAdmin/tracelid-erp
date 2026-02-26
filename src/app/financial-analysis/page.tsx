@@ -55,6 +55,7 @@ interface GLAccount {
 }
 
 export default function FinancialAnalysisPage() {
+  const buildTime = '20260226-v2'
   const { isDark } = useTheme();
   const bgColor = isDark ? '#111827' : '#F1F5F9';
   const cardBg = isDark ? '#1F2937' : '#FFFFFF';

@@ -40,6 +40,7 @@ interface Stats {
 }
 
 export default function Home() {
+  const buildTime = '20260226-v2'
   const { t } = useLanguage()
   const { theme, toggleTheme, isDark } = useTheme()
   const [isMobile, setIsMobile] = useState(false)
@@ -472,7 +473,7 @@ export default function Home() {
           <div style={{...styles.welcomeCard, backgroundColor: cardBg, borderColor}}>
             <h1 style={{...styles.welcomeTitle, color: textColor}}>Welcome to Tracelid ERP</h1>
             <p style={{...styles.welcomeSubtitle, color: mutedColor}}>
-              Manage your sales orders, deliveries, invoices, and receivables in one place.
+              Manage your sales orders, deliveries, invoices, and receivables in one place. v2
             </p>
           </div>
 
