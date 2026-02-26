@@ -127,9 +127,14 @@ export default function Home() {
       const tenantList = Array.isArray(data) ? data : (data.tenants || [])
       setTenants(tenantList)
       
-      // BUGFIX: Check localStorage, not state variable, to avoid overwriting saved tenant
+      // BUGFIX: Restore saved tenant or use first tenant as default
       const savedTenantId = localStorage.getItem('tracelid-selected-tenant')
-      if (tenantList.length > 0 && !savedTenantId) {
+      if (savedTenantId && tenantList.find((t: Tenant) => t.id === savedTenantId)) {
+        // Restore saved tenant
+        setSelectedTenantId(savedTenantId)
+        setTenantInput(savedTenantId)
+      } else if (tenantList.length > 0) {
+        // No saved tenant, use first one
         const firstTenant = tenantList[0]
         setSelectedTenantId(firstTenant.id)
         setTenantInput(firstTenant.id)
