@@ -60,6 +60,8 @@ export default function FinancialAnalysisPage() {
   const cardBg = isDark ? '#1F2937' : '#FFFFFF';
   const textColor = isDark ? '#F9FAFB' : '#1F2937';
   const borderColor = isDark ? '#374151' : '#E5E7EB';
+  const inputBg = isDark ? '#374151' : '#F9FAFB';
+  const mutedColor = isDark ? '#9CA3AF' : '#6B7280';
 
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
   const [tenantId, setTenantId] = useState('');
@@ -317,9 +319,9 @@ export default function FinancialAnalysisPage() {
 
             {/* Income Statement Tab */}
             {activeTab === 'income-statement' && (
-              <div style={{ backgroundColor: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+              <div style={{ backgroundColor: cardBg, borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
                 <div style={{ padding: '20px 24px', borderBottom: '1px solid #E5E7EB' }}>
-                  <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#1F2937' }}>Income Statement (YTD)</h2>
+                  <h2 style={{ margin: 0, fontSize: '1.25rem', color: textColor }}>Income Statement (YTD)</h2>
                 </div>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <tbody>
@@ -330,7 +332,7 @@ export default function FinancialAnalysisPage() {
                         <tr 
                           key={item.line_item} 
                           style={{ 
-                            borderBottom: '1px solid #F3F4F6',
+                            borderBottom: `1px solid ${borderColor}`,
                             backgroundColor: isSummaryLine(item.line_item) ? '#F9FAFB' : '#fff',
                           }}
                         >
@@ -361,14 +363,14 @@ export default function FinancialAnalysisPage() {
 
             {/* Balance Sheet Tab */}
             {activeTab === 'balance-sheet' && (
-              <div style={{ backgroundColor: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+              <div style={{ backgroundColor: cardBg, borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
                 <div style={{ padding: '20px 24px', borderBottom: '1px solid #E5E7EB' }}>
-                  <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#1F2937' }}>Balance Sheet</h2>
+                  <h2 style={{ margin: 0, fontSize: '1.25rem', color: textColor }}>Balance Sheet</h2>
                 </div>
                 
                 {/* Assets Section */}
                 <div style={{ padding: '16px 24px', backgroundColor: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
-                  <h3 style={{ margin: 0, fontSize: '1rem', color: '#1F2937', fontWeight: 700 }}>ASSETS</h3>
+                  <h3 style={{ margin: 0, fontSize: '1rem', color: textColor, fontWeight: 700 }}>ASSETS</h3>
                 </div>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <tbody>
@@ -376,7 +378,7 @@ export default function FinancialAnalysisPage() {
                       .filter(item => item.tenant_id === tenantId && item.section === 'ASSETS')
                       .sort((a, b) => a.sort_order - b.sort_order)
                       .map((item) => (
-                        <tr key={item.line_item} style={{ borderBottom: '1px solid #F3F4F6' }}>
+                        <tr key={item.line_item} style={{ borderBottom: `1px solid ${borderColor}` }}>
                           <td style={{ padding: '16px 24px', color: '#6B7280' }}>{item.line_item}</td>
                           <td style={{ padding: '16px 24px', textAlign: 'right', fontWeight: 600, fontFamily: 'monospace', fontSize: '0.95rem' }}>
                             {formatCurrency(item.amount)}
@@ -388,14 +390,14 @@ export default function FinancialAnalysisPage() {
 
                 {/* Liabilities Section */}
                 <div style={{ padding: '16px 24px', backgroundColor: '#F9FAFB', borderBottom: '1px solid #E5E7EB', borderTop: '2px solid #E5E7EB' }}>
-                  <h3 style={{ margin: 0, fontSize: '1rem', color: '#1F2937', fontWeight: 700 }}>LIABILITIES</h3>
+                  <h3 style={{ margin: 0, fontSize: '1rem', color: textColor, fontWeight: 700 }}>LIABILITIES</h3>
                 </div>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <tbody>
                     {balanceSheet
                       .filter(item => item.tenant_id === tenantId && item.section === 'LIABILITIES')
                       .map((item) => (
-                        <tr key={item.line_item} style={{ borderBottom: '1px solid #F3F4F6' }}>
+                        <tr key={item.line_item} style={{ borderBottom: `1px solid ${borderColor}` }}>
                           <td style={{ padding: '16px 24px', color: '#6B7280' }}>{item.line_item}</td>
                           <td style={{ padding: '16px 24px', textAlign: 'right', fontWeight: 600, fontFamily: 'monospace', fontSize: '0.95rem' }}>
                             {formatCurrency(item.amount)}
@@ -407,14 +409,14 @@ export default function FinancialAnalysisPage() {
 
                 {/* Equity Section */}
                 <div style={{ padding: '16px 24px', backgroundColor: '#F9FAFB', borderBottom: '1px solid #E5E7EB', borderTop: '2px solid #E5E7EB' }}>
-                  <h3 style={{ margin: 0, fontSize: '1rem', color: '#1F2937', fontWeight: 700 }}>EQUITY</h3>
+                  <h3 style={{ margin: 0, fontSize: '1rem', color: textColor, fontWeight: 700 }}>EQUITY</h3>
                 </div>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <tbody>
                     {balanceSheet
                       .filter(item => item.tenant_id === tenantId && item.section === 'EQUITY')
                       .map((item) => (
-                        <tr key={item.line_item} style={{ borderBottom: '1px solid #F3F4F6' }}>
+                        <tr key={item.line_item} style={{ borderBottom: `1px solid ${borderColor}` }}>
                           <td style={{ padding: '16px 24px', color: '#6B7280' }}>{item.line_item}</td>
                           <td style={{ padding: '16px 24px', textAlign: 'right', fontWeight: 600, fontFamily: 'monospace', fontSize: '0.95rem' }}>
                             {formatCurrency(item.amount)}
@@ -428,17 +430,17 @@ export default function FinancialAnalysisPage() {
 
             {/* Monthly Trend Tab */}
             {activeTab === 'monthly' && (
-              <div style={{ backgroundColor: '#fff', borderRadius: '12px', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-                <h2 style={{ margin: '0 0 20px 0', fontSize: '1.25rem', color: '#1F2937' }}>Monthly Financial Trend</h2>
+              <div style={{ backgroundColor: cardBg, borderRadius: '12px', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                <h2 style={{ margin: '0 0 20px 0', fontSize: '1.25rem', color: textColor }}>Monthly Financial Trend</h2>
                 <p style={{ color: '#6B7280' }}>Monthly breakdown coming soon...</p>
               </div>
             )}
 
             {/* Journal Entries Tab */}
             {activeTab === 'journal-entries' && (
-              <div style={{ backgroundColor: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+              <div style={{ backgroundColor: cardBg, borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
                 <div style={{ padding: '20px 24px', borderBottom: '1px solid #E5E7EB', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#1F2937' }}>📒 Journal Entries</h2>
+                  <h2 style={{ margin: 0, fontSize: '1.25rem', color: textColor }}>📒 Journal Entries</h2>
                   <button
                     onClick={() => setShowJournalForm(!showJournalForm)}
                     style={{
@@ -543,13 +545,13 @@ export default function FinancialAnalysisPage() {
                 {/* Journal Entries Table */}
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
-                    <tr style={{ backgroundColor: '#F9FAFB' }}>
-                      <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Date</th>
-                      <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Description</th>
-                      <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Account</th>
+                    <tr style={{ backgroundColor: inputBg }}>
+                      <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Date</th>
+                      <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Description</th>
+                      <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Account</th>
                       <th style={{ padding: '16px', textAlign: 'right', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Debit</th>
                       <th style={{ padding: '16px', textAlign: 'right', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Credit</th>
-                      <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Created By</th>
+                      <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Created By</th>
                       {(user?.role === 'admin' || user?.role === 'owner') && (
                         <th style={{ padding: '16px', textAlign: 'center', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Action</th>
                       )}
@@ -564,7 +566,7 @@ export default function FinancialAnalysisPage() {
                       </tr>
                     ) : (
                       journalEntries.map((entry) => (
-                        <tr key={entry.id} style={{ borderBottom: '1px solid #F3F4F6' }}>
+                        <tr key={entry.id} style={{ borderBottom: `1px solid ${borderColor}` }}>
                           <td style={{ padding: '16px', color: '#1F2937' }}>{new Date(entry.date).toLocaleDateString()}</td>
                           <td style={{ padding: '16px', color: '#1F2937' }}>{entry.description}</td>
                           <td style={{ padding: '16px', color: '#6B7280', fontFamily: 'monospace' }}>{entry.account_code}</td>

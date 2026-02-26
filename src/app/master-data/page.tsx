@@ -27,6 +27,8 @@ export default function MasterDataPage() {
   const cardBg = isDark ? '#1F2937' : '#FFFFFF';
   const textColor = isDark ? '#F9FAFB' : '#1F2937';
   const borderColor = isDark ? '#374151' : '#E5E7EB';
+  const inputBg = isDark ? '#374151' : '#F9FAFB';
+  const mutedColor = isDark ? '#9CA3AF' : '#6B7280';
 
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
@@ -1060,8 +1062,7 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#667eea',
   },
   section: {
-    backgroundColor: 'white',
-    borderRadius: '16px',
+    backgroundColor: '#FFFFFF', borderRadius: '16px',
     padding: '30px',
     marginBottom: '30px',
     boxShadow: '0 10px 40px rgba(0,0,0,0.2)',
@@ -1155,8 +1156,7 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: 'pointer',
   },
   unauthorized: {
-    backgroundColor: 'white',
-    borderRadius: '16px',
+    backgroundColor: '#FFFFFF', borderRadius: '16px',
     padding: '50px',
     textAlign: 'center',
     maxWidth: '500px',
@@ -1164,8 +1164,7 @@ const styles: Record<string, React.CSSProperties> = {
     boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
   },
   loading: {
-    backgroundColor: 'white',
-    borderRadius: '16px',
+    backgroundColor: '#FFFFFF', borderRadius: '16px',
     padding: '50px',
     textAlign: 'center',
     maxWidth: '500px',

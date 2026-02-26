@@ -35,6 +35,8 @@ export default function CostsExpensesPage() {
   const cardBg = isDark ? '#1F2937' : '#FFFFFF';
   const textColor = isDark ? '#F9FAFB' : '#1F2937';
   const borderColor = isDark ? '#374151' : '#E5E7EB';
+  const inputBg = isDark ? '#374151' : '#F9FAFB';
+  const mutedColor = isDark ? '#9CA3AF' : '#6B7280';
 
   const [costs, setCosts] = useState<CostExpense[]>([]);
   const [loading, setLoading] = useState(true);
@@ -483,8 +485,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 600,
   },
   uploadSection: {
-    backgroundColor: 'white',
-    borderRadius: '12px',
+    backgroundColor: '#FFFFFF', borderRadius: '12px',
     padding: '24px',
     marginBottom: '24px',
     boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
@@ -518,8 +519,7 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '24px',
   },
   summaryItem: {
-    backgroundColor: 'white',
-    borderRadius: '12px',
+    backgroundColor: '#FFFFFF', borderRadius: '12px',
     padding: '20px',
     boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
     display: 'flex',
@@ -552,8 +552,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '1rem',
   },
   tableWrapper: {
-    backgroundColor: 'white',
-    borderRadius: '12px',
+    backgroundColor: '#FFFFFF', borderRadius: '12px',
     overflow: 'hidden',
     boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
   },
@@ -573,7 +572,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   td: {
     padding: '16px',
-    borderTop: '1px solid #F3F4F6',
+    borderTop: '1px solid #E5E7EB',
     color: '#1F2937',
   },
   emptyCell: {
@@ -613,8 +612,7 @@ const styles: Record<string, React.CSSProperties> = {
     zIndex: 1000,
   },
   modal: {
-    backgroundColor: 'white',
-    borderRadius: '16px',
+    backgroundColor: '#FFFFFF', borderRadius: '16px',
     padding: '32px',
     maxWidth: '500px',
     width: '90%',

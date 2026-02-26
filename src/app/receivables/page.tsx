@@ -22,6 +22,8 @@ export default function ReceivablesPage() {
   const cardBg = isDark ? '#1F2937' : '#FFFFFF';
   const textColor = isDark ? '#F9FAFB' : '#1F2937';
   const borderColor = isDark ? '#374151' : '#E5E7EB';
+  const inputBg = isDark ? '#374151' : '#F9FAFB';
+  const mutedColor = isDark ? '#9CA3AF' : '#6B7280';
 
   const [receivables, setReceivables] = useState<Receivable[]>([]);
   const [loading, setLoading] = useState(true);
@@ -195,25 +197,25 @@ export default function ReceivablesPage() {
         {loading ? (
           <div style={{ textAlign: 'center', padding: '40px', color: '#6B7280' }}>Loading...</div>
         ) : receivables.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '40px', backgroundColor: '#fff', borderRadius: '12px' }}>
+          <div style={{ textAlign: 'center', padding: '40px', backgroundColor: cardBg, borderRadius: '12px' }}>
             <p style={{ color: '#6B7280' }}>No receivables found</p>
           </div>
         ) : (
-          <div style={{ backgroundColor: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+          <div style={{ backgroundColor: cardBg, borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
-                <tr style={{ backgroundColor: '#F9FAFB' }}>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Customer</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Order #</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Amount Due</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Received</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Status</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Actions</th>
+                <tr style={{ backgroundColor: inputBg }}>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Customer</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Order #</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Amount Due</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Received</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Status</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {receivables.map((rec) => (
-                  <tr key={rec.id} style={{ borderTop: '1px solid #F3F4F6' }}>
+                  <tr key={rec.id} style={{ borderTop: `1px solid ${borderColor}` }}>
                     <td style={{ padding: '16px', color: '#1F2937' }}>{rec.customer_name || rec.customer_id}</td>
                     <td style={{ padding: '16px', fontFamily: 'monospace', fontWeight: 600, color: '#6C5CE7' }}>{rec.sales_order_number}</td>
                     <td style={{ padding: '16px', fontWeight: 600 }}>${rec.amount_due?.toFixed(2)}</td>

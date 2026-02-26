@@ -28,6 +28,8 @@ export default function DeliveryStatusPage() {
   const cardBg = isDark ? '#1F2937' : '#FFFFFF';
   const textColor = isDark ? '#F9FAFB' : '#1F2937';
   const borderColor = isDark ? '#374151' : '#E5E7EB';
+  const inputBg = isDark ? '#374151' : '#F9FAFB';
+  const mutedColor = isDark ? '#9CA3AF' : '#6B7280';
 
   const [deliveries, setDeliveries] = useState<Delivery[]>([]);
   const [orders, setOrders] = useState<Record<string, SalesOrder>>({});
@@ -291,9 +293,9 @@ export default function DeliveryStatusPage() {
         {loading ? (
           <div style={{ textAlign: 'center', padding: '40px', color: '#6B7280' }}>Loading...</div>
         ) : filteredDeliveries.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '60px', backgroundColor: '#fff', borderRadius: '12px' }}>
+          <div style={{ textAlign: 'center', padding: '60px', backgroundColor: cardBg, borderRadius: '12px' }}>
             <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🚚</div>
-            <h3 style={{ margin: '0 0 8px 0', color: '#1F2937' }}>No Deliveries Found</h3>
+            <h3 style={{ margin: '0 0 8px 0', color: textColor }}>No Deliveries Found</h3>
             <p style={{ color: '#6B7280' }}>
               {filter === 'all' 
                 ? 'Deliveries are created automatically when you create a sales order.'
@@ -301,24 +303,24 @@ export default function DeliveryStatusPage() {
             </p>
           </div>
         ) : (
-          <div style={{ backgroundColor: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+          <div style={{ backgroundColor: cardBg, borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
-                <tr style={{ backgroundColor: '#F9FAFB' }}>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Order #</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Customer</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Product</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Qty</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Status</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Delivery Date</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Actions</th>
+                <tr style={{ backgroundColor: inputBg }}>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Order #</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Customer</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Product</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Qty</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Status</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Delivery Date</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredDeliveries.map((d) => {
                   const order = orders[d.sales_order_number];
                   return (
-                    <tr key={d.id} style={{ borderTop: '1px solid #F3F4F6' }}>
+                    <tr key={d.id} style={{ borderTop: `1px solid ${borderColor}` }}>
                       <td style={{ padding: '16px', fontFamily: 'monospace', fontWeight: 600, color: '#6C5CE7' }}>{d.sales_order_number}</td>
                       <td style={{ padding: '16px', color: '#1F2937' }}>{order?.customer_name || '-'}</td>
                       <td style={{ padding: '16px', color: '#6B7280' }}>{order?.product_name || '-'}</td>
