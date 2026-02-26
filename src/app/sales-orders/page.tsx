@@ -60,6 +60,7 @@ export default function SalesOrdersPage() {
   const [tenantId, setTenantId] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   // Searchable dropdown states
   const [customerSearch, setCustomerSearch] = useState('');
@@ -128,17 +129,22 @@ export default function SalesOrdersPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this item?')) return;
-
     try {
-      const res = await fetch('/api/sales-orders', {
+      const token = localStorage.getItem('tracelid-token');
+      const headers: Record<string, string> = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch(`/api/sales-orders?id=${id}`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id }),
+        headers,
       });
 
       if (res.ok) {
-        fetchOrders(tenantId);
+        const savedTenantId = localStorage.getItem('tracelid-selected-tenant');
+        if (savedTenantId) {
+          fetchOrders(savedTenantId);
+        }
+        setDeleteConfirmId(null);
       } else {
         console.error('Failed to delete sales order');
       }
@@ -447,21 +453,56 @@ export default function SalesOrdersPage() {
                     </td>
                     <td style={{ padding: '16px', color: '#6B7280', fontSize: '0.875rem' }}>{new Date(order.created_at).toLocaleDateString()}</td>
                     <td style={{ padding: '16px' }}>
-                      <button
-                        onClick={() => handleDelete(order.id)}
-                        style={{
-                          padding: '6px 10px',
-                          backgroundColor: 'transparent',
-                          color: '#EF4444',
-                          border: 'none',
-                          borderRadius: '6px',
-                          cursor: 'pointer',
-                          fontSize: '0.875rem',
-                        }}
-                        title="Delete"
-                      >
-                        🗑️
-                      </button>
+                      {deleteConfirmId === order.id ? (
+                        <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                          <button
+                            onClick={() => handleDelete(order.id)}
+                            style={{
+                              padding: '4px 8px',
+                              backgroundColor: '#EF4444',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '4px',
+                              cursor: 'pointer',
+                              fontSize: '0.75rem',
+                              fontWeight: 600,
+                            }}
+                          >
+                            Yes
+                          </button>
+                          <button
+                            onClick={() => setDeleteConfirmId(null)}
+                            style={{
+                              padding: '4px 8px',
+                              backgroundColor: '#6B7280',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '4px',
+                              cursor: 'pointer',
+                              fontSize: '0.75rem',
+                              fontWeight: 600,
+                            }}
+                          >
+                            No
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setDeleteConfirmId(order.id)}
+                          style={{
+                            padding: '6px 10px',
+                            backgroundColor: 'transparent',
+                            color: '#EF4444',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontSize: '0.875rem',
+                          }}
+                          title="Delete"
+                        >
+                          🗑️
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}
