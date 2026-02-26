@@ -7,19 +7,36 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: '/(.*)',
+        source: '/',
         headers: [
           {
             key: 'Cache-Control',
-            value: 'no-cache, no-store, must-revalidate'
+            value: 'no-store, must-revalidate'
           },
           {
-            key: 'Pragma',
-            value: 'no-cache'
+            key: 'CDN-Cache-Control',
+            value: 'no-store'
           },
           {
-            key: 'Expires',
-            value: '0'
+            key: 'Vercel-CDN-Cache-Control',
+            value: 'no-store'
+          },
+        ],
+      },
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-store, must-revalidate'
+          },
+          {
+            key: 'CDN-Cache-Control',
+            value: 'no-store'
+          },
+          {
+            key: 'Vercel-CDN-Cache-Control',
+            value: 'no-store'
           },
         ],
       },
