@@ -7,7 +7,9 @@ import CurrencySelector from '@/components/CurrencySelector'
 import TenantLogin from '@/components/TenantLogin'
 import ChatBot from '@/components/ChatBot'
 import { useLanguage } from '@/lib/LanguageContext'
+import { useCurrency } from '@/lib/CurrencyContext'
 import { useTheme } from '@/lib/ThemeContext'
+import { formatCurrency } from '@/lib/currency'
 
 interface Tenant {
   id: string
@@ -42,6 +44,7 @@ interface Stats {
 export default function Home() {
   const buildTime = '20260226-v3'
   const { t } = useLanguage()
+  const { currency } = useCurrency()
   const { theme, toggleTheme, isDark } = useTheme()
   const [isMobile, setIsMobile] = useState(false)
   const [tenants, setTenants] = useState<Tenant[]>([])
@@ -339,7 +342,7 @@ export default function Home() {
             }}>
               {selectedTenant?.name && (
                 <div style={styles.headerItem}>
-                  <span style={{...styles.headerLabel, color: mutedColor}}>TENANT</span>
+                  <span style={{...styles.headerLabel, color: mutedColor}}>{t('tenant').toUpperCase()}</span>
                   <span style={{...styles.headerValue, color: textColor}}>
                     {selectedTenant.name}
                     {user?.role && (
@@ -353,7 +356,7 @@ export default function Home() {
               
               {user && (
                 <div style={styles.headerItem}>
-                  <span style={{...styles.headerLabel, color: mutedColor}}>USER</span>
+                  <span style={{...styles.headerLabel, color: mutedColor}}>{t('user').toUpperCase()}</span>
                   <span style={{...styles.headerValue, color: textColor}}>
                     {user.firstName} {user.lastName}
                   </span>
@@ -378,23 +381,23 @@ export default function Home() {
                 {(isOwner || isAdmin) && (
                   <a href="/master-data" style={{...styles.headerBtn, background: 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)'}}>
                     <span style={{ marginRight: '6px' }}>📊</span>
-                    Master Data
+                    {t('masterData')}
                   </a>
                 )}
                 
                 <a href="/financial-analysis" style={{...styles.headerBtn, background: 'linear-gradient(135deg, #10B981 0%, #34D399 100%)'}}>
                   <span style={{ marginRight: '6px' }}>💰</span>
-                  Financial
+                  {t('financialAnalysis')}
                 </a>
                 
                 <a href="/analytics" style={{...styles.headerBtn, background: 'linear-gradient(135deg, #6C5CE7 0%, #764ba2 100%)'}}>
                   <span style={{ marginRight: '6px' }}>📈</span>
-                  Analytics
+                  {t('analytics')}
                 </a>
                 
                 <button onClick={handleLogout} style={{...styles.headerBtn, background: '#EF4444', border: 'none', cursor: 'pointer'}}>
                   <span style={{ marginRight: '6px' }}>🚪</span>
-                  Logout
+                  {t('logout')}
                 </button>
               </div>
             </div>
@@ -405,17 +408,17 @@ export default function Home() {
         <div className="mobile-sidebar">
           {(isOwner || isAdmin) && (
             <a href="/master-data" className="mobile-sidebar-btn" style={{background: 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)'}}>
-              Data
+              {t('masterData')}
             </a>
           )}
           <a href="/financial-analysis" className="mobile-sidebar-btn" style={{background: 'linear-gradient(135deg, #10B981 0%, #34D399 100%)'}}>
-            Finance
+            {t('financialAnalysis')}
           </a>
           <a href="/analytics" className="mobile-sidebar-btn" style={{background: 'linear-gradient(135deg, #6C5CE7 0%, #764ba2 100%)'}}>
-            Stats
+            {t('analytics')}
           </a>
           <button onClick={handleLogout} className="mobile-sidebar-btn" style={{background: '#EF4444', border: 'none', cursor: 'pointer'}}>
-            Logout
+            {t('logout')}
           </button>
         </div>
 
@@ -424,7 +427,7 @@ export default function Home() {
           {isOwner && (
             <div style={{...styles.tenantBar, backgroundColor: cardBg, borderColor}}>
               <div style={styles.tenantLeft}>
-                <span style={{...styles.tenantLabel, color: '#9CA3AF'}}>TENANT</span>
+                <span style={{...styles.tenantLabel, color: '#9CA3AF'}}>{t('tenant').toUpperCase()}</span>
                 <select
                   value={selectedTenantId}
                   onChange={(e) => {
@@ -463,7 +466,7 @@ export default function Home() {
           {(isAdmin || isOperator) && user?.tenant && (
             <div style={{...styles.tenantBar, backgroundColor: cardBg, borderColor}}>
               <div style={styles.tenantLeft}>
-                <span style={{...styles.tenantLabel, color: '#9CA3AF'}}>TENANT</span>
+                <span style={{...styles.tenantLabel, color: '#9CA3AF'}}>{t('tenant').toUpperCase()}</span>
                 <span style={{...styles.tenantName, color: textColor}}>{user.tenant.name}</span>
               </div>
             </div>
@@ -471,9 +474,9 @@ export default function Home() {
 
           {/* Welcome Card */}
           <div style={{...styles.welcomeCard, backgroundColor: cardBg, borderColor}}>
-            <h1 style={{...styles.welcomeTitle, color: textColor}}>Welcome to Tracelid ERP</h1>
+            <h1 style={{...styles.welcomeTitle, color: textColor}}>{t('welcomeToTracelid')}</h1>
             <p style={{...styles.welcomeSubtitle, color: mutedColor}}>
-              Manage your sales orders, costs, deliveries, invoices, and receivables in one place.
+              {t('dashboardSubtitle')}
             </p>
           </div>
 
@@ -482,27 +485,27 @@ export default function Home() {
             <div style={{...styles.statCard, backgroundColor: cardBg, borderColor}}>
               <div style={styles.statIcon}>📋</div>
               <div style={{...styles.statValue, color: '#6C5CE7'}}>{stats.salesOrders}</div>
-              <div style={{...styles.statLabel, color: mutedColor}}>Sales Orders</div>
+              <div style={{...styles.statLabel, color: mutedColor}}>{t('salesOrders')}</div>
             </div>
             <div style={{...styles.statCard, backgroundColor: cardBg, borderColor}}>
               <div style={styles.statIcon}>💸</div>
               <div style={{...styles.statValue, color: '#EC4899'}}>{stats.costsExpenses}</div>
-              <div style={{...styles.statLabel, color: mutedColor}}>Costs/Expenses</div>
+              <div style={{...styles.statLabel, color: mutedColor}}>{t('costsExpenses')}</div>
             </div>
             <div style={{...styles.statCard, backgroundColor: cardBg, borderColor}}>
               <div style={styles.statIcon}>🚚</div>
               <div style={{...styles.statValue, color: '#F59E0B'}}>{stats.pendingDeliveries}</div>
-              <div style={{...styles.statLabel, color: mutedColor}}>Pending Deliveries</div>
+              <div style={{...styles.statLabel, color: mutedColor}}>{t('pendingDeliveries')}</div>
             </div>
             <div style={{...styles.statCard, backgroundColor: cardBg, borderColor}}>
               <div style={styles.statIcon}>📄</div>
               <div style={{...styles.statValue, color: '#EF4444'}}>{stats.unpaidInvoices}</div>
-              <div style={{...styles.statLabel, color: mutedColor}}>Unpaid Invoices</div>
+              <div style={{...styles.statLabel, color: mutedColor}}>{t('unpaidInvoices')}</div>
             </div>
             <div style={{...styles.statCard, backgroundColor: cardBg, borderColor}}>
               <div style={styles.statIcon}>💰</div>
               <div style={{...styles.statValue, color: '#10B981'}}>{stats.totalReceivables}</div>
-              <div style={{...styles.statLabel, color: mutedColor}}>Paid Invoices</div>
+              <div style={{...styles.statLabel, color: mutedColor}}>{t('paidInvoices')}</div>
             </div>
           </div>
 
@@ -511,55 +514,55 @@ export default function Home() {
             <Link href="/sales-orders" style={{textDecoration: 'none'}}>
               <div style={{...styles.navCard, backgroundColor: cardBg, borderColor}}>
                 <div style={{...styles.navIcon, backgroundColor: '#6C5CE720', color: '#6C5CE7'}}>📋</div>
-                <h3 style={{...styles.navTitle, color: textColor}}>Sales Orders</h3>
+                <h3 style={{...styles.navTitle, color: textColor}}>{t('salesOrders')}</h3>
                 <p style={{...styles.navDesc, color: mutedColor}}>
-                  Create and manage sales orders. Track order status from pending to delivered.
+                  {t('createOrder')} and manage sales orders. Track order status from {t('pending').toLowerCase()} to {t('delivered').toLowerCase()}.
                 </p>
-                <span style={{...styles.navLink, color: '#6C5CE7'}}>Go to Sales Orders →</span>
+                <span style={{...styles.navLink, color: '#6C5CE7'}}>{t('goToSalesOrders')} →</span>
               </div>
             </Link>
             
             <Link href="/costs-expenses" style={{textDecoration: 'none'}}>
               <div style={{...styles.navCard, backgroundColor: cardBg, borderColor}}>
                 <div style={{...styles.navIcon, backgroundColor: '#EC489920', color: '#EC4899'}}>💸</div>
-                <h3 style={{...styles.navTitle, color: textColor}}>Costs / Expenses</h3>
+                <h3 style={{...styles.navTitle, color: textColor}}>{t('costsExpenses')}</h3>
                 <p style={{...styles.navDesc, color: mutedColor}}>
                   Track and manage business costs and expenses.
                 </p>
-                <span style={{...styles.navLink, color: '#EC4899'}}>Go to Costs/Expenses →</span>
+                <span style={{...styles.navLink, color: '#EC4899'}}>{t('goToCostsExpenses')} →</span>
               </div>
             </Link>
             
             <Link href="/delivery-status" style={{textDecoration: 'none'}}>
               <div style={{...styles.navCard, backgroundColor: cardBg, borderColor}}>
                 <div style={{...styles.navIcon, backgroundColor: '#F59E0B20', color: '#F59E0B'}}>🚚</div>
-                <h3 style={{...styles.navTitle, color: textColor}}>Deliveries</h3>
+                <h3 style={{...styles.navTitle, color: textColor}}>{t('deliveries')}</h3>
                 <p style={{...styles.navDesc, color: mutedColor}}>
                   Track delivery status and manage pending shipments.
                 </p>
-                <span style={{...styles.navLink, color: '#F59E0B'}}>Go to Deliveries →</span>
+                <span style={{...styles.navLink, color: '#F59E0B'}}>{t('goToDeliveries')} →</span>
               </div>
             </Link>
             
             <Link href="/invoices" style={{textDecoration: 'none'}}>
               <div style={{...styles.navCard, backgroundColor: cardBg, borderColor}}>
                 <div style={{...styles.navIcon, backgroundColor: '#EF444420', color: '#EF4444'}}>📄</div>
-                <h3 style={{...styles.navTitle, color: textColor}}>Invoices</h3>
+                <h3 style={{...styles.navTitle, color: textColor}}>{t('invoices')}</h3>
                 <p style={{...styles.navDesc, color: mutedColor}}>
-                  View and manage invoices. Track paid and unpaid invoices.
+                  View and manage invoices. Track {t('paid').toLowerCase()} and {t('unpaid').toLowerCase()} invoices.
                 </p>
-                <span style={{...styles.navLink, color: '#EF4444'}}>Go to Invoices →</span>
+                <span style={{...styles.navLink, color: '#EF4444'}}>{t('goToInvoices')} →</span>
               </div>
             </Link>
             
             <Link href="/receivables" style={{textDecoration: 'none'}}>
               <div style={{...styles.navCard, backgroundColor: cardBg, borderColor}}>
                 <div style={{...styles.navIcon, backgroundColor: '#10B98120', color: '#10B981'}}>💰</div>
-                <h3 style={{...styles.navTitle, color: textColor}}>Receivables</h3>
+                <h3 style={{...styles.navTitle, color: textColor}}>{t('receivables')}</h3>
                 <p style={{...styles.navDesc, color: mutedColor}}>
                   Manage accounts receivable and track payments.
                 </p>
-                <span style={{...styles.navLink, color: '#10B981'}}>Go to Receivables →</span>
+                <span style={{...styles.navLink, color: '#10B981'}}>{t('goToReceivables')} →</span>
               </div>
             </Link>
           </div>

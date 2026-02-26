@@ -3,6 +3,9 @@
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { useTheme } from '@/lib/ThemeContext';
+import { useLanguage } from '@/lib/LanguageContext';
+import { useCurrency } from '@/lib/CurrencyContext';
+import { formatCurrency } from '@/lib/currency';
 
 interface Customer {
   id: string;
@@ -54,6 +57,8 @@ type TransactionType = 'SALE' | 'COST' | 'RETURN';
 export default function SalesOrdersPage() {
   const buildTime = '20260226-v2'
   const { isDark } = useTheme();
+  const { t } = useLanguage();
+  const { currency } = useCurrency();
   const bgColor = isDark ? '#111827' : '#F1F5F9';
   const cardBg = isDark ? '#1F2937' : '#FFFFFF';
   const textColor = isDark ? '#F9FAFB' : '#1F2937';
@@ -232,7 +237,7 @@ export default function SalesOrdersPage() {
       price: product.sales_price || 0,
       quantity_unit: product.uom || 'PCS',
     }));
-    setProductSearch(`${product.name} (${product.product_code}) - $${product.sales_price?.toFixed(2)}`);
+    setProductSearch(`${product.name} (${product.product_code}) - ${formatCurrency(product.sales_price, currency)}`);
     setShowProductDropdown(false);
   };
 
@@ -360,8 +365,8 @@ export default function SalesOrdersPage() {
       <header style={{ backgroundColor: cardBg, borderBottom: '1px solid #E5E7EB', padding: '16px 24px' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <Link href="/" style={{ color: '#6C5CE7', textDecoration: 'none', fontSize: '0.9rem' }}>← Back to Dashboard</Link>
-            <h1 style={{ margin: 0, fontSize: '1.5rem', color: '#1F2937' }}>📋 Sales Orders</h1>
+            <Link href="/" style={{ color: '#6C5CE7', textDecoration: 'none', fontSize: '0.9rem' }}>← {t('back')}</Link>
+            <h1 style={{ margin: 0, fontSize: '1.5rem', color: '#1F2937' }}>📋 {t('salesOrders')}</h1>
           </div>
           
           <button
@@ -376,7 +381,7 @@ export default function SalesOrdersPage() {
               fontWeight: 600,
             }}
           >
-            + Create Order
+            + {t('createOrder')}
           </button>
         </div>
       </header>
@@ -398,7 +403,7 @@ export default function SalesOrdersPage() {
         )}
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '40px', color: '#6B7280' }}>Loading...</div>
+          <div style={{ textAlign: 'center', padding: '40px', color: '#6B7280' }}>{t('loading')}</div>
         ) : orders.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px', backgroundColor: '#fff', borderRadius: '12px' }}>
             <div style={{ fontSize: '3rem', marginBottom: '16px' }}>📋</div>
@@ -424,16 +429,16 @@ export default function SalesOrdersPage() {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ backgroundColor: inputBg }}>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Order #</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>{t('orderNumber')}</th>
                   <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Type</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Customer</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Product</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Qty</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Price</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Total</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Status</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Created</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Actions</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>{t('customer')}</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>{t('product')}</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>{t('quantity')}</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>{t('price')}</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>{t('total')}</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>{t('status')}</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>{t('date')}</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>{t('actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -444,8 +449,8 @@ export default function SalesOrdersPage() {
                     <td style={{ padding: '16px', color: textColor }}>{order.customer_name}</td>
                     <td style={{ padding: '16px', color: mutedColor }}>{order.product_name}</td>
                     <td style={{ padding: '16px', color: mutedColor }}>{order.quantity} {order.quantity_unit}</td>
-                    <td style={{ padding: '16px', color: mutedColor }}>${order.price?.toFixed(2)}</td>
-                    <td style={{ padding: '16px', fontWeight: 600, color: textColor }}>${order.total_amount?.toFixed(2)}</td>
+                    <td style={{ padding: '16px', color: mutedColor }}>{formatCurrency(order.price, currency)}</td>
+                    <td style={{ padding: '16px', fontWeight: 600, color: textColor }}>{formatCurrency(order.total_amount, currency)}</td>
                     <td style={{ padding: '16px' }}>
                       <select
                         value={order.status}
@@ -460,9 +465,9 @@ export default function SalesOrdersPage() {
                           cursor: 'pointer',
                         }}
                       >
-                        <option value="pending">Pending</option>
+                        <option value="pending">{t('pending')}</option>
                         <option value="processing">Processing</option>
-                        <option value="cancelled">Cancelled</option>
+                        <option value="cancelled">{t('cancelled')}</option>
                       </select>
                     </td>
                     <td style={{ padding: '16px', color: '#6B7280', fontSize: '0.875rem' }}>{new Date(order.created_at).toLocaleDateString()}</td>
@@ -551,7 +556,7 @@ export default function SalesOrdersPage() {
               overflow: 'auto',
             }}
           >
-            <h2 style={{ margin: '0 0 24px 0', color: textColor }}>Create Sales Order</h2>
+            <h2 style={{ margin: '0 0 24px 0', color: textColor }}>{t('newSalesOrder')}</h2>
 
             <form onSubmit={handleSubmit}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
@@ -588,7 +593,7 @@ export default function SalesOrdersPage() {
                 {/* Customer Searchable Dropdown */}
                 <div style={{ gridColumn: 'span 2' }} ref={customerDropdownRef}>
                   <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>
-                    Customer *
+                    {t('customer')} *
                   </label>
                   <input
                     type="text"
@@ -653,7 +658,7 @@ export default function SalesOrdersPage() {
                 {/* Product Searchable Dropdown */}
                 <div style={{ gridColumn: 'span 2' }} ref={productDropdownRef}>
                   <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>
-                    Product *
+                    {t('product')} *
                   </label>
                   <input
                     type="text"
@@ -702,7 +707,7 @@ export default function SalesOrdersPage() {
                         >
                           <div style={{ fontWeight: 600, color: '#1F2937' }}>{product.name}</div>
                           <div style={{ fontSize: '0.8rem', color: '#6B7280' }}>
-                            {product.product_code} • ${product.sales_price?.toFixed(2)} / {product.uom}
+                            {product.product_code} • {formatCurrency(product.sales_price, currency)} / {product.uom}
                           </div>
                         </div>
                       ))}
@@ -782,7 +787,7 @@ export default function SalesOrdersPage() {
                 {/* Quantity */}
                 <div>
                   <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>
-                    Quantity *
+                    {t('quantity')} *
                   </label>
                   <input
                     type="number"
@@ -831,7 +836,7 @@ export default function SalesOrdersPage() {
                 {/* Price */}
                 <div>
                   <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>
-                    Unit Price *
+                    {t('price')} *
                   </label>
                   <input
                     type="number"
@@ -853,11 +858,11 @@ export default function SalesOrdersPage() {
                 {/* Total Amount (Read-only) */}
                 <div>
                   <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>
-                    Total Amount
+                    {t('total')}
                   </label>
                   <input
                     type="text"
-                    value={`$${totalAmount.toFixed(2)}`}
+                    value={formatCurrency(totalAmount, currency)}
                     readOnly
                     style={{
                       width: '100%',
@@ -962,7 +967,7 @@ export default function SalesOrdersPage() {
                     fontWeight: 600,
                   }}
                 >
-                  Cancel
+                  {t('cancel')}
                 </button>
                 <button
                   type="submit"
@@ -979,7 +984,7 @@ export default function SalesOrdersPage() {
                     opacity: submitting || !formData.customer_id || !formData.product_id ? 0.6 : 1,
                   }}
                 >
-                  {submitting ? 'Creating...' : 'Create Order'}
+                  {submitting ? t('loading') : t('createOrder')}
                 </button>
               </div>
             </form>

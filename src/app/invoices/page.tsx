@@ -3,6 +3,9 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useTheme } from '@/lib/ThemeContext';
+import { useLanguage } from '@/lib/LanguageContext';
+import { useCurrency } from '@/lib/CurrencyContext';
+import { formatCurrency } from '@/lib/currency';
 
 interface Invoice {
   id: string;
@@ -28,6 +31,8 @@ interface Invoice {
 export default function InvoicesPage() {
   const buildTime = '20260226-v2'
   const { isDark } = useTheme();
+  const { t } = useLanguage();
+  const { currency } = useCurrency();
   const bgColor = isDark ? '#111827' : '#F1F5F9';
   const cardBg = isDark ? '#1F2937' : '#FFFFFF';
   const textColor = isDark ? '#F9FAFB' : '#1F2937';
@@ -170,17 +175,17 @@ export default function InvoicesPage() {
       <header style={{ backgroundColor: cardBg, borderBottom: '1px solid #E5E7EB', padding: '16px 24px' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <Link href="/" style={{ color: '#6C5CE7', textDecoration: 'none', fontSize: '0.9rem' }}>← Back to Dashboard</Link>
-            <h1 style={{ margin: 0, fontSize: '1.5rem', color: '#1F2937' }}>📄 Invoices</h1>
+            <Link href="/" style={{ color: '#6C5CE7', textDecoration: 'none', fontSize: '0.9rem' }}>← {t('back')}</Link>
+            <h1 style={{ margin: 0, fontSize: '1.5rem', color: '#1F2937' }}>📄 {t('invoices')}</h1>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '0.75rem', color: '#6B7280' }}>Total Amount</div>
-              <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#10B981' }}>${totalAmount.toFixed(2)}</div>
+              <div style={{ fontSize: '0.75rem', color: '#6B7280' }}>{t('total')}</div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#10B981' }}>{formatCurrency(totalAmount, currency)}</div>
             </div>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#6C5CE7' }}>{invoices.length}</div>
-              <div style={{ fontSize: '0.7rem', color: '#6B7280' }}>Invoices</div>
+              <div style={{ fontSize: '0.7rem', color: '#6B7280' }}>{t('invoices')}</div>
             </div>
           </div>
         </div>
@@ -219,13 +224,13 @@ export default function InvoicesPage() {
                 boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
               }}
             >
-              {f === 'all' ? 'All Time' : f === 'recent' ? 'Last 7 Days' : 'This Month'}
+              {f === 'all' ? t('all') : f === 'recent' ? 'Last 7 Days' : 'This Month'}
             </button>
           ))}
         </div>
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '40px', color: '#6B7280' }}>Loading...</div>
+          <div style={{ textAlign: 'center', padding: '40px', color: '#6B7280' }}>{t('loading')}</div>
         ) : filteredInvoices.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px', backgroundColor: cardBg, borderRadius: '12px' }}>
             <div style={{ fontSize: '3rem', marginBottom: '16px' }}>📄</div>
@@ -251,13 +256,13 @@ export default function InvoicesPage() {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ backgroundColor: inputBg }}>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Invoice #</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Order #</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Customer</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Product</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Amount</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Status</th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>Actions</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>{t('invoiceNumber')}</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>{t('orderNumber')}</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>{t('customer')}</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>{t('product')}</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>{t('amount')}</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>{t('status')}</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: mutedColor, textTransform: 'uppercase' }}>{t('actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -274,7 +279,7 @@ export default function InvoicesPage() {
                     </td>
                     <td style={{ padding: '16px', color: '#1F2937' }}>{inv.customer_name}</td>
                     <td style={{ padding: '16px', color: '#6B7280' }}>{inv.product_name}</td>
-                    <td style={{ padding: '16px', fontWeight: 600, color: '#1F2937' }}>${inv.total_amount?.toFixed(2)}</td>
+                    <td style={{ padding: '16px', fontWeight: 600, color: '#1F2937' }}>{formatCurrency(inv.total_amount, currency)}</td>
                     <td style={{ padding: '16px' }}>
                       <select
                         value={inv.status || 'unpaid'}
@@ -289,8 +294,8 @@ export default function InvoicesPage() {
                           cursor: 'pointer',
                         }}
                       >
-                        <option value="unpaid">Unpaid</option>
-                        <option value="paid">Paid</option>
+                        <option value="unpaid">{t('unpaid')}</option>
+                        <option value="paid">{t('paid')}</option>
                       </select>
                     </td>
                     <td style={{ padding: '16px' }}>

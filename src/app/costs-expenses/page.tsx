@@ -3,6 +3,9 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useTheme } from '@/lib/ThemeContext';
+import { useLanguage } from '@/lib/LanguageContext';
+import { useCurrency } from '@/lib/CurrencyContext';
+import { formatCurrency } from '@/lib/currency';
 
 interface CostExpense {
   id: string;
@@ -32,6 +35,8 @@ type Category = 'materials' | 'services' | 'logistics' | 'overhead' | 'other';
 export default function CostsExpensesPage() {
   const buildTime = '20260226-v2'
   const { isDark } = useTheme();
+  const { t } = useLanguage();
+  const { currency } = useCurrency();
   const bgColor = isDark ? '#111827' : '#F1F5F9';
   const cardBg = isDark ? '#1F2937' : '#FFFFFF';
   const textColor = isDark ? '#F9FAFB' : '#1F2937';
