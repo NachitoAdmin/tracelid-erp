@@ -1,14 +1,13 @@
 'use client'
 
-import { useEffect, useState, createContext } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
 import CurrencySelector from '@/components/CurrencySelector'
 import TenantLogin from '@/components/TenantLogin'
 import ChatBot from '@/components/ChatBot'
 import { useLanguage } from '@/lib/LanguageContext'
-
-const ThemeContext = createContext({ theme: 'light', toggleTheme: () => {} })
+import { useTheme } from '@/lib/ThemeContext'
 
 interface Tenant {
   id: string
@@ -42,7 +41,7 @@ interface Stats {
 
 export default function Home() {
   const { t } = useLanguage()
-  const [theme, setTheme] = useState('light')
+  const { theme, toggleTheme, isDark } = useTheme()
   const [isMobile, setIsMobile] = useState(false)
   const [tenants, setTenants] = useState<Tenant[]>([])
   const [selectedTenantId, setSelectedTenantId] = useState('')
@@ -64,9 +63,6 @@ export default function Home() {
   const isDev = envName === 'development'
 
   useEffect(() => {
-    const saved = localStorage.getItem('tracelid-theme')
-    if (saved) setTheme(saved)
-    
     // Check if mobile
     const checkMobile = () => setIsMobile(window.innerWidth < 768)
     checkMobile()
@@ -109,12 +105,6 @@ export default function Home() {
       fetchStats(selectedTenantId)
     }
   }, [selectedTenantId])
-
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light'
-    setTheme(newTheme)
-    localStorage.setItem('tracelid-theme', newTheme)
-  }
 
   const fetchTenants = async () => {
     try {
@@ -215,7 +205,6 @@ export default function Home() {
   const isAdmin = user?.role === 'admin'
   const isOperator = user?.role === 'operator'
 
-  const isDark = theme === 'dark'
   const bgColor = isDark ? '#111827' : '#F1F5F9'
   const cardBg = isDark ? '#1F2937' : '#FFFFFF'
   const textColor = isDark ? '#F9FAFB' : '#1F2937'
@@ -238,9 +227,8 @@ export default function Home() {
   }
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      <>
-        <style>{`
+    <>
+      <style>{`
           @media screen and (max-width: 600px) {
             .mobile-header-container {
               flex-direction: row !important;
@@ -587,8 +575,7 @@ export default function Home() {
 
         <ChatBot />
       </div>
-      </>
-    </ThemeContext.Provider>
+    </>
   )
 }
 

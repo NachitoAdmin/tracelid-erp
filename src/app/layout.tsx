@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { LanguageProvider } from '@/lib/LanguageContext'
 import { CurrencyProvider } from '@/lib/CurrencyContext'
+import { ThemeProvider } from '@/lib/ThemeContext'
 import MaintenanceCheck from '@/components/MaintenanceCheck'
 
 export const metadata: Metadata = {
@@ -40,13 +41,15 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="Tracelid" />
       </head>
       <body>
-        <LanguageProvider>
-          <CurrencyProvider>
-            <MaintenanceCheck>
-              {children}
-            </MaintenanceCheck>
-          </CurrencyProvider>
-        </LanguageProvider>
+        <ThemeProvider>
+          <LanguageProvider>
+            <CurrencyProvider>
+              <MaintenanceCheck>
+                {children}
+              </MaintenanceCheck>
+            </CurrencyProvider>
+          </LanguageProvider>
+        </ThemeProvider>
         <script
           dangerouslySetInnerHTML={{
             __html: `
